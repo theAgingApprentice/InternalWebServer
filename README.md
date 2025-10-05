@@ -173,11 +173,17 @@ docker ps -a | grep my-secure-web-server
 - **Browser warnings**: Expected due to self-signed certificate
 - **Port conflicts**: Ensure port 443 is free
 
-## Next Steps
+## Certificate Next Steps
 1. **Save README** to `/home/andrew/web_server/README.md`
 2. **Fix CN mismatch** (optional)
 3. **Investigate `fullchain.pem` and `privkey.key`** (optional)
 4. **Provide OpenSSL Version** (optional)
 5. **Verify Setup**
+
+## After cerrtificate things to do
+1. Create test and production dirctory structures 
+2. Make a test and prod docker image
+3. Create repo structure
+4. Create Automated checkin and promote to test 
 
 

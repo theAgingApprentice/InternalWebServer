@@ -30,3 +30,21 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
           "docker restart nginx-test"
+
+      - name: Wait for service to restart
+        run: |
+          echo "Waiting 5 seconds for container to restart..."
+          sleep 5
+
+      - name: Verify deployment via HTTPS request
+        run: |
+          echo "Verifying deployment at https://${{ secrets.DEPLOY_HOST }}/test ..."
+          STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" https://${{ secrets.DEPLOY_HOST }}/test)
+          echo "Received HTTP status code: $STATUS"
+
+          if [ "$STATUS" -eq 200 ]; then
+            echo "✅ Deployment verified successfully!"
+          else
+            echo "❌ Deployment failed (status code: $STATUS)"
+            exit 1
+          fi

@@ -1,53 +1,235 @@
 # MitchellNET (Internal WebServer)
 
-This repository details the internal MitchellNET website, running on an Nginx web server hosted on a 2019 iMac Ubuntu server. The web server and content are served over HTTPS using a reverse proxy setup with Docker containers. Full details about all services hosted on this server are available in the README file in [this repository](https://github.com/theAgingApprentice/2019iMacServer).
+This repository describes the full setup, configuration, and workflow of the **MitchellNET Internal WebServer**, a local, containerized NGINX-based deployment hosted on a 2019 iMac Ubuntu Server, with development and CI/CD orchestration managed via a Mac Studio and GitHub Actions.
 
-## IP Address
-The server is located in the electronics lab and is accessible only from within the MitchellNET network at [https://192.168.2.10](https://192.168.2.10).
+---
 
-## Home Directory
-The root directory for the website content is located on the Ubuntu server at `/home/andrew/web_server/html`. It contains:
-- `index.html`: Default page (not directly served, used for testing).
-- `test/`: Directory for the test environment, containing `index.html`.
-- `prod/`: Directory for the production environment, containing `index.html`.
+## 📑 Table of Contents
+1. [Overview](#overview)
+2. [System Architecture](#system-architecture)
+   - [Development Environment (Mac Studio)](#development-environment-mac-studio)
+   - [Version Control and GitHub Actions](#version-control-and-github-actions)
+   - [Server Environment (2019 iMac Ubuntu)](#server-environment-2019-imac-ubuntu)
+3. [Initial Setup](#initial-setup)
+   - [1. Local Development Setup](#1-local-development-setup)
+   - [2. GitHub Repository Setup](#2-github-repository-setup)
+   - [3. Ubuntu Server Setup](#3-ubuntu-server-setup)
+   - [4. NGINX Reverse Proxy and SSL Configuration](#4-nginx-reverse-proxy-and-ssl-configuration)
+4. [Deployment Workflow](#deployment-workflow)
+   - [Development → Test](#development--test)
+   - [Test → Production Promotion](#test--production-promotion)
+5. [Branching Strategy](#branching-strategy)
+6. [Cloning and Replicating the Environment](#cloning-and-replicating-the-environment)
+7. [Troubleshooting and Maintenance](#troubleshooting-and-maintenance)
 
-## Self-Signed HTTPS Certificate Configuration for NGINX Reverse Proxy on Ubuntu (Docker)
+---
 
-This section describes the configuration of a self-signed HTTPS certificate for an NGINX reverse proxy setup running in Docker containers on an Ubuntu Server 24.04.2 LTS, hosted on a 2019 iMac.
+## 🧭 Overview
 
-### Overview
-The setup uses three Nginx containers:
-- **nginx-proxy**: Acts as a reverse proxy, handling HTTPS traffic and routing requests to the appropriate backend.
-- **nginx-prod**: Serves production content from `/home/andrew/web_server/html/prod`.
-- **nginx-test**: Serves test content from `/home/andrew/web_server/html/test`.
+The MitchellNET web system provides an internal HTTPS website for local use, served by **Nginx running in Docker containers** on a **2019 iMac (Ubuntu Server 24.04.2 LTS)**.  
+Development occurs on a **Mac Studio**, with automated CI/CD deployments using **GitHub Actions**.
 
-The reverse proxy routes requests as follows:
-- `https://192.168.2.10/` → Production (`nginx-prod`)
-- `https://192.168.2.10/test/` → Test (`nginx-test`)
-- `https://192.168.2.10/prod/` → Production (`nginx-prod`)
+Environments:
+- **Development** → Mac Studio (local Visual Studio Code)
+- **Test** → iMac Ubuntu Server via GitHub Actions (self-hosted runner)
+- **Production** → iMac Ubuntu Server (promoted from Test)
 
-A self-signed SSL/TLS certificate enables secure communication. This setup is part of a system hosting Nginx, Mosquitto, Grafana, and Prometheus for web serving, messaging, and monitoring.
+---
 
-### System Information
-- **Hardware**: iMac (2019, Model: iMac19,1)
-  - Processor: 3.1 GHz 6-Core Intel Core i5
-  - Memory: 32 GB 2667 MHz DDR4
-  - Storage: 1.39 TB
-- **Operating System**: Ubuntu Server 24.04.2 LTS (Noble)
-- **Docker Version**: 28.3.1, build 38b7060
-- **NGINX Version**: nginx:latest (Docker image)
-- **OpenSSL Version**: [Run `openssl version` to confirm, e.g., OpenSSL 3.0.2]
+## 🖥️ System Architecture
 
-### Certificate Details
-- **Certificate File**: `/etc/ssl/certs/selfsigned.crt`
-- **Private Key File**: `/etc/ssl/private/selfsigned.key`
-- **Certificate Subject**: `C=CA, ST=Ontario, L=London, O=TheAgingApprentice, CN=Andrew Mitchell, emailAddress=va3wam@gmail.com`
-- **Issuer**: Self-signed
-- **Validity**: October 5, 2025, to October 5, 2026
-- **Public Key**: 2048-bit RSA
-- **Generation Command**:
+### Development Environment (Mac Studio)
+| Component | Details |
+|------------|----------|
+| **Hardware** | Apple Mac Studio |
+| **OS** | macOS Sonoma |
+| **IDE** | Visual Studio Code |
+| **Git Client** | Built-in Git integration |
+| **SSH Keys** | Stored in `~/.ssh/id_rsa` and registered in GitHub Secrets |
+| **Primary Directory** | `/Users/andrewmitchell/Documents/visualStudioCode/html/projects/InternalWebServer` |
+
+All source content and workflows are developed and pushed to the remote GitHub repository:
+```
+https://github.com/theAgingApprentice/InternalWebServer.git
+```
+
+---
+
+### Version Control and GitHub Actions
+| Component | Details |
+|------------|----------|
+| **Repo** | `theAgingApprentice/InternalWebServer` |
+| **Remote URL** | `https://github.com/theAgingApprentice/InternalWebServer.git` |
+| **Runner** | Self-hosted runner on iMac (`imac-server-runner`) |
+| **Secrets Used** | `SSH_PRIVATE_KEY`, `DEPLOY_USER`, `DEPLOY_HOST`, `DEPLOY_PATH` |
+| **Workflows** | `.github/workflows/deploy-test.yml`, `.github/workflows/deploy-prod.yml` |
+
+These workflows automate:
+- Deployment of `develop` branch → Test environment
+- Deployment of `main` branch → Production environment
+
+---
+
+### Server Environment (2019 iMac Ubuntu)
+| Component | Details |
+|------------|----------|
+| **Hardware** | iMac 2019 (Model: iMac19,1) |
+| **CPU** | 3.1 GHz 6-Core Intel Core i5 |
+| **Memory** | 32 GB DDR4 |
+| **OS** | Ubuntu Server 24.04.2 LTS |
+| **Docker** | v28.3.1 |
+| **NGINX** | `nginx:latest` Docker image |
+| **Location** | Electronics Lab — accessible only on MitchellNET LAN |
+| **IP Address** | `192.168.2.10` |
+
+#### Directory Structure
+```
+/home/andrew/web_server/html/
+├── index.html
+├── test/
+│   └── index.html
+└── prod/
+    └── index.html
+```
+
+---
+
+## ⚙️ Initial Setup
+
+### 1. Local Development Setup
+1. Clone the GitHub repository:
+   ```bash
+   git clone https://github.com/theAgingApprentice/InternalWebServer.git
+   ```
+2. Create an SSH key if not already present:
+   ```bash
+   ssh-keygen -t rsa -b 4096 -C "andrewmitchell@macstudio"
+   ```
+3. Add your public key to the Ubuntu server:
+   ```bash
+   ssh-copy-id andrew@192.168.2.10
+   ```
+4. Test SSH connection:
+   ```bash
+   ssh andrew@192.168.2.10
+   ```
+
+---
+
+### 2. GitHub Repository Setup
+1. Add a remote:
+   ```bash
+   git remote add origin https://github.com/theAgingApprentice/InternalWebServer.git
+   ```
+2. Add repository secrets:
+   | Name | Description |
+   |------|--------------|
+   | `SSH_PRIVATE_KEY` | Your Mac Studio’s private SSH key |
+   | `DEPLOY_USER` | `andrew` |
+   | `DEPLOY_HOST` | `192.168.2.10` |
+   | `DEPLOY_PATH` | `/home/andrew/web_server/html` |
+
+3. Push branches:
+   ```bash
+   git push origin develop
+   git push origin main
+   ```
+
+---
+
+### 3. Ubuntu Server Setup
+1. Install Docker and GitHub Runner:
+   ```bash
+   sudo apt update && sudo apt install -y docker.io git
+   ```
+2. Register the GitHub self-hosted runner:
+   - Go to your repo → **Settings → Actions → Runners → New self-hosted runner**
+   - Follow the registration commands (as `andrew` user)
+3. Start the runner service:
+   ```bash
+   ./svc.sh install
+   ./svc.sh start
+   ```
+
+---
+
+### 4. NGINX Reverse Proxy and SSL Configuration
+
+#### Proxy Overview
+Three NGINX containers manage traffic:
+| Container | Purpose | Path |
+|------------|----------|------|
+| `nginx-proxy` | Reverse proxy (SSL termination) | `/usr/share/nginx/html` |
+| `nginx-test` | Serves test environment | `/home/andrew/web_server/html/test` |
+| `nginx-prod` | Serves production environment | `/home/andrew/web_server/html/prod` |
+
+#### SSL Certificate
+Self-signed SSL/TLS cert:
+```bash
+sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048   -keyout /etc/ssl/private/selfsigned.key   -out /etc/ssl/certs/selfsigned.crt   -subj "/C=CA/ST=Ontario/L=London/O=TheAgingApprentice/CN=Andrew Mitchell/emailAddress=va3wam@gmail.com"
+```
+
+---
+
+## 🚀 Deployment Workflow
+
+### Development → Test
+When code is pushed to the `develop` branch:
+1. GitHub Action (`deploy-test.yml`) runs on `imac-server-runner`.
+2. Workflow connects to Ubuntu via SSH using secrets.
+3. Files sync to `/home/andrew/web_server/html/test/`.
+4. `https://192.168.2.10/test/` serves the updated version.
+
+### Test → Production Promotion
+Once validated, changes are merged into `main`:
+1. GitHub Action (`deploy-prod.yml`) runs.
+2. Files deploy to `/home/andrew/web_server/html/prod/`.
+3. `https://192.168.2.10/` serves the production content.
+
+---
+
+## 🌿 Branching Strategy
+
+| Branch | Purpose | Deployment Target |
+|---------|----------|-------------------|
+| `develop` | Active development and testing | `/test/` environment |
+| `main` | Stable production-ready code | `/prod/` environment |
+
+**Workflow:**
+1. Create feature branches from `develop`
+2. Open PRs into `develop` for integration testing
+3. Merge `develop` → `main` for release to production
+
+---
+
+## 🔁 Cloning and Replicating the Environment
+
+To recreate this setup on a new network or device:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/theAgingApprentice/InternalWebServer.git
+   ```
+2. Run the provided setup script (`setup_environment.sh`) to:
+   - Generate SSH keys  
+   - Register a new GitHub runner  
+   - Deploy Docker + NGINX + certificates
+3. Update `.github/workflows` secrets for the new environment.
+
+---
+
+## 🛠️ Troubleshooting and Maintenance
+- **Workflow Fails with SSH Error** → Ensure Ubuntu server is reachable by runner (private LAN only)
+- **Certificate Mismatch** → Regenerate `selfsigned.crt` and `selfsigned.key`
+- **Nginx Proxy Issues** → Check container logs:
   ```bash
-  sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048     -keyout /etc/ssl/private/selfsigned.key     -out /etc/ssl/certs/selfsigned.crt     -subj "/C=CA/ST=Ontario/L=London/O=TheAgingApprentice/CN=Andrew Mitchell/emailAddress=va3wam@gmail.com"
+  sudo docker logs nginx-proxy
+  ```
+- **Re-register GitHub Runner** (if it goes offline):
+  ```bash
+  ./config.sh remove
+  ./config.sh
   ```
 
-(Full installation steps, file permissions, docker-compose config, proxy.conf, troubleshooting, and next steps are included in this document as provided.)
+---
+
+© 2025 TheAgingApprentice — Internal use only.

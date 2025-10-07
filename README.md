@@ -34,6 +34,9 @@ Environments:
 - **Test** → iMac Ubuntu Server via GitHub Actions (self-hosted runner)
 - **Production** → iMac Ubuntu Server (promoted from Test)
 
+Developer Notes:
+If you wish to contribute to the MitchellNET internal website you can read developer notes [here](DeveloperNotes.md).
+
 ---
 
 ## 🖥️ System Architecture

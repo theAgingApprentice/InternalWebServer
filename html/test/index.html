@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My TEST Secure Web Server</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        h1 { color: #333; }
+        p { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to Your TEST Secure Web Server!</h1>
+    <p>Testing new actions. This page is hosted by Nginx in a Docker container.</p>
+    <p>You're viewing this over HTTPS, secured with your self-signed certificate.</p>
+    <p>Current Time (UTC): <span id="time"></span></p>
+    <script>
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('time').textContent = now.toUTCString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+</body>
+</html>

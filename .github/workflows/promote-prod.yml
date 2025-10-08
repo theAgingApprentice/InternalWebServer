@@ -43,20 +43,23 @@ jobs:
           fi
           echo "✅ Production deployment verified successfully!"
 
-      - name: Email notification
-        if: always()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "Production Deployment — ${{ job.status }}"
-          to: "andrew@mitchellnet.local"
-          from: "GitHub Actions <no-reply@github.com>"
-          body: |
-            The production deployment has completed with status: **${{ job.status }}**
-
-            Host: ${{ secrets.DEPLOY_HOST }}
-            Deployment Path: ${{ secrets.DEPLOY_PATH }}/prod
-            Timestamp: ${{ github.run_started_at }}
+      # Have not set up GitHub secrets to use email notifications yet
+      # SMTP_USERNAME and SMTP_PASSWORD would need to be added
+      # GitHub → Your repo → Settings → Secrets and variables → Actions → New repository secret
+      # - name: Email notification
+      #  if: always()
+      #  uses: dawidd6/action-send-mail@v3
+      #  with:
+      #    server_address: smtp.gmail.com
+      #    server_port: 465
+      #    username: ${{ secrets.SMTP_USERNAME }}
+      #    password: ${{ secrets.SMTP_PASSWORD }}
+      #    subject: "Production Deployment — ${{ job.status }}"
+      #    to: "andrew@mitchellnet.local"
+      #    from: "GitHub Actions <no-reply@github.com>"
+      #    body: |
+      #      The production deployment has completed with status: **${{ job.status }}**
+      #
+      #      Host: ${{ secrets.DEPLOY_HOST }}
+      #      Deployment Path: ${{ secrets.DEPLOY_PATH }}/prod
+      #      Timestamp: ${{ github.run_started_at }}

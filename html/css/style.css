@@ -1,0 +1,134 @@
+/* =======================================================
+   MitchellNET Shared Stylesheet
+   Mobile-First Layout for Test & Production Environments
+   ======================================================= */
+
+/* General Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Inter", Arial, sans-serif;
+  color: #333;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Environment Banners */
+#env-banner {
+  text-align: center;
+  padding: 0.75rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.05rem;
+}
+
+.env-test {
+  background-color: #ffeb3b;
+  color: #000;
+}
+
+.env-prod {
+  background-color: #4caf50;
+  color: #fff;
+}
+
+/* Header */
+.site-header {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: #222;
+  color: #fff;
+}
+
+.site-header h1 {
+  font-size: 1.8rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: #bbb;
+  margin-top: 0.25rem;
+}
+
+/* Main Content */
+main.content {
+  flex: 1;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+main h2 {
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+}
+
+main p {
+  max-width: 600px;
+  margin: 0.5rem auto;
+  line-height: 1.6;
+}
+
+/* Buttons */
+.button {
+  display: inline-block;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  background-color: #4caf50;
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.3s;
+}
+
+.button.secondary {
+  background-color: #777;
+}
+
+.button:hover {
+  background-color: #388e3c;
+}
+
+/* Footer */
+.site-footer {
+  text-align: center;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #666;
+  background-color: #eee;
+  border-top: 1px solid #ddd;
+}
+
+/* =======================================================
+   Responsive Layout (Tablet and Desktop)
+   ======================================================= */
+@media (min-width: 600px) {
+  .site-header h1 {
+    font-size: 2rem;
+  }
+
+  main h2 {
+    font-size: 1.6rem;
+  }
+}
+
+@media (min-width: 900px) {
+  body {
+    font-size: 18px;
+  }
+
+  main p {
+    max-width: 700px;
+  }
+}

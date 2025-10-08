@@ -3,31 +3,31 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MitchellNET — Test Environment</title>
+  <title>MitchellNET — Production</title>
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
   <!-- Environment Banner (injected by NGINX include, but duplicated here for local fallback) -->
-  <div id="env-banner" class="env-test">
-    🚧 TEST ENVIRONMENT — NOT FOR PRODUCTION USE 🚧
+  <div id="env-banner" class="env-prod">
+    ✅ PRODUCTION ENVIRONMENT
   </div>
 
   <header class="site-header">
     <h1>MitchellNET Internal Web</h1>
-    <p class="subtitle">Test Environment</p>
+    <p class="subtitle">Production Environment</p>
   </header>
 
   <main class="content">
     <section>
-      <h2>Welcome to the Test Environment</h2>
+      <h2>Welcome to the Production Environment</h2>
       <p>
-        This version of the site is used for validating changes before promoting them to production.
+        This is the live internal site served from the production container.
       </p>
       <p>
-        Developers can safely deploy updates here via the <code>develop</code> branch in GitHub.
+        All content here has passed testing and review in the <strong>Test Environment</strong>.
       </p>
-      <a href="https://192.168.2.10/prod" class="button">Go to Production</a>
+      <a href="https://192.168.2.10/test" class="button secondary">Go to Test</a>
     </section>
   </main>
 

@@ -7,7 +7,6 @@ jobs:
   promote:
     runs-on: self-hosted
 
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -18,12 +17,46 @@ jobs:
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
-      - name: Copy test content to production
+      - name: Copy production files to server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-          "cp -r ${{ secrets.DEPLOY_PATH }}/test/* ${{ secrets.DEPLOY_PATH }}/prod/"
+          rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            html/prod/ \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/prod/
 
       - name: Restart nginx-prod container
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
           "docker restart nginx-prod"
+
+      - name: Wait for restart
+        run: sleep 5
+
+      - name: Verify production deployment
+        run: |
+          echo "Verifying production deployment at https://${{ secrets.DEPLOY_HOST }}/ ..."
+          STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" https://${{ secrets.DEPLOY_HOST }}/)
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" -ne 200 ]; then
+            echo "❌ Production verification failed (HTTP $STATUS)"
+            exit 1
+          fi
+          echo "✅ Production deployment verified successfully!"
+
+      - name: Email notification
+        if: always()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Production Deployment — ${{ job.status }}"
+          to: "andrew@mitchellnet.local"
+          from: "GitHub Actions <no-reply@github.com>"
+          body: |
+            The production deployment has completed with status: **${{ job.status }}**
+
+            Host: ${{ secrets.DEPLOY_HOST }}
+            Deployment Path: ${{ secrets.DEPLOY_PATH }}/prod
+            Timestamp: ${{ github.run_started_at }}

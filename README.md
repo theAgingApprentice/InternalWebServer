@@ -21,6 +21,7 @@ This repository describes the full setup, configuration, and workflow of the **M
 5. [Branching Strategy](#branching-strategy)
 6. [Cloning and Replicating the Environment](#cloning-and-replicating-the-environment)
 7. [Troubleshooting and Maintenance](#troubleshooting-and-maintenance)
+8. [Dev quick reference](devQuickReference.md)
 
 ---
 

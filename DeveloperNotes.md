@@ -15,6 +15,7 @@ This document provides detailed guidance for developers contributing to the Mitc
 8. [Server Directory Structure](#server-directory-structure)
 9. [Tips for Future Developers](#tips-for-future-developers)
 10. [Main README file](README.md)
+11. [Dev quick reference](devQuickReference.md)
 ---
 
 ## Overview

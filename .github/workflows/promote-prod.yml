@@ -74,24 +74,24 @@ jobs:
               exit 1
             fi
 
-      - name: Send email notification
-        if: always()
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          subject: >
-            MitchellNET Production Deployment ${{ job.status }}
-          to: ${{ secrets.MAIL_TO }}
-          from: MitchellNET CI <${{ secrets.MAIL_USERNAME }}>
-          body: |
-            The Promote to Production workflow has completed with status: **${{ job.status }}**
+      # - name: Send email notification
+      #   if: always()
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: smtp.gmail.com
+      #     server_port: 465
+      #     username: ${{ secrets.MAIL_USERNAME }}
+      #     password: ${{ secrets.MAIL_PASSWORD }}
+      #     subject: >
+      #       MitchellNET Production Deployment ${{ job.status }}
+      #     to: ${{ secrets.MAIL_TO }}
+      #     from: MitchellNET CI <${{ secrets.MAIL_USERNAME }}>
+      #     body: |
+      #       The Promote to Production workflow has completed with status: **${{ job.status }}**
 
-            - **Environment:** Production
-            - **Verification Result:** ${{ steps.verify.outputs.verify_result || 'N/A' }}
-            - **Rollback:** ${{ steps.verify.outputs.verify_result == 'failure' && 'Performed ⚠️' || 'Not needed ✅' }}
-            - **Backup Cleanup:** Performed automatically for backups older than 7 days 🧹
-            - **Timestamp:** ${{ github.run_started_at }}
-            - **Run URL:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      #       - **Environment:** Production
+      #       - **Verification Result:** ${{ steps.verify.outputs.verify_result || 'N/A' }}
+      #       - **Rollback:** ${{ steps.verify.outputs.verify_result == 'failure' && 'Performed ⚠️' || 'Not needed ✅' }}
+      #       - **Backup Cleanup:** Performed automatically for backups older than 7 days 🧹
+      #       - **Timestamp:** ${{ github.run_started_at }}
+      #       - **Run URL:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}

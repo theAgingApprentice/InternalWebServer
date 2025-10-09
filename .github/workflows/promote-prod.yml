@@ -5,93 +5,97 @@ on:
 
 jobs:
   promote-to-prod:
+    name: Promote Web Content to Production
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Backup current production and promote new version
+      # ✅ Validate required secrets before connecting
+      - name: Validate required secrets
+        run: |
+          missing=""
+          for var in DEPLOY_HOST DEPLOY_USER SSH_PRIVATE_KEY DEPLOY_PATH; do
+            if [ -z "${!var}" ]; then
+              echo "❌ Missing secret: $var"
+              missing=1
+            fi
+          done
+          if [ "$missing" = "1" ]; then
+            echo "🚫 Required secrets missing in repo settings."
+            exit 1
+          fi
+        env:
+          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+
+      # ✅ SSH into the server to promote /test → /prod with backup & rollback safety
+      - name: Promote Test to Production (with verification & rollback)
         uses: appleboy/ssh-action@v1.2.0
         with:
-          host: ${{ secrets.UBUNTU_SERVER_IP }}
-          username: ${{ secrets.UBUNTU_USERNAME }}
-          key: ${{ secrets.UBUNTU_SSH_KEY }}
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             set -e
-            echo "== Step 1: Creating backup of current production =="
-            TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
-            BACKUP_DIR="/home/${{ secrets.UBUNTU_USERNAME }}/web_server/html/prod-backup-${TIMESTAMP}"
-            sudo cp -r /home/${{ secrets.UBUNTU_USERNAME }}/web_server/html/prod "$BACKUP_DIR"
-            echo "✅ Backup created at $BACKUP_DIR"
 
-            echo "== Step 2: Promoting test to production =="
-            sudo rm -rf /home/${{ secrets.UBUNTU_USERNAME }}/web_server/html/prod/*
-            sudo cp -r /home/${{ secrets.UBUNTU_USERNAME }}/web_server/html/test/* /home/${{ secrets.UBUNTU_USERNAME }}/web_server/html/prod/
-            sudo docker restart nginx-prod
-            echo "✅ Production container restarted with new content."
+            echo "=== Starting Production Promotion Process ==="
+            PROD_PATH="${{ secrets.DEPLOY_PATH }}/prod"
+            TEST_PATH="${{ secrets.DEPLOY_PATH }}/test"
+            BACKUP_DIR="${{ secrets.DEPLOY_PATH }}/backups"
+            TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+            BACKUP_PATH="$BACKUP_DIR/prod_backup_$TIMESTAMP"
 
-            echo "== Step 3: Cleaning up old backups (older than 7 days) =="
-            sudo find /home/${{ secrets.UBUNTU_USERNAME }}/web_server/html/ -maxdepth 1 -type d -name "prod-backup-*" -mtime +7 -exec rm -rf {} +
-            echo "🧹 Old backups removed (if any)."
+            echo "Creating backup directory if needed..."
+            mkdir -p "$BACKUP_DIR"
 
-      - name: Verify production container content
-        id: verify
-        continue-on-error: true
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.UBUNTU_SERVER_IP }}
-          username: ${{ secrets.UBUNTU_USERNAME }}
-          key: ${{ secrets.UBUNTU_SSH_KEY }}
-          script: |
-            echo "== Step 4: Verifying production container =="
-            if sudo docker exec nginx-prod cat /usr/share/nginx/html/index.html | grep -q "Production"; then
-              echo "✅ Verification passed: 'Production' string found."
-              echo "verify_result=success" >> $GITHUB_OUTPUT
+            echo "Backing up current /prod to $BACKUP_PATH..."
+            cp -r "$PROD_PATH" "$BACKUP_PATH"
+
+            echo "Replacing /prod content with /test content..."
+            rm -rf "$PROD_PATH"
+            cp -r "$TEST_PATH" "$PROD_PATH"
+
+            echo "Restarting nginx-prod container..."
+            docker restart nginx-prod
+
+            echo "Verifying production container content..."
+            sleep 3
+            if docker exec nginx-prod grep -q "Production" /usr/share/nginx/html/index.html; then
+              echo "✅ Verification successful: 'Production' found in index.html"
             else
-              echo "❌ Verification failed: Expected 'Production' string not found."
-              echo "verify_result=failure" >> $GITHUB_OUTPUT
+              echo "❌ Verification failed: reverting to previous backup..."
+              rm -rf "$PROD_PATH"
+              cp -r "$BACKUP_PATH" "$PROD_PATH"
+              docker restart nginx-prod
+              echo "Rollback complete."
               exit 1
             fi
 
-      - name: Roll back if verification failed
-        if: steps.verify.outputs.verify_result == 'failure'
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: ${{ secrets.UBUNTU_SERVER_IP }}
-          username: ${{ secrets.UBUNTU_USERNAME }}
-          key: ${{ secrets.UBUNTU_SSH_KEY }}
-          script: |
-            echo "⚠️ Verification failed — rolling back to last known good backup..."
-            LATEST_BACKUP=$(ls -td /home/${{ secrets.UBUNTU_USERNAME }}/web_server/html/prod-backup-* | head -n 1)
-            if [ -d "$LATEST_BACKUP" ]; then
-              sudo rm -rf /home/${{ secrets.UBUNTU_USERNAME }}/web_server/html/prod/*
-              sudo cp -r "$LATEST_BACKUP"/* /home/${{ secrets.UBUNTU_USERNAME }}/web_server/html/prod/
-              sudo docker restart nginx-prod
-              echo "✅ Rollback completed from $LATEST_BACKUP"
-            else
-              echo "❌ No backup found — manual intervention required."
-              exit 1
-            fi
+            echo "Cleaning up backups older than 7 days..."
+            find "$BACKUP_DIR" -maxdepth 1 -type d -mtime +7 -name 'prod_backup_*' -exec rm -rf {} \;
 
-      # - name: Send email notification
+            echo "✅ Promotion completed successfully and verified."
+
+      # 🚫 Email notifications (currently commented out)
+      # - name: Send Email Notification
       #   if: always()
       #   uses: dawidd6/action-send-mail@v3
       #   with:
       #     server_address: smtp.gmail.com
       #     server_port: 465
-      #     username: ${{ secrets.MAIL_USERNAME }}
-      #     password: ${{ secrets.MAIL_PASSWORD }}
-      #     subject: >
-      #       MitchellNET Production Deployment ${{ job.status }}
-      #     to: ${{ secrets.MAIL_TO }}
-      #     from: MitchellNET CI <${{ secrets.MAIL_USERNAME }}>
+      #     username: ${{ secrets.SMTP_USERNAME }}
+      #     password: ${{ secrets.SMTP_PASSWORD }}
+      #     subject: "Production Promotion Result"
+      #     to: ${{ secrets.NOTIFY_EMAIL }}
+      #     from: "GitHub Actions <${{ secrets.SMTP_USERNAME }}>"
+      #     secure: true
       #     body: |
-      #       The Promote to Production workflow has completed with status: **${{ job.status }}**
+      #       The promote-to-production workflow has completed.
+      #       Status: ${{ job.status }}
 
-      #       - **Environment:** Production
-      #       - **Verification Result:** ${{ steps.verify.outputs.verify_result || 'N/A' }}
-      #       - **Rollback:** ${{ steps.verify.outputs.verify_result == 'failure' && 'Performed ⚠️' || 'Not needed ✅' }}
-      #       - **Backup Cleanup:** Performed automatically for backups older than 7 days 🧹
-      #       - **Timestamp:** ${{ github.run_started_at }}
-      #       - **Run URL:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      - name: Done
+        run: echo "🚀 Promote-to-production workflow finished."

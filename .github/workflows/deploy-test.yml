@@ -6,46 +6,72 @@ on:
       - develop
 
 jobs:
-  deploy:
-    runs-on: self-hosted
-
+  deploy-test:
+    name: Deploy to Test Environment
+    runs-on: self-hosted   # 🖥 Runs directly on your Ubuntu server runner
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup SSH key
+      - name: Backup current /test content
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo "=== Backing up existing /test ==="
+          BACKUP_DIR="/home/andrew/web_server/html/test_backup_$(date +%Y%m%d_%H%M%S)"
+          mkdir -p "$BACKUP_DIR"
+          cp -r /home/andrew/web_server/html/test/* "$BACKUP_DIR"/
+          echo "Backup stored at: $BACKUP_DIR"
 
-      - name: Copy files to Ubuntu server (test)
+      - name: Deploy new content to /test
         run: |
-          rsync -avz --delete \
-            -e "ssh -o StrictHostKeyChecking=no" \
-            html/test/ \
-            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH }}/test/
+          echo "=== Deploying new test content ==="
+          cp -r html/test/* /home/andrew/web_server/html/test/
+          echo "Deployment complete."
 
       - name: Restart nginx-test container
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} \
-          "docker restart nginx-test"
-
-      - name: Wait for service to restart
-        run: |
-          echo "Waiting 5 seconds for container to restart..."
+          echo "Restarting nginx-test container..."
+          docker restart nginx-test
           sleep 5
 
-      - name: Verify deployment via HTTPS request
+      - name: Verify Test Container
         run: |
-          echo "Verifying deployment at https://${{ secrets.DEPLOY_HOST }}/test ..."
-          STATUS=$(curl -k -s -o /dev/null -w "%{http_code}" https://${{ secrets.DEPLOY_HOST }}/test)
-          echo "Received HTTP status code: $STATUS"
-
-          if [ "$STATUS" -eq 200 ]; then
-            echo "✅ Deployment verified successfully!"
-          else
-            echo "❌ Deployment failed (status code: $STATUS)"
+          echo "=== Verifying nginx-test container ==="
+          TITLE=$(docker exec nginx-test grep -o "Test Environment" /usr/share/nginx/html/index.html || true)
+          if [ -z "$TITLE" ]; then
+            echo "❌ Verification failed: 'Test Environment' not found in /usr/share/nginx/html/index.html"
             exit 1
+          else
+            echo "✅ Verification passed: Test environment confirmed."
           fi
+
+      - name: Rollback if verification fails
+        if: failure()
+        run: |
+          echo "=== Rolling back to previous backup ==="
+          LATEST_BACKUP=$(ls -td /home/andrew/web_server/html/test_backup_* | head -1)
+          if [ -d "$LATEST_BACKUP" ]; then
+            rm -rf /home/andrew/web_server/html/test/*
+            cp -r "$LATEST_BACKUP"/* /home/andrew/web_server/html/test/
+            echo "Rollback completed using backup: $LATEST_BACKUP"
+          else
+            echo "⚠️ No backup directory found to restore from!"
+          fi
+
+      - name: Retention — delete backups older than 7 days
+        run: |
+          echo "=== Cleaning up old backups ==="
+          find /home/andrew/web_server/html/ -maxdepth 1 -type d -name "test_backup_*" -mtime +7 -exec rm -rf {} \;
+          echo "Old backups cleaned up."
+
+      # - name: Send email notification (disabled for now)
+      #   uses: dawidd6/action-send-mail@v3
+      #   with:
+      #     server_address: smtp.gmail.com
+      #     server_port: 587
+      #     username: ${{ secrets.MAIL_USERNAME }}
+      #     password: ${{ secrets.MAIL_PASSWORD }}
+      #     subject: "Test Deployment ${{ job.status }}"
+      #     to: "you@example.com"
+      #     from: "GitHub Actions <you@example.com>"
+      #     body: "The deploy-to-test workflow finished with status: ${{ job.status }}"

@@ -106,11 +106,11 @@ git push origin develop-backup
 
 ```mermaid
 flowchart TD
-    A[💻 Local Dev (Mac Studio)] -->|Push develop| B[🌐 GitHub Repo]
-    B -->|Deploy to Test| C[🧪 nginx-test (Ubuntu)]
-    C -->|Verify changes| D[🚀 Promote to Production Workflow]
-    D --> E[🌐 nginx-prod (Ubuntu)]
-    E -->|Live site verified| F[✅ Production Confirmed]
+    A[Local Dev (Mac Studio)] -->|Push to develop| B[GitHub Repository]
+    B -->|Auto Deploy| C[Test Server (nginx-test, Ubuntu)]
+    C -->|Verify OK| D[Promote to Production Workflow]
+    D --> E[Production Server (nginx-prod, Ubuntu)]
+    E -->|Live site| F[Verified Production]
 ```
 
 ---

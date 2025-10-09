@@ -1,6 +1,6 @@
 # Developer Quick Reference — MitchellNET Internal Web
 
-This guide summarizes the full workflow for updating, testing, and promoting changes to the MitchellNET internal web system.
+This guide summarizes the workflow for updating, testing, and promoting changes to the MitchellNET internal web system, with the latest deployment improvements and safety features.
 
 ---
 
@@ -9,8 +9,8 @@ This guide summarizes the full workflow for updating, testing, and promoting cha
 | Environment | Location | Purpose |
 |--------------|-----------|----------|
 | **Development** | 💻 Mac Studio (local dev) | Make and test code changes locally |
-| **Test** | 🧪 Ubuntu 2019 iMac (`nginx-test`) | Preview and validate updates deployed from GitHub `develop` branch |
-| **Production** | 🚀 Ubuntu 2019 iMac (`nginx-prod`) | Live internal site — only updated through the Promote to Production workflow |
+| **Test** | 🧪 Ubuntu 2019 iMac (`nginx-test`) | Automatically deploys updates from the GitHub `develop` branch |
+| **Production** | 🚀 Ubuntu 2019 iMac (`nginx-prod`) | Live internal site, updated only via the Promote to Production workflow |
 | **GitHub Repository** | 🌐 GitHub Web GUI | Source control, Actions automation, and environment management |
 
 ---
@@ -18,9 +18,8 @@ This guide summarizes the full workflow for updating, testing, and promoting cha
 ## 🔄 End-to-End Workflow
 
 ### 1. Local Development (Mac Studio)
-- **Environment:** Mac Studio
 - **Branch:** `develop`
-- **Purpose:** Build and test new site changes before deployment.
+- **Purpose:** Build and test new site changes locally.
 
 ```bash
 # Switch to the develop branch
@@ -29,10 +28,9 @@ git checkout develop
 # Pull latest updates
 git pull
 
-# Make your code changes locally (HTML, CSS, etc.)
-# Then stage and commit your changes
+# Make code changes (HTML, CSS, etc.)
 git add .
-git commit -m "Update test environment banner and layout"
+git commit -m "Update layout or content"
 
 # Push to GitHub to trigger Deploy to Test
 git push origin develop
@@ -40,52 +38,61 @@ git push origin develop
 
 ---
 
-### 2. GitHub Deploys to Test (GitHub Actions)
-- **Environment:** GitHub Repository
+### 2. Deploy to Test (Ubuntu Self-Hosted Runner)
+- **Workflow:** `.github/workflows/deploy-test.yml`
 - **Triggered by:** Push to `develop`
-- **Action:** `.github/workflows/deploy-test.yml`
-- **Result:** Updates the Ubuntu test container (`nginx-test`) automatically.
+- **Runs on:** The Ubuntu 2019 iMac server
+- **Result:** Updates the `/html/test` folder and restarts the `nginx-test` container.
 
-🧩 **Verification:**
-- Visit `https://192.168.2.10/test` from a browser or run:
-  ```bash
-  curl -k https://192.168.2.10/test
-  ```
-- Confirm that the new changes appear correctly and the **TEST ENVIRONMENT** banner is visible.
+#### 🧠 What’s New
+- **Local Execution:** Runs directly on the server (no SSH or internet access required).  
+- **Automatic Verification:** Checks that the container responds correctly at `https://192.168.2.10/test`.  
+- **Future-Proof:** This structure enables rollback and retention support, similar to production.
 
----
-
-### 3. Manual Promote to Production (GitHub Actions)
-- **Environment:** GitHub Repository
-- **Triggered by:** Manually running **“Promote to Production”** workflow (`.github/workflows/promote-prod.yml`)
-- **Action:** Copies validated content from `/html/test` → `/html/prod` in the repo, rebuilds the `nginx-prod` container.
-
-🧩 **Verification:**
-- Visit `https://192.168.2.10` or `https://192.168.2.10/prod`
-- You should see the **PRODUCTION ENVIRONMENT** banner and the latest approved content.
+🧩 **Verification**
+- Visit `https://192.168.2.10/test`
+- Confirm the **TEST ENVIRONMENT** banner appears correctly.
 
 ---
 
-### 4. Post-Promotion Verification (Ubuntu Server)
-- **Environment:** 2019 iMac Ubuntu server
-- **Confirm content inside the containers:**
+### 3. Promote to Production (Manual GitHub Action)
+- **Workflow:** `.github/workflows/promote-prod.yml`
+- **Triggered by:** Manual run from GitHub → Actions tab → “Promote to Production”
+- **Runs on:** Ubuntu self-hosted runner
+- **Result:** Promotes validated content from `/html/test` to `/html/prod`.
+
+#### ✅ Safeguards Added
+- **Container verification:** Ensures `/prod` contains “Production Environment.”  
+- **Automatic rollback:** Restores from backup if verification fails.  
+- **Backup retention:** Automatically deletes backups older than 7 days.  
+- **Email step:** Temporarily commented out (secrets not configured).
+
+🧩 **Verification**
+```bash
+curl -k https://192.168.2.10
+```
+You should see **Production Environment** in the banner and `<title>`.
+
+---
+
+### 4. Container Checks (Ubuntu Server)
 
 ```bash
-# Check container mounts and HTML
-docker exec nginx-prod cat /usr/share/nginx/html/index.html | grep title
-docker exec nginx-test cat /usr/share/nginx/html/index.html | grep title
+# Verify environment banners in HTML content
+docker exec nginx-prod grep title /usr/share/nginx/html/index.html
+docker exec nginx-test grep title /usr/share/nginx/html/index.html
 ```
 
-✅ `nginx-prod` should show “Production Environment”  
-🚧 `nginx-test` should show “Test Environment”
+✅ `nginx-prod` → “Production Environment”  
+🚧 `nginx-test` → “Test Environment”
 
 ---
 
 ### 5. Branch Maintenance (GitHub + Local)
-- Keep `develop` as your ongoing feature/testing branch.
-- After a successful production promotion, **do not delete `develop`** — reuse it for the next update cycle.
+- Keep `develop` as your working/testing branch.
+- After promoting to production, **do not delete `develop`** — continue using it for the next cycle.
 
-Optionally, you can keep a **backup branch**:
+Optional backup:
 ```bash
 git checkout develop
 git pull
@@ -99,27 +106,29 @@ git push origin develop-backup
 
 ```mermaid
 flowchart TD
-    A[💻 Local Dev (Mac Studio)] -->|Push to develop| B[🌐 GitHub Repo]
-    B -->|Auto Deploy| C[🧪 nginx-test (Ubuntu)]
-    C -->|Verify OK| D[🚀 Promote to Production Workflow]
-    D --> E[🌐 nginx-prod (Ubuntu)]
-    E -->|Live site| F[✅ Verified Production]
+    A[Local Dev (Mac Studio)] -->|Push to develop| B[GitHub Repository]
+    B -->|Auto Deploy| C[Test Server (nginx-test, Ubuntu)]
+    C -->|Verify OK| D[Promote to Production Workflow]
+    D --> E[Production Server (nginx-prod, Ubuntu)]
+    E -->|Live site| F[Verified Production]
 ```
 
 ---
 
-## 📋 Summary of Key Commands
+## 📋 Key Commands Summary
 
-| Task | Command | Where |
-|------|----------|-------|
-| Pull latest dev changes | `git pull` | Mac Studio |
-| Commit and push changes | `git add . && git commit -m "msg" && git push` | Mac Studio |
-| Verify test deployment | `curl -k https://192.168.2.10/test` | Any system |
-| Run production promotion | GitHub Actions → “Promote to Production” | GitHub Web |
-| Verify production deployment | `curl -k https://192.168.2.10` | Any system |
+| Task | Command | Location |
+|------|----------|-----------|
+| Pull latest | `git pull` | Mac Studio |
+| Commit & push | `git add . && git commit -m "msg" && git push` | Mac Studio |
+| Check test | `curl -k https://192.168.2.10/test` | Any system |
+| Promote to prod | GitHub Actions → “Promote to Production” | GitHub |
+| Verify prod | `curl -k https://192.168.2.10` | Any system |
 | Inspect containers | `docker ps && docker exec <container> ls /usr/share/nginx/html` | Ubuntu server |
 
-# Readme Navigation Links
+---
 
-- [Main README file](README.md)
-- [Developer Notes](DeveloperNotes.md)
+# Related Files
+
+- [README.md](README.md)
+- [DeveloperNotes.md](DeveloperNotes.md)

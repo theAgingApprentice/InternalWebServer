@@ -15,7 +15,7 @@ The stack allows you to track:
 
 ### 🧠 Prometheus
 Prometheus collects and stores time-series metrics from all exporters. It scrapes metrics every 15 seconds and retains them in a local database (`prometheus_data` volume).  
-**Access URL:** [http://localhost:9090](http://localhost:9090)
+**Access URL:** [http://192.168.2.10:9090](http://192.168.2.10:9090)
 
 Prometheus scrapes metrics from:
 - **Itself** (`localhost:9090`)

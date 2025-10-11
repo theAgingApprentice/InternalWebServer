@@ -1,6 +1,8 @@
 # MitchellNET (Internal WebServer)
 
-This repository describes the full setup, configuration, and workflow of the **MitchellNET Internal WebServer**, a local, containerized NGINX-based deployment hosted on a 2019 iMac Ubuntu Server, with development and CI/CD orchestration managed via a Mac Studio and GitHub Actions.
+This repository describes the full setup, configuration, and workflow of the **MitchellNET Internal WebServer**, a local, containerized NGINX-based deployment hosted on a 2019 iMac Ubuntu Server, with development and CI/CD orchestration managed via a Mac Studio and GitHub Actions. 
+
+You can read about the network monitoring system [here](dashboard.md).
 
 ---
 

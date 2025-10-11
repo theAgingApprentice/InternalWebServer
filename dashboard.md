@@ -1,7 +1,7 @@
 # Network Monitoring Dashboard Guide
 
 ## Overview
-This monitoring setup provides **real-time visibility** into the health and performance of your home or lab network infrastructure using **Prometheus**, **Grafana**, **Node Exporter**, **SNMP Exporter**, and **Blackbox Exporter** — all running in Docker containers on your Ubuntu-based iMac server.
+This monitoring setup provides **real-time visibility** into the health and performance of the MitchellNET network infrastructure using **Prometheus**, **Grafana**, **Node Exporter**, **SNMP Exporter**, and **Blackbox Exporter** — all running in Docker containers on the  Ubuntu-based 2019 iMac server.
 
 The stack allows you to track:
 - System resource usage (CPU, RAM, Disk, Network)
@@ -27,7 +27,7 @@ Prometheus scrapes metrics from:
 
 ### 📊 Grafana
 Grafana visualizes data collected by Prometheus through customizable dashboards. You can monitor device uptime, bandwidth usage, CPU load, and other performance indicators.  
-**Access URL:** [http://localhost:3000](http://localhost:3000)
+**Access URL:** [http://192.168.10:3000](http://192.168.2.10:3000)
 
 **Default login:**
 - **Username:** `admin`
@@ -140,6 +140,6 @@ docker logs grafana --tail 50
 ---
 
 ## Summary
-You now have a complete **private network monitoring stack** that visualizes and alerts on the status of your local network. It’s modular, extensible, and fully contained within your local environment — no internet connectivity required.
+This is a complete **private network monitoring stack** that visualizes and alerts on the status of the MitchellNET network. It’s modular, extensible, and fully contained within the local environment — no internet connectivity required.
 
-Monitor confidently knowing your **data stays private** while maintaining **enterprise-grade observability** at home or in your lab!
+Monitor confidently knowing that the **data stays private** while maintaining **enterprise-grade observability** for the MitchellNET network.

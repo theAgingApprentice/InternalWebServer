@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# MacOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
 # User-specific files
 *.rsuser
 *.suo

@@ -1,0 +1,12 @@
+{
+  "name": "Prometheus",
+  "type": "prometheus",
+  "access": "proxy",
+  "url": "http://192.168.2.10:9090",
+  "isDefault": true,
+  "jsonData": {
+    "httpMethod": "GET",
+    "manageAlerts": false
+  },
+  "version": 1
+}

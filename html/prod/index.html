@@ -8,15 +8,13 @@
 </head>
 
 <body>
-  <!-- Environment Banner (injected by NGINX include, but duplicated here for local fallback) -->
+  <!-- Environment Banner -->
   <div id="env-banner" class="env-prod">
     ✅ PRODUCTION ENVIRONMENT
   </div>
 
-  <header class="site-header">
-    <h1>MitchellNET Internal Web</h1>
-    <p class="subtitle">Production Environment</p>
-  </header>
+  <!-- Include Header -->
+  <!--# include file="header.html" -->
 
   <main class="content">
     <section>
@@ -31,8 +29,7 @@
     </section>
   </main>
 
-  <footer class="site-footer">
-    <p>&copy; 2025 TheAgingApprentice — Internal Use Only</p>
-  </footer>
+  <!-- Include Footer -->
+  <!--# include file="footer.html" -->
 </body>
 </html>

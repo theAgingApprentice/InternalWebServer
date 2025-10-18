@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MitchellNET — Test Environment</title>
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="css/style.css" />
 </head>
 
 <body>
@@ -13,8 +13,23 @@
         🚧 TEST ENVIRONMENT — NOT FOR PRODUCTION USE 🚧
     </div>
 
-    <!-- Include Header -->
-    <!--#include virtual="/test/header.html" -->
+    <!-- Header -->
+    <nav class="main-nav">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <img src="../../img/whiteLogoMN800x600.png" alt="MitchellNET Logo">
+            </a>
+            <div class="dropdown-menu">
+                <button class="menu-toggle">Menu</button>
+                <ul class="nav-items">
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/tools">Tools</a></li>
+                    <li><a href="/reference">Reference</a></li>
+                    <li><a href="/about">About</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
     <main class="content">
         <section>
@@ -29,7 +44,9 @@
         </section>
     </main>
 
-    <!-- Include Footer -->
-    <!--#include virtual="/test/footer.html" -->
+    <!-- Footer -->
+    <footer class="site-footer">
+        <p>&copy; 2025 TheAgingApprentice — Internal Use Only</p>
+    </footer>
 </body>
 </html>

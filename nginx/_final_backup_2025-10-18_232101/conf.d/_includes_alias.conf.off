@@ -1,0 +1,6 @@
+# Shared includes alias for banner fragments
+location /includes/ {
+    alias /home/andrew/web_server/includes/;
+    autoindex off;
+    add_header Cache-Control "no-store";
+}

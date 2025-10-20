@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Old Secure Web Server</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; margin-top: 50px; }
+        h1 { color: #333; }
+        p { color: #666; }
+    </style>
+</head>
+<body>
+    <h1>You should never see this pager</h1>
+    <p>This page is located in the root of the web server at /home/andrew/web_server/html.</p>
+    <p>This site is hosted by Nginx and has two Docker containers, one for Test and one for Prod.</p>
+    <p>You're viewing this over HTTPS, secured with a self-signed certificate.</p>
+    <p>Current Time (UTC): <span id="time"></span></p>
+    <script>
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('time').textContent = now.toUTCString();
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+    </script>
+</body>
+</html>

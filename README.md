@@ -24,6 +24,7 @@ You can read about the network monitoring system [here](dashboard.md).
 6. [Cloning and Replicating the Environment](#cloning-and-replicating-the-environment)
 7. [Troubleshooting and Maintenance](#troubleshooting-and-maintenance)
 8. [Dev quick reference](devQuickReference.md)
+9. [Newer config info](README-New.md)
 
 ---
 
@@ -92,6 +93,8 @@ These workflows automate:
 ```
 /home/andrew/web_server/html/
 ├── index.html
+├── dev/
+│   └── index.html
 ├── test/
 │   └── index.html
 └── prod/

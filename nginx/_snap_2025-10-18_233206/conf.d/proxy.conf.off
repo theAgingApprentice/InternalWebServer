@@ -1,0 +1,44 @@
+# Redirect all HTTP traffic to HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    server_name 192.168.2.10;
+    return 301 https://$host$request_uri;
+}
+
+# HTTPS Reverse Proxy
+server {
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name 192.168.2.10;
+
+    ssl_certificate /etc/nginx/ssl/server.crt;
+    ssl_certificate_key /etc/nginx/ssl/server.key;
+
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+    add_header Content-Security-Policy "default-src 'self' data: 'unsafe-inline' 'unsafe-eval';" always;
+
+    # Default (Production)
+    location / {
+        proxy_pass http://nginx-prod:80/;
+    }
+
+    # Test site (access via /test)
+    location /test/ {
+        proxy_pass http://nginx-test:80/;
+    }
+
+    # New Location: Explicitly handles /test (without a trailing slash) 
+    # and redirects to /test/ to prevent the backend container from doing it (which can sometimes fail).
+    location = /test {
+        return 301 $scheme://$host/test/;
+    }    
+}

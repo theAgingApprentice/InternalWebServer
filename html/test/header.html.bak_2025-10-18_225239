@@ -1,0 +1,16 @@
+<nav class="main-nav">
+    <div class="nav-container">
+        <a href="/" class="logo">
+            <img src="/img/whiteLogoMN800x600.png" alt="MitchellNET Logo">
+        </a>
+        <div class="dropdown-menu">
+            <button class="menu-toggle">Menu</button>
+            <ul class="nav-items">
+                <li><a href="/">Home</a></li>
+                <li><a href="/tools">Tools</a></li>
+                <li><a href="/reference">Reference</a></li>
+                <li><a href="/about">About</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>

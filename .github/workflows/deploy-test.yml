@@ -8,70 +8,54 @@ on:
 jobs:
   deploy-test:
     name: Deploy to Test Environment
-    runs-on: self-hosted   # 🖥 Runs directly on your Ubuntu server runner
+    runs-on: self-hosted  # Runs on your Ubuntu iMac server runner
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set variables
+        run: |
+          echo "BASE=/home/andrew/web_server/html" >> $GITHUB_ENV
+          echo "TEST_ROOT=/home/andrew/web_server/html/test" >> $GITHUB_ENV
+          echo "BACKUP_DIR=/home/andrew/web_server/html/test_backup_$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
+
       - name: Backup current /test content
         run: |
-          echo "=== Backing up existing /test ==="
-          BACKUP_DIR="/home/andrew/web_server/html/test_backup_$(date +%Y%m%d_%H%M%S)"
+          set -euo pipefail
+          echo "=== Backing up existing /test to: $BACKUP_DIR ==="
           mkdir -p "$BACKUP_DIR"
-          cp -r /home/andrew/web_server/html/test/* "$BACKUP_DIR"/
-          echo "Backup stored at: $BACKUP_DIR"
+          if [ -d "$TEST_ROOT" ]; then
+            cp -r "$TEST_ROOT"/. "$BACKUP_DIR"/
+          else
+            echo "No existing $TEST_ROOT directory; creating it."
+            mkdir -p "$TEST_ROOT"
+          fi
 
-      - name: Deploy new content to /test
+      - name: Deploy new content to /test (rsync --delete)
         run: |
-          echo "=== Deploying new test content ==="
-          cp -r html/test/* /home/andrew/web_server/html/test/
-          echo "Deployment complete."
+          set -euo pipefail
+          echo "=== Deploying html/test -> $TEST_ROOT ==="
+          rsync -av --delete html/test/ "$TEST_ROOT"/
 
+      # Optional: restart not required for static files, but harmless if you prefer it
       - name: Restart nginx-test container
         run: |
           echo "Restarting nginx-test container..."
-          docker restart nginx-test
+          docker restart nginx-test || true
           sleep 5
 
-      - name: Verify Test Container
+      - name: Verify Test via HTTP
         run: |
-          echo "=== Verifying nginx-test container ==="
-          TITLE=$(docker exec nginx-test grep -o "Test Environment" /usr/share/nginx/html/index.html || true)
-          if [ -z "$TITLE" ]; then
-            echo "❌ Verification failed: 'Test Environment' not found in /usr/share/nginx/html/index.html"
-            exit 1
-          else
-            echo "✅ Verification passed: Test environment confirmed."
-          fi
+          set -euo pipefail
+          echo "=== HTTP checks against https://test.mitchellnet.local ==="
+          curl -skI https://test.mitchellnet.local/ | head -n1 | grep "200"
+          curl -skI https://test.mitchellnet.local/header.html | grep "200"
+          curl -skI https://test.mitchellnet.local/js/includes.js | grep "200"
+          curl -skI https://test.mitchellnet.local/css/style.css | grep "200"
+          curl -sk  https://test.mitchellnet.local/ | grep -qi "Test Environment" && echo "Content looks like TEST ✅"
 
       - name: Rollback if verification fails
         if: failure()
         run: |
-          echo "=== Rolling back to previous backup ==="
-          LATEST_BACKUP=$(ls -td /home/andrew/web_server/html/test_backup_* | head -1)
-          if [ -d "$LATEST_BACKUP" ]; then
-            rm -rf /home/andrew/web_server/html/test/*
-            cp -r "$LATEST_BACKUP"/* /home/andrew/web_server/html/test/
-            echo "Rollback completed using backup: $LATEST_BACKUP"
-          else
-            echo "⚠️ No backup directory found to restore from!"
-          fi
-
-      - name: Retention — delete backups older than 7 days
-        run: |
-          echo "=== Cleaning up old backups ==="
-          find /home/andrew/web_server/html/ -maxdepth 1 -type d -name "test_backup_*" -mtime +7 -exec rm -rf {} \;
-          echo "Old backups cleaned up."
-
-      # - name: Send email notification (disabled for now)
-      #   uses: dawidd6/action-send-mail@v3
-      #   with:
-      #     server_address: smtp.gmail.com
-      #     server_port: 587
-      #     username: ${{ secrets.MAIL_USERNAME }}
-      #     password: ${{ secrets.MAIL_PASSWORD }}
-      #     subject: "Test Deployment ${{ job.status }}"
-      #     to: "you@example.com"
-      #     from: "GitHub Actions <you@example.com>"
-      #     body: "The deploy-to-test workflow finished with status: ${{ job.status }}"
+          set -euo pipefail

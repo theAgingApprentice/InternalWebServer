@@ -32,6 +32,15 @@ jobs:
             mkdir -p "$PROD_ROOT"
           fi
 
+      - name: Write version.json (prod)
+        run: |
+          set -euo pipefail
+          mkdir -p html/prod
+          printf '{\n  "env":"prod",\n  "commit":"%s",\n  "deployed_at":"%s"\n}\n' \
+            "$GITHUB_SHA" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > html/prod/version.json
+          echo "Wrote html/prod/version.json:"
+          cat html/prod/version.json
+
       - name: Deploy new content to /prod (rsync --delete)
         run: |
           set -euo pipefail
@@ -50,7 +59,7 @@ jobs:
           set -euo pipefail
           HOST="$HOST"
           IP="$PROXY_IP"
-          PATHS=("/" "/header.html" "/js/includes.js" "/css/style.css" "/img/whiteLogoMN800x600.png")
+          PATHS=("/" "/header.html" "/js/includes.js" "/css/style.css" "/img/whiteLogoMN800x600.png" "/version.json")
 
           fail=0
           for attempt in 1 2; do
@@ -63,12 +72,19 @@ jobs:
               fi
             done
 
-            # Content check on root page
-            page=$(curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/" | tr -d '\r')
-            if echo "$page" | grep -qi "Production"; then
+            # Content checks
+            root=$(curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/" | tr -d '\r')
+            ver=$(curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/version.json" | tr -d '\r')
+            if echo "$root" | grep -qi "Production"; then
               echo "  Root page contains 'Production' ✅"
             else
               echo "  Root page missing 'Production' ❌"
+              fail=1
+            fi
+            if echo "$ver" | grep -q '"env":"prod"'; then
+              echo "  version.json reports env=prod ✅"
+            else
+              echo "  version.json missing or env != prod ❌"
               fail=1
             fi
 
@@ -86,8 +102,8 @@ jobs:
             echo "Verification failed."
             echo "--- Debug: full headers for / ---"
             curl -skI --resolve "$HOST:443:$IP" "https://${HOST}/"
-            echo "--- Debug: first 40 lines of / ---"
-            curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/" | sed -n '1,40p'
+            echo "--- Debug: version.json ---"
+            curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/version.json" || true
             exit 1
           fi
 

@@ -1,35 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MitchellNET — Test Environment</title>
-    <link rel="stylesheet" href="/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MitchellNET — Test Environment</title>
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
-    <!-- Environment Banner -->
-    <div id="env-banner" class="env-test">
-        🚧 TEST ENVIRONMENT — NOT FOR PRODUCTION USE 🚧
-    </div>
+  <!-- Environment Banner -->
+  <div id="env-banner" class="env-test">
+    🚧 TEST ENVIRONMENT — NOT FOR PRODUCTION USE 🚧
+  </div>
 
-    <!-- Include Header -->
-    <!--#include virtual="/header.html" -->
+  <!-- Include Header -->
+  <div data-include="/header.html"></div>
 
-    <main class="content">
-        <section>
-            <h2>Welcome to the Test Environment</h2>
-            <p>
-                This version of the site is used for validating changes before promoting them to production.
-            </p>
-            <p>
-                Developers can safely deploy updates here via the <code>develop</code> branch in GitHub.
-            </p>
-            <a href="https://prod.mitchellnet.local" class="button">Go to Production</a>
-        </section>
-    </main>
+  <main class="content">
+    <section>
+      <h2>Welcome to the Test Environment</h2>
+      <p>
+        This version of the site is used for validating changes before promoting them to production.
+      </p>
+      <p>
+        Developers can safely deploy updates here via the <code>develop</code> branch in GitHub.
+      </p>
+      <a href="https://prod.mitchellnet.local"
+         class="button"
+         data-env-link="prod">Go to Production</a>
+    </section>
+  </main>
 
-    <!-- Include Footer -->
-    <!--#include virtual="/footer.html" -->
+  <!-- Include Footer -->
+  <div data-include="/footer.html"></div>
+
+  <!-- Scripts -->
+  <script src="/js/includes.js" defer></script>
 </body>
 </html>

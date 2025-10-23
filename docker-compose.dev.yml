@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  nginx-proxy:
+    image: nginx:latest
+    container_name: nginx-proxy-dev
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./proxy/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - nginx-prod
+      - nginx-test
+    networks:
+      - dev-webnet
+
+  nginx-prod:
+    image: nginx:latest
+    container_name: nginx-prod-dev
+    volumes:
+      - ./html/prod:/usr/share/nginx/html:ro
+    networks:
+      - dev-webnet
+
+  nginx-test:
+    image: nginx:latest
+    container_name: nginx-test-dev
+    volumes:
+      - ./html/test:/usr/share/nginx/html:ro
+    networks:
+      - dev-webnet
+
+networks:
+  dev-webnet:
+    name: dev-webnet

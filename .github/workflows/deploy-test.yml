@@ -19,6 +19,8 @@ jobs:
           echo "BASE=/home/andrew/web_server/html" >> $GITHUB_ENV
           echo "TEST_ROOT=/home/andrew/web_server/html/test" >> $GITHUB_ENV
           echo "BACKUP_DIR=/home/andrew/web_server/html/test_backup_$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
+          echo "HOST=test.mitchellnet.local" >> $GITHUB_ENV
+          echo "PROXY_IP=127.0.0.1" >> $GITHUB_ENV   # nginx-proxy listens on localhost:443
 
       - name: Backup current /test content
         run: |
@@ -38,24 +40,81 @@ jobs:
           echo "=== Deploying html/test -> $TEST_ROOT ==="
           rsync -av --delete html/test/ "$TEST_ROOT"/
 
-      # Optional: restart not required for static files, but harmless if you prefer it
+      # Optional: restart not needed for static files, but harmless if you prefer it
       - name: Restart nginx-test container
         run: |
           echo "Restarting nginx-test container..."
           docker restart nginx-test || true
-          sleep 5
+          sleep 3
 
-      - name: Verify Test via HTTP
+      - name: Verify Test via HTTP (with SNI + IP pinning)
         run: |
           set -euo pipefail
-          echo "=== HTTP checks against https://test.mitchellnet.local ==="
-          curl -skI https://test.mitchellnet.local/ | head -n1 | grep "200"
-          curl -skI https://test.mitchellnet.local/header.html | grep "200"
-          curl -skI https://test.mitchellnet.local/js/includes.js | grep "200"
-          curl -skI https://test.mitchellnet.local/css/style.css | grep "200"
-          curl -sk  https://test.mitchellnet.local/ | grep -qi "Test Environment" && echo "Content looks like TEST ✅"
+          HOST="$HOST"
+          IP="$PROXY_IP"
+          PATHS=("/" "/header.html" "/js/includes.js" "/css/style.css" "/img/whiteLogoMN800x600.png")
+
+          fail=0
+          for attempt in 1 2; do
+            echo "=== Attempt $attempt ==="
+            for p in "${PATHS[@]}"; do
+              status=$(curl -skI --resolve "$HOST:443:$IP" "https://${HOST}${p}" | sed -n '1s/.* \([0-9][0-9][0-9]\).*/\1/p')
+              echo "  ${p} -> ${status}"
+              if [ "$status" != "200" ]; then
+                fail=1
+              fi
+            done
+
+            # Content check on root page
+            page=$(curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/" | tr -d '\r')
+            if echo "$page" | grep -qi "Test Environment"; then
+              echo "  Root page contains 'Test Environment' ✅"
+            else
+              echo "  Root page missing 'Test Environment' ❌"
+              fail=1
+            fi
+
+            # If any failure, sleep once and retry
+            if [ "$fail" -ne 0 ] && [ "$attempt" -eq 1 ]; then
+              echo "Some checks failed; waiting 3s and retrying..."
+              sleep 3
+              fail=0
+              continue
+            fi
+            break
+          done
+
+          if [ "$fail" -ne 0 ]; then
+            echo "Verification failed."
+            echo "--- Debug: full headers for / ---"
+            curl -skI --resolve "$HOST:443:$IP" "https://${HOST}/"
+            echo "--- Debug: first 40 lines of / ---"
+            curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/" | sed -n '1,40p'
+            exit 1
+          fi
+
+          echo "All checks passed ✅"
 
       - name: Rollback if verification fails
         if: failure()
         run: |
           set -euo pipefail
+          echo "=== Rolling back to previous backup ==="
+          LATEST_BACKUP=$(ls -td "$BASE"/test_backup_* 2>/dev/null | head -1 || true)
+          if [ -n "${LATEST_BACKUP:-}" ] && [ -d "$LATEST_BACKUP" ]; then
+            rsync -av --delete "$LATEST_BACKUP"/ "$TEST_ROOT"/
+            echo "Rollback completed using backup: $LATEST_BACKUP"
+          else
+            echo "⚠️ No backup directory found to restore from!"
+          fi
+
+      - name: Retention — delete test backups older than 7 days
+        run: |
+          set -euo pipefail
+          echo "=== Cleaning up old test backups (>7 days) ==="
+          find "$BASE" -maxdepth 1 -type d -name "test_backup_*" -mtime +7 -print -exec rm -rf {} \;
+          echo "Cleanup complete."
+
+      # Optional: reload proxy if its config changed
+      # - name: Reload nginx-proxy (optional)
+      #   run: docker exec nginx-proxy nginx -t && docker exec nginx-proxy nginx -s reload || true

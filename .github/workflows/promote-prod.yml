@@ -17,6 +17,8 @@ jobs:
           echo "BASE=/home/andrew/web_server/html" >> $GITHUB_ENV
           echo "PROD_ROOT=/home/andrew/web_server/html/prod" >> $GITHUB_ENV
           echo "BACKUP_DIR=/home/andrew/web_server/html/prod_backup_$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
+          echo "HOST=prod.mitchellnet.local" >> $GITHUB_ENV
+          echo "PROXY_IP=127.0.0.1" >> $GITHUB_ENV   # nginx-proxy listens on localhost:443
 
       - name: Backup current /prod content
         run: |
@@ -41,17 +43,55 @@ jobs:
         run: |
           echo "Restarting nginx-prod container..."
           docker restart nginx-prod || true
-          sleep 5
+          sleep 3
 
-      - name: Verify Prod via HTTP
+      - name: Verify Prod via HTTP (with SNI + IP pinning)
         run: |
           set -euo pipefail
-          echo "=== HTTP checks against https://prod.mitchellnet.local ==="
-          curl -skI https://prod.mitchellnet.local/ | head -n1 | grep "200"
-          curl -skI https://prod.mitchellnet.local/header.html | grep "200"
-          curl -skI https://prod.mitchellnet.local/js/includes.js | grep "200"
-          curl -skI https://prod.mitchellnet.local/css/style.css | grep "200"
-          curl -sk  https://prod.mitchellnet.local/ | grep -qi "Production" && echo "Content looks like PROD ✅"
+          HOST="$HOST"
+          IP="$PROXY_IP"
+          PATHS=("/" "/header.html" "/js/includes.js" "/css/style.css" "/img/whiteLogoMN800x600.png")
+
+          fail=0
+          for attempt in 1 2; do
+            echo "=== Attempt $attempt ==="
+            for p in "${PATHS[@]}"; do
+              status=$(curl -skI --resolve "$HOST:443:$IP" "https://${HOST}${p}" | sed -n '1s/.* \([0-9][0-9][0-9]\).*/\1/p')
+              echo "  ${p} -> ${status}"
+              if [ "$status" != "200" ]; then
+                fail=1
+              fi
+            done
+
+            # Content check on root page
+            page=$(curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/" | tr -d '\r')
+            if echo "$page" | grep -qi "Production"; then
+              echo "  Root page contains 'Production' ✅"
+            else
+              echo "  Root page missing 'Production' ❌"
+              fail=1
+            fi
+
+            # If any failure, sleep once and retry
+            if [ "$fail" -ne 0 ] && [ "$attempt" -eq 1 ]; then
+              echo "Some checks failed; waiting 3s and retrying..."
+              sleep 3
+              fail=0
+              continue
+            fi
+            break
+          done
+
+          if [ "$fail" -ne 0 ]; then
+            echo "Verification failed."
+            echo "--- Debug: full headers for / ---"
+            curl -skI --resolve "$HOST:443:$IP" "https://${HOST}/"
+            echo "--- Debug: first 40 lines of / ---"
+            curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/" | sed -n '1,40p'
+            exit 1
+          fi
+
+          echo "All checks passed ✅"
 
       - name: Rollback if verification fails
         if: failure()

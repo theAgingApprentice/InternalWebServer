@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MitchellNET — Production</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
@@ -14,7 +14,7 @@
   </div>
 
   <!-- Include Header -->
-  <!--#include virtual="/header.html" -->
+  <div data-include="/header.html"></div>
 
   <main class="content">
     <section>
@@ -25,11 +25,16 @@
       <p>
         All content here has passed testing and review in the <strong>Test Environment</strong>.
       </p>
-      <a href="https://192.168.2.10/test" class="button secondary">Go to Test</a>
+      <a href="https://test.mitchellnet.local"
+         class="button secondary"
+         data-env-link="test">Go to Test</a>
     </section>
   </main>
 
   <!-- Include Footer -->
-  <!--#include virtual="/footer.html" -->
+  <div data-include="/footer.html"></div>
+
+  <!-- Scripts -->
+  <script src="/js/includes.js" defer></script>
 </body>
 </html>

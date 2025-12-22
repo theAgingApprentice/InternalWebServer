@@ -4,22 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitness Tracker</title>
+    <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Fitness Tracker</h1>
-            <p class="subtitle">Track your fitness journey with ease</p>
-        </header>
+    <!-- Environment Banner -->
+    <div id="env-banner" class="env-prod">
+    </div>
 
-        <div class="status">
-            <div id="apiStatus" class="status-indicator">
-                <span id="statusText">Checking API...</span>
+    <!-- Include Header -->
+    <div data-include="/header.html"></div>
+
+    <div class="content">
+        <div class="container">
+            <header>
+                <h1>Fitness Tracker</h1>
+                <p class="subtitle">Track your fitness journey with ease</p>
+            </header>
+
+            <div class="status">
+                <div id="apiStatus" class="status-indicator">
+                    <span id="statusText">Checking API...</span>
+                </div>
             </div>
-        </div>
 
-        <main>
+            <main>
             <section class="add-item">
                 <h2>Add New Item</h2>
                 <form id="addItemForm">
@@ -47,7 +56,13 @@
             <p>Environment: <span id="environment">Unknown</span></p>
         </footer>
     </div>
+    </div>
 
+    <!-- Include Footer -->
+    <div data-include="/footer.html"></div>
+
+    <!-- Scripts -->
+    <script src="/js/includes.js" defer></script>
     <script src="js/app.js"></script>
 </body>
 </html>

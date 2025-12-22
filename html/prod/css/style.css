@@ -29,6 +29,21 @@ body {
     height: 40px;
 }
 
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+}
+
+#dev-badge {
+    color: white !important;
+    font-weight: bold;
+    margin-left: 10px;
+    font-size: 1.2rem;
+    display: none;
+    text-decoration: none;
+}
+
 .dropdown-menu {
     position: relative;
 }

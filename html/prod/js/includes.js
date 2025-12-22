@@ -41,12 +41,10 @@
 
   const urls = isDevHost
     ? {
-        prod: "https://prod.dev.mitchellnet.local",
-        test: "https://test.dev.mitchellnet.local",
+        prod: "https://mitchellnet.dev.local",
       }
     : {
-        prod: "https://prod.mitchellnet.local",
-        test: "https://test.mitchellnet.local",
+        prod: "https://mitchellnet.local",
       };
 
   // Rewrite anchors that are clearly "Go to Production" / "Go to Test"

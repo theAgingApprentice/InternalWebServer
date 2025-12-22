@@ -21,7 +21,7 @@ certs:
 		echo "Installing mkcert (requires Homebrew)..." && brew install mkcert nss || true; \
 	fi
 	mkcert -install
-	mkcert -key-file ssl/dev.key -cert-file ssl/dev.crt "prod.mitchellnet.local" "test.mitchellnet.local" "localhost"
+	mkcert -key-file ssl/dev.key -cert-file ssl/dev.crt "mitchellnet.dev.local" "localhost"
 	@echo "Certs written to ./ssl/dev.crt and ./ssl/dev.key"
 
 nuke:

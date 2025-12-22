@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fitness Tracker</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -29,28 +30,51 @@
             </div>
 
             <main>
-            <section class="add-item">
-                <h2>Add New Item</h2>
-                <form id="addItemForm">
-                    <div class="form-group">
-                        <label for="itemName">Name:</label>
-                        <input type="text" id="itemName" name="name" required>
+                <section class="calendar-section">
+                    <div class="calendar-header">
+                        <button id="prevMonth" class="btn btn-nav">&larr; Prev</button>
+                        <h2 id="currentMonth">Loading...</h2>
+                        <button id="nextMonth" class="btn btn-nav">Next &rarr;</button>
                     </div>
-                    <div class="form-group">
-                        <label for="itemDescription">Description:</label>
-                        <textarea id="itemDescription" name="description" rows="3"></textarea>
+                    <div class="calendar-grid" id="calendarGrid">
+                        <div class="calendar-day-header">Sun</div>
+                        <div class="calendar-day-header">Mon</div>
+                        <div class="calendar-day-header">Tue</div>
+                        <div class="calendar-day-header">Wed</div>
+                        <div class="calendar-day-header">Thu</div>
+                        <div class="calendar-day-header">Fri</div>
+                        <div class="calendar-day-header">Sat</div>
                     </div>
-                    <button type="submit" class="btn btn-primary">Add Item</button>
-                </form>
-            </section>
+                </section>
 
-            <section class="items-list">
-                <h2>Items List</h2>
-                <div id="itemsContainer">
-                    <p class="loading">Loading items...</p>
-                </div>
-            </section>
-        </main>
+                <section class="activity-details" id="activityDetails" style="display: none;">
+                    <h2>Activities for <span id="selectedDate"></span></h2>
+                    <div id="activitiesContainer">
+                        <p class="loading">Loading activities...</p>
+                    </div>
+                    
+                    <div class="add-activity-form" id="addActivityForm" style="margin-top: 20px;">
+                        <h3>Add Activity</h3>
+                        <form id="activityForm">
+                            <div class="form-row">
+                                <label for="activitySelect">Activity:</label>
+                                <select id="activitySelect" required>
+                                    <option value="">Select activity...</option>
+                                </select>
+                            </div>
+                            <div class="form-row">
+                                <label for="unitDisplay">Units:</label>
+                                <input type="text" id="unitDisplay" readonly>
+                            </div>
+                            <div class="form-row">
+                                <label for="valueInput">Value:</label>
+                                <input type="number" id="valueInput" required min="0">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Add Activity</button>
+                        </form>
+                    </div>
+                </section>
+            </main>
 
         <footer>
             <p>Environment: <span id="environment">Unknown</span></p>

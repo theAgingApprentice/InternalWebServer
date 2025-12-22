@@ -93,9 +93,8 @@ docker ps
 ```
 
 You should see containers running:
-- `nginx-proxy-dev`
-- `nginx-prod-dev`
-- `nginx-test-dev` (if still present)
+- `nginx-proxy-dev` - Reverse proxy on ports 80/443
+- `nginx-prod-dev` - Production content server
 
 #### Step 2: Make Your Changes
 
@@ -117,15 +116,13 @@ code html/prod/css/style.css
    sudo nano /etc/hosts
    ```
 
-2. Add these lines:
+2. Add this line:
    ```
    127.0.0.1 prod.mitchellnet.local
-   127.0.0.1 test.mitchellnet.local
    ```
 
 3. View in browser:
    - Production: https://prod.mitchellnet.local
-   - Test: https://test.mitchellnet.local
 
 **Option B: Using VS Code Live Preview**
 

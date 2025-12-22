@@ -8,6 +8,10 @@
 .AppleDouble
 .LSOverride
 
+# LibreOffice lock files
+.~lock.*
+~$*.*
+
 # User-specific files
 *.rsuser
 *.suo

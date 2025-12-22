@@ -1,0 +1,112 @@
+name: Deploy to Production
+
+on:
+  pull_request:
+    types: [closed]
+    branches:
+      - main
+
+jobs:
+  deploy-production:
+    name: Deploy to Production Environment
+    # Only run if the PR was merged (not just closed)
+    if: github.event.pull_request.merged == true
+    runs-on: self-hosted  # Runs on your Ubuntu iMac server runner
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: main  # Ensure we deploy the merged main branch
+
+      - name: Set variables
+        run: |
+          echo "PROD_ROOT=/home/andrew/web_server/html/prod" >> $GITHUB_ENV
+          echo "BACKUP_DIR=/home/andrew/web_server/backups/prod_backup_$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
+          echo "HOST=prod.mitchellnet.local" >> $GITHUB_ENV
+          echo "PROXY_IP=127.0.0.1" >> $GITHUB_ENV
+
+      - name: Create backup directory
+        run: |
+          mkdir -p /home/andrew/web_server/backups
+          echo "Backups will be stored in: /home/andrew/web_server/backups"
+
+      - name: Backup current production content
+        run: |
+          set -euo pipefail
+          echo "=== Backing up existing production to: $BACKUP_DIR ==="
+          if [ -d "$PROD_ROOT" ]; then
+            cp -r "$PROD_ROOT" "$BACKUP_DIR"
+            echo "Backup completed successfully"
+          else
+            echo "No existing production directory; creating it."
+            mkdir -p "$PROD_ROOT"
+          fi
+
+      - name: Write deployment metadata
+        run: |
+          set -euo pipefail
+          mkdir -p html/prod
+          cat > html/prod/version.json <<EOF
+          {
+            "env": "production",
+            "commit": "$GITHUB_SHA",
+            "deployed_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "deployed_by": "${{ github.actor }}",
+            "pr_number": "${{ github.event.pull_request.number }}",
+            "pr_title": "${{ github.event.pull_request.title }}"
+          }
+          EOF
+          echo "Deployment metadata:"
+          cat html/prod/version.json
+
+      - name: Deploy content to production
+        run: |
+          set -euo pipefail
+          echo "=== Deploying html/prod -> $PROD_ROOT ==="
+          rsync -av --delete html/prod/ "$PROD_ROOT"/
+          echo "Deployment completed successfully"
+
+      - name: Restart nginx-prod container
+        run: |
+          echo "Restarting nginx-prod container..."
+          docker restart nginx-prod || true
+          sleep 3
+
+      - name: Verify production deployment
+        run: |
+          set -euo pipefail
+          HOST="$HOST"
+          IP="$PROXY_IP"
+          PATHS=("/" "/version.json")
+
+          echo "=== Verifying production deployment ==="
+          for p in "${PATHS[@]}"; do
+            status=$(curl -skI --resolve "$HOST:443:$IP" "https://${HOST}${p}" | sed -n '1s/.* \([0-9][0-9][0-9]\).*/\1/p')
+            echo "  ${p} -> ${status}"
+            if [ "$status" != "200" ]; then
+              echo "ERROR: Failed to verify ${p}"
+              exit 1
+            fi
+          done
+
+          # Verify deployment metadata
+          ver=$(curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/version.json")
+          if echo "$ver" | grep -q '"env":"production"'; then
+            echo "✅ Production deployment verified successfully"
+          else
+            echo "❌ Deployment verification failed"
+            exit 1
+          fi
+
+      - name: Deployment summary
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🚀 Deployment Complete!"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Environment: Production"
+          echo "Commit: $GITHUB_SHA"
+          echo "PR: #${{ github.event.pull_request.number }}"
+          echo "Deployed by: ${{ github.actor }}"
+          echo "Backup: $BACKUP_DIR"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

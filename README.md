@@ -32,7 +32,12 @@
 ✅ **Local Testing:** Test changes locally before pushing to GitHub  
 ✅ **Simple Infrastructure:** Only production environment maintained
 
-**Production URL:** https://mitchellnet.local
+### URL Reference
+
+| URL | Points To | Purpose |
+|-----|-----------|----------|
+| **https://mitchellnet.local** | Ubuntu server (192.168.2.10) | Production site |
+| **https://mitchellnet.dev.local** | Local Mac (127.0.0.1) | Local development/preview |
 
 ---
 
@@ -167,70 +172,316 @@ make down
 
 ## 3. Deployment Workflow
 
-### Making Changes
+### URL Summary
 
-#### Standard Workflow (Feature Branch)
+| Environment | URL | Access From |
+|-------------|-----|-------------|
+| **Production** | https://mitchellnet.local | Any device on MitchellNET |
+| **Local Dev** | https://mitchellnet.dev.local | Your Mac only |
 
-1. **Create a feature branch:**
-   ```bash
-   git checkout main
-   git pull origin main
-   git checkout -b feature/your-feature-name
-   ```
+### Feature Branch Workflow
 
-2. **Make changes** in `html/prod/`:
-   ```bash
-   # Edit your files
-   code html/prod/index.html
-   ```
+This repository uses a **single-branch workflow** with temporary feature branches for new work.
 
-3. **Test locally** (see "Testing Changes Locally" above):
-   ```bash
-   make up
-   # View at https://prod.mitchellnet.local
-   make down
-   ```
+**Key Principles:**
+- ✅ Only `main` branch is permanent
+- ✅ Create feature branches for each piece of work
+- ✅ Delete feature branches after merging
+- ✅ Never commit directly to `main` (use PRs instead)
 
-4. **Commit and push:**
-   ```bash
-   git add html/prod/
-   git commit -m "Description of your changes"
-   git push origin feature/your-feature-name
-   ```
+---
 
-5. **Create Pull Request** on GitHub to `main`
+#### Complete Feature Workflow
 
-6. **Merge PR** → Automatic deployment to production! 🚀
-
-#### Quick Workflow (Direct to Main)
-
-⚠️ Use only for minor changes
+**1. Start New Feature**
 
 ```bash
+# Make sure you're on main and up to date
 git checkout main
 git pull origin main
-# Make changes
-git add html/prod/
-git commit -m "Minor update"
-git push origin main
+
+# Create a new feature branch (use descriptive names)
+git checkout -b feature/add-contact-page
+# or
+git checkout -b feature/update-navigation
+# or
+git checkout -b fix/broken-image-link
 ```
 
-This will NOT trigger automatic deployment. Only merged PRs trigger deployment.
+**Naming conventions:**
+- `feature/` - New features or enhancements
+- `fix/` - Bug fixes
+- `update/` - Content updates or improvements
 
-### Pull Request Deployment
+---
 
-When you merge a PR to `main`, GitHub Actions automatically:
+**2. Make Your Changes**
 
-1. ✅ Checks out merged code
-2. 📦 Backs up current production
-3. 📝 Creates deployment metadata
-4. 🚀 Deploys to Ubuntu server
-5. 🔄 Restarts nginx-prod container
-6. ✓ Verifies deployment
+```bash
+# Edit files
+code html/prod/index.html
+code html/prod/header.html
+code html/prod/css/style.css
+
+# Or use your preferred editor
+```
+
+---
+
+**3. Test Locally**
+
+```bash
+# Start development containers
+make up
+
+# View changes at https://mitchellnet.dev.local
+# Test navigation, links, styling, etc.
+
+# Make additional changes if needed
+# Containers auto-reload for HTML/CSS/JS changes
+
+# When satisfied, stop containers
+make down
+```
+
+---
+
+**4. Commit Your Changes**
+
+```bash
+# Check what files changed
+git status
+
+# Stage your changes
+git add html/prod/
+# or add specific files
+git add html/prod/index.html html/prod/css/style.css
+
+# Commit with a clear message
+git commit -m "Add contact page with email form"
+
+# Push to GitHub
+git push origin feature/add-contact-page
+```
+
+**Good commit messages:**
+- ✅ "Add contact page with email form"
+- ✅ "Fix navigation table alignment"
+- ✅ "Update home page hero image"
+- ❌ "updates" (too vague)
+- ❌ "WIP" (work in progress - commit when done)
+
+---
+
+**5. Create Pull Request**
+
+```bash
+# GitHub will show a link in the terminal output:
+# https://github.com/theAgingApprentice/InternalWebServer/pull/new/feature/add-contact-page
+
+# Or go to GitHub and click "Compare & pull request"
+```
+
+On GitHub:
+1. Review your changes in the "Files changed" tab
+2. Write a description of what you changed
+3. Click "Create pull request"
+
+---
+
+**6. Merge Pull Request**
+
+Since you're the only developer:
+1. Review the changes one final time
+2. Click "Merge pull request"
+3. Click "Confirm merge"
+4. **Check "Delete branch" checkbox** (clean up automatically)
+5. Click "Delete branch" to remove the feature branch
+
+This triggers automatic deployment! 🚀
+
+---
+
+**7. Clean Up Locally**
+
+After merging and deleting the remote branch:
+
+```bash
+# Switch back to main
+git checkout main
+
+# Pull the merged changes
+git pull origin main
+
+# Delete your local feature branch
+git branch -d feature/add-contact-page
+
+# Verify only main remains
+git branch
+# Should show: * main
+```
+
+---
+
+#### Quick Reference
+
+**Complete workflow in one block:**
+
+```bash
+# Start
+git checkout main && git pull origin main
+git checkout -b feature/my-feature
+
+# Work
+# ... edit files ...
+make up  # test locally
+make down
+
+# Commit
+git add html/prod/
+git commit -m "Clear description of changes"
+git push origin feature/my-feature
+
+# Create PR on GitHub, merge it, delete remote branch
+
+# Clean up
+git checkout main
+git pull origin main
+git branch -d feature/my-feature
+```
+
+---
+
+#### Troubleshooting Feature Branches
+
+**Forgot to create a feature branch and worked on main?**
+
+```bash
+# Don't panic! Create the branch now
+git checkout -b feature/my-forgotten-feature
+
+# Your changes come with you
+git push origin feature/my-forgotten-feature
+
+# Now create PR as normal
+```
+
+**Want to abandon a feature branch?**
+
+```bash
+# Switch to main
+git checkout main
+
+# Delete local branch (use -D to force)
+git branch -D feature/unwanted-feature
+
+# Delete from GitHub (if you pushed it)
+git push origin --delete feature/unwanted-feature
+```
+
+**Need to update feature branch with latest main?**
+
+```bash
+# While on your feature branch
+git checkout feature/my-feature
+
+# Pull latest main changes
+git pull origin main
+
+# Resolve any conflicts if needed
+# Then continue working
+```
+
+---
+
+### Deployment Methods
+
+#### Method 1: Automated via Pull Request (Recommended)
+
+This is the **preferred method** as it provides automatic backups, verification, and deployment logs.
+
+**Steps:**
+1. Create and push your feature branch (see above)
+2. Go to GitHub and create a Pull Request to `main`
+3. Review the changes in the PR
+4. Click "Merge Pull Request"
+5. GitHub Actions automatically:
+   - Backs up current production to `/home/andrew/web_server/backups/`
+   - Deploys your changes to `/home/andrew/web_server/html/prod/`
+   - Restarts nginx containers
+   - Verifies deployment succeeded
+   - Creates `version.json` with deployment metadata
 
 **Monitor deployment:**
 - Go to GitHub → Actions tab
 - Watch the "Deploy to Production" workflow
+- Check for ✅ success or ❌ failure
+
+**Advantages:**
+- ✅ Automatic backups
+- ✅ Deployment verification
+- ✅ Audit trail in GitHub Actions
+- ✅ Rollback capability
+- ✅ Deployment metadata tracking
+
+---
+
+#### Method 2: Manual Deployment
+
+Use this when you push directly to `main` (which bypasses the PR workflow) or need to deploy urgently.
+
+**When to use:**
+- You pushed directly to `main` instead of creating a PR
+- Emergency hotfix needed immediately
+- GitHub Actions is down
+
+**Steps:**
+
+1. **Commit and push your changes:**
+   ```bash
+   git add .
+   git commit -m "Your changes"
+   git push origin main
+   ```
+
+2. **Copy files to the Ubuntu server:**
+   ```bash
+   # Copy HTML/CSS/JS changes
+   scp html/prod/header.html andrew@192.168.2.10:/home/andrew/web_server/html/prod/
+   scp html/prod/index.html andrew@192.168.2.10:/home/andrew/web_server/html/prod/
+   scp html/prod/js/includes.js andrew@192.168.2.10:/home/andrew/web_server/html/prod/js/
+   scp html/prod/css/style.css andrew@192.168.2.10:/home/andrew/web_server/html/prod/css/
+   
+   # If nginx config changed
+   scp nginx/conf.d/prod.conf andrew@192.168.2.10:/home/andrew/web_server/nginx/conf.d/
+   scp nginx/conf.d/000-bareip.conf andrew@192.168.2.10:/home/andrew/web_server/nginx/conf.d/
+   ```
+
+3. **Restart containers on the server:**
+   ```bash
+   ssh andrew@192.168.2.10 'docker restart nginx-proxy nginx-prod'
+   ```
+
+4. **Verify deployment:**
+   ```bash
+   # Check site loads
+   curl -sk https://mitchellnet.local/ | grep -i "<title>"
+   
+   # Or open in browser
+   open https://mitchellnet.local
+   ```
+
+**Pro tip:** You can combine steps 2 and 3:
+```bash
+scp html/prod/*.html andrew@192.168.2.10:/home/andrew/web_server/html/prod/ && \
+ssh andrew@192.168.2.10 'docker restart nginx-prod'
+```
+
+**Disadvantages:**
+- ⚠️ No automatic backup
+- ⚠️ No deployment verification
+- ⚠️ Manual rollback if issues occur
+- ⚠️ No deployment metadata created
 
 ---
 
@@ -242,7 +493,7 @@ When you merge a PR to `main`, GitHub Actions automatically:
 |-----------|---------|
 | **Server** | Ubuntu Server 24.04.2 LTS (iMac 2019) |
 | **IP** | 192.168.2.10 |
-| **URL** | https://prod.mitchellnet.local |
+| **URL** | https://mitchellnet.local |
 | **Containers** | nginx-proxy, nginx-prod |
 | **Deployment** | /home/andrew/web_server/html/prod/ |
 

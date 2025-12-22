@@ -32,7 +32,7 @@
 ✅ **Local Testing:** Test changes locally before pushing to GitHub  
 ✅ **Simple Infrastructure:** Only production environment maintained
 
-**Production URL:** https://prod.mitchellnet.local
+**Production URL:** https://mitchellnet.local
 
 ---
 
@@ -118,11 +118,11 @@ code html/prod/css/style.css
 
 2. Add this line:
    ```
-   127.0.0.1 prod.mitchellnet.local
+   127.0.0.1 mitchellnet.dev.local
    ```
 
 3. View in browser:
-   - Production: https://prod.mitchellnet.local
+   - Local dev: https://mitchellnet.dev.local
 
 **Option B: Using VS Code Live Preview**
 

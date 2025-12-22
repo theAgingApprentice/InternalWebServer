@@ -15,7 +15,6 @@ services:
       - /etc/ssl/private/selfsigned.key:/etc/nginx/ssl/server.key:ro
     depends_on:
       - nginx-prod
-      - nginx-test
     networks:
       - webnet
 
@@ -25,15 +24,6 @@ services:
     restart: unless-stopped
     volumes:
       - ./html/prod:/usr/share/nginx/html:ro
-    networks:
-      - webnet
-
-  nginx-test:
-    image: nginx:1.29
-    container_name: nginx-test
-    restart: unless-stopped
-    volumes:
-      - ./html/test:/usr/share/nginx/html:ro
     networks:
       - webnet
 

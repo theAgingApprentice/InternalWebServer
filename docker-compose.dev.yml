@@ -12,7 +12,6 @@ services:
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
       - nginx-prod
-      - nginx-test
     networks:
       - dev-webnet
 
@@ -21,14 +20,6 @@ services:
     container_name: nginx-prod-dev
     volumes:
       - ./html/prod:/usr/share/nginx/html:ro
-    networks:
-      - dev-webnet
-
-  nginx-test:
-    image: nginx:latest
-    container_name: nginx-test-dev
-    volumes:
-      - ./html/test:/usr/share/nginx/html:ro
     networks:
       - dev-webnet
 

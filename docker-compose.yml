@@ -15,6 +15,7 @@ services:
       - /etc/ssl/private/selfsigned.key:/etc/nginx/ssl/server.key:ro
     depends_on:
       - nginx-prod
+      - fitness-tracker-backend
     networks:
       - webnet
 
@@ -26,6 +27,48 @@ services:
       - ./html/prod:/usr/share/nginx/html:ro
     networks:
       - webnet
+
+  mariadb:
+    image: mariadb:10.7
+    container_name: mariadb-prod
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: fitness_tracker_prod
+      MYSQL_USER: ${DB_USER:-fitness_user}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-fitness_password}
+    volumes:
+      - mariadb_prod_data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "3306:3306"
+    networks:
+      - webnet
+
+  fitness-tracker-backend:
+    build:
+      context: ./backend/fitnessTracker
+      dockerfile: Dockerfile
+    container_name: fitness-tracker-backend-prod
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - DB_HOST=mariadb
+      - DB_PORT=3306
+      - DB_NAME=fitness_tracker_prod
+      - DB_USER=${DB_USER:-fitness_user}
+      - DB_PASSWORD=${DB_PASSWORD:-fitness_password}
+    depends_on:
+      - mariadb
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend/fitnessTracker:/app:ro
+    networks:
+      - webnet
+
+volumes:
+  mariadb_prod_data:
 
 networks:
   webnet:

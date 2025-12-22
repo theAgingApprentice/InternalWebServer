@@ -20,6 +20,7 @@
 5. [Troubleshooting](#troubleshooting)
 6. [Rollback Procedure](#rollback-procedure)
 7. [System Architecture](#system-architecture)
+8. [Custom Applications](#8-custom-applications)
 
 ---
 
@@ -866,6 +867,47 @@ docker restart nginx-prod
 # Check deployment
 cat /home/andrew/web_server/html/prod/version.json
 ```
+
+---
+
+## 8. Custom Applications
+
+InternalWebServer supports custom full-stack applications with HTML/JavaScript/CSS frontends and Python backends, integrated with MariaDB databases.
+
+### Fitness Tracker App
+
+A full-stack fitness tracking application demonstrating the complete development workflow.
+
+**Features:**
+- HTML/CSS/JavaScript frontend
+- Python Flask REST API backend
+- MariaDB database integration
+- Separate dev/production databases
+- Docker containerized deployment
+
+**Documentation & Access:**
+- **Setup Guide:** [backend/fitnessTracker/README.md](backend/fitnessTracker/README.md)
+- **Frontend:** [html/prod/fitnessTracker/index.html](html/prod/fitnessTracker/index.html)
+- **Live App:** https://mitchellnet.local/fitnessTracker/ (when deployed)
+- **Backend API:** http://localhost:5000/api (production) or http://localhost:5001/api (dev)
+
+**Quick Start:**
+```bash
+# Development
+docker-compose -f docker-compose.dev.yml up -d
+
+# Access at https://mitchellnet.dev.local/fitnessTracker/
+```
+
+### Adding Your Own Apps
+
+The same pattern can be used for additional custom applications:
+1. Create backend directory: `backend/yourapp/`
+2. Create frontend directory: `html/prod/yourapp/`
+3. Add services to `docker-compose.yml` and `docker-compose.dev.yml`
+4. Use separate databases (e.g., `yourapp_dev` and `yourapp_prod`)
+
+See the [Fitness Tracker README](backend/fitnessTracker/README.md) for the complete architecture and setup instructions.
 
 ---
 

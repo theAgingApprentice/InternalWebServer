@@ -91,11 +91,16 @@ jobs:
           done
 
           # Verify deployment metadata
+          echo "Fetching version.json content..."
           ver=$(curl -sk --resolve "$HOST:443:$IP" "https://${HOST}/version.json")
+          echo "Content received:"
+          echo "$ver"
+          
           if echo "$ver" | grep -q '"env":"production"'; then
             echo "✅ Production deployment verified successfully"
           else
-            echo "❌ Deployment verification failed"
+            echo "❌ Deployment verification failed - env field not found or incorrect"
+            echo "Full response: $ver"
             exit 1
           fi
 

@@ -7,6 +7,10 @@
   const isLocalLike = location.hostname === "localhost" || location.hostname.endsWith(".local");
   const bust = isLocalLike ? ("?_cb=" + Date.now()) : "";
 
+  // Detect environment early
+  const host = location.hostname;
+  const isDevHost = /mitchellnet\.dev\.local$/i.test(host) || host === "localhost";
+
   if (hasIncludes) {
     for (const el of nodes) {
       const url = el.getAttribute("data-include") + bust;
@@ -26,7 +30,27 @@
     }
   }
 
-  // ---- 2) Highlight current nav link (after includes are in DOM) ----
+  // ---- 2) Environment detection and banner update (AFTER includes loaded) ----
+  
+  // Update environment banner if present
+  const envBanner = document.getElementById('env-banner');
+  if (envBanner) {
+    if (isDevHost) {
+      envBanner.className = 'env-test';
+      envBanner.textContent = '⚠️ DEVELOPMENT ENVIRONMENT';
+    } else {
+      envBanner.className = 'env-prod';
+      envBanner.textContent = '';
+    }
+  }
+
+  // Update DEV badge in header if present (NOW the header is loaded)
+  const devBadge = document.getElementById('dev-badge');
+  if (devBadge && isDevHost) {
+    devBadge.style.display = 'inline';
+  }
+
+  // ---- 3) Highlight current nav link (after includes are in DOM) ----
   try {
     const here = new URL(location.href);
     const sel = `header nav a[href="${here.pathname.replace(/\/+$/, "/")}"], header nav a[href="${here.pathname}"]`;
@@ -34,11 +58,9 @@
     if (active) active.classList.add("is-active");
   } catch {}
 
-  // ---- 3) Smart environment link rewriter (dev vs server) ----
+  // ---- 4) Smart environment link rewriter (dev vs server) ----
   // Detect if we’re on the local dev hostnames (*.dev.mitchellnet.local)
-  const host = location.hostname;
-  const isDevHost = /\.dev\.mitchellnet\.local$/i.test(host);
-
+  
   const urls = isDevHost
     ? {
         prod: "https://mitchellnet.dev.local",

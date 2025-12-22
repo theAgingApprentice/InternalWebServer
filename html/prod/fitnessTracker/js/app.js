@@ -1,5 +1,6 @@
 // API Configuration
-const API_BASE_URL = window.location.hostname === 'localhost' 
+const isDevEnv = /mitchellnet\.dev\.local$/i.test(window.location.hostname) || window.location.hostname === 'localhost';
+const API_BASE_URL = isDevEnv
     ? 'http://localhost:5001/api'  // Development
     : 'http://localhost:5000/api'; // Production
 

@@ -96,7 +96,7 @@ jobs:
           echo "Content received:"
           echo "$ver"
           
-          if echo "$ver" | grep -q '"env":"production"'; then
+          if echo "$ver" | grep -q '"env"[[:space:]]*:[[:space:]]*"production"'; then
             echo "✅ Production deployment verified successfully"
           else
             echo "❌ Deployment verification failed - env field not found or incorrect"

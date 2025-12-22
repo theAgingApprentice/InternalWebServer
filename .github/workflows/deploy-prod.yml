@@ -23,7 +23,7 @@ jobs:
         run: |
           echo "PROD_ROOT=/home/andrew/web_server/html/prod" >> $GITHUB_ENV
           echo "BACKUP_DIR=/home/andrew/web_server/backups/prod_backup_$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
-          echo "HOST=prod.mitchellnet.local" >> $GITHUB_ENV
+          echo "HOST=mitchellnet.local" >> $GITHUB_ENV
           echo "PROXY_IP=127.0.0.1" >> $GITHUB_ENV
 
       - name: Create backup directory

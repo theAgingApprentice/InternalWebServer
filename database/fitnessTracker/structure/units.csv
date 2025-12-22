@@ -1,0 +1,5 @@
+id,name,unit
+1,Count,Number-whole
+2,Time-Seconds,Number-whole
+3,Time-Minutes,Number-whole
+4,Time-Hours,Number-whole

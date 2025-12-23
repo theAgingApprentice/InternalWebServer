@@ -12,6 +12,10 @@
 .~lock.*
 ~$*.*
 
+# SSL Certificates - private keys must not be committed
+sslCertificates/*.key
+sslCertificates/*.pem
+
 # User-specific files
 *.rsuser
 *.suo

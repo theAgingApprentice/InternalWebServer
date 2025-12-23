@@ -1,12 +1,21 @@
-# Fitness Tracker - Full Stack Application Setup
+# Fitness Tracker - Calendar-Based Activity Logging Application
 
-This is a full-stack fitness tracking web application with HTML/JavaScript/CSS frontend and Python Flask backend, using MariaDB for data persistence.
+A full-stack fitness tracking web application featuring a calendar-based interface for logging and visualizing daily activities. Built with HTML/JavaScript/CSS frontend and Python Flask backend, using MariaDB for data persistence.
+
+## Features
+
+- **Calendar Interface**: Monthly calendar view with navigation
+- **Activity Highlighting**: Days with logged activities are highlighted in green
+- **Activity Logging**: Track multiple activities per day with values and units
+- **CRUD Operations**: Add, edit, and delete activity log entries
+- **Activity Types**: Pre-configured activities (Swimming, Cycling, Running, Gym, Walking) with units
+- **Real-time Updates**: Calendar automatically refreshes after adding/deleting activities
 
 ## Architecture
 
 - **Frontend**: HTML/CSS/JavaScript (Vanilla JS, no frameworks)
 - **Backend**: Python Flask with REST API
-- **Database**: MariaDB 10.7
+- **Database**: MariaDB 10.7 (dev) / 10.11 (prod)
 - **Proxy**: Nginx reverse proxy
 - **Containerization**: Docker Compose
 
@@ -16,115 +25,172 @@ This is a full-stack fitness tracking web application with HTML/JavaScript/CSS f
 InternalWebServer/
 ├── docker-compose.yml              # Production configuration
 ├── docker-compose.dev.yml          # Development configuration
+├── deploy-to-prod.sh               # Deployment script to production server
 ├── backend/
 │   └── fitnessTracker/
 │       ├── Dockerfile              # Python backend container
 │       ├── app.py                  # Main Flask application
 │       ├── requirements.txt        # Python dependencies
-│       ├── .env.example            # Environment variables template
 │       ├── config/
 │       │   └── database.py         # Database connection config
-│       ├── routes/
-│       │   └── api_routes.py       # API endpoints
-│       └── models/                 # Database models (add as needed)
+│       └── routes/
+│           └── api_routes.py       # REST API endpoints
 ├── html/prod/fitnessTracker/
-│   ├── index.html                  # Main frontend page
+│   ├── index.html                  # Calendar-based frontend
 │   ├── css/
-│   │   └── style.css               # Styles
-│   ├── js/
-│   │   └── app.js                  # Frontend JavaScript
-│   └── assets/                     # Images, etc.
-└── database/
-    └── migrations/
-        └── 01_create_items_table.sql  # Database schema
-
+│   │   └── style.css               # Calendar grid and activity styles
+│   └── js/
+│       └── app.js                  # Calendar rendering and API calls
+├── database/fitnessTracker/structure/
+│   ├── units.sql                   # Units table (Minutes, Meters, Laps, Reps)
+│   ├── activities.sql              # Activities table with unit relationships
+│   └── activityLog.sql             # Activity log entries (670+ entries)
+└── nginx/
+    └── conf.d/
+        └── prod.conf               # Nginx proxy with API routing
 ```
 
 ## Environment Separation
 
-### Development vs Production
+### Development Environment (Local macOS with Docker Desktop)
 
-The setup uses **separate databases** for development and production:
+The development environment runs on your local macOS machine using Docker Desktop:
 
-- **Development** (`docker-compose.dev.yml`):
-  - Database: `fitness_tracker_dev`
-  - Backend Port: `5001`
-  - MariaDB Port: `3307` (mapped from container's 3306)
-  - Debug mode enabled
-  - Live code reloading
+- **Docker Compose**: `docker-compose.dev.yml`
+- **Database**: `fitness_tracker_dev` on MariaDB 10.7
+- **Backend Port**: `5001` (http://localhost:5001)
+- **MariaDB Port**: `3307` (mapped from container's 3306)
+- **Container Names**: `mariadb-dev`, `fitness-tracker-backend-dev`
+- **Access URL**: http://mitchellnet.dev.local/fitnessTracker/
+- **API URL**: http://localhost:5001/api
+- **Features**:
+  - Debug mode enabled (FLASK_DEBUG=1)
+  - Live code reloading via volume mounts
+  - Separate test data from production
 
-- **Production** (`docker-compose.yml`):
-  - Database: `fitness_tracker_prod`
-  - Backend Port: `5000`
-  - MariaDB Port: `3306`
+### Production Environment (Ubuntu Server at 192.168.2.10)
+
+The production environment runs on a dedicated Ubuntu 24.04.2 LTS server:
+
+- **Server**: andrew@192.168.2.10 (2019 iMac server)
+- **Docker Compose**: `docker-compose.yml`
+- **Database**: `fitness_tracker_prod` on MariaDB 10.7
+- **Backend Port**: `5000` (internal only)
+- **MariaDB Port**: `3306` (internal only)
+- **Container Names**: `mariadb-prod`, `fitness-tracker-backend-prod`
+- **Access URL**: https://mitchellnet.local/fitnessTracker/
+- **API URL**: https://mitchellnet.local/api (proxied through nginx)
+- **Features**:
   - Debug mode disabled
-  - Read-only volumes
+  - Read-only volume mounts for code
+  - SSL/TLS termination at nginx proxy
+  - API requests proxied through nginx (no direct backend access)
 
-This ensures **test data never overwrites production data**.
+**Important**: Development and production use **separate databases** to ensure test data never overwrites production data.
 
 ## Setup Instructions
 
-### 1. Environment Variables
+### 1. Database Setup
 
-Create a `.env` file in the `backend/fitnessTracker/` directory (copy from `.env.example`):
+The fitness tracker uses a structured database schema with three tables:
+
+1. **units** - Measurement units (Minutes, Meters, Laps, Reps)
+2. **activities** - Activity types (Swimming, Cycling, Running, Gym, Walking)
+3. **activityLog** - Daily activity entries with values
+
+**Development Database Setup:**
 
 ```bash
-cp backend/fitnessTracker/.env.example backend/fitnessTracker/.env
+# Start MariaDB container
+docker-compose -f docker-compose.dev.yml up -d mariadb
+
+# Wait for MariaDB to be ready (about 10 seconds)
+sleep 10
+
+# Run SQL scripts in order
+docker exec -i mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev < database/fitnessTracker/structure/units.sql
+docker exec -i mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev < database/fitnessTracker/structure/activities.sql
+docker exec -i mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev < database/fitnessTracker/structure/activityLog.sql
 ```
 
-Edit `.env` with your desired credentials:
-```env
-DB_ROOT_PASSWORD=your_secure_password
-DB_USER=fitness_user
-DB_PASSWORD=your_app_password
-ENVIRONMENT=development
+**Verify Data Load:**
+```bash
+# Should return 670
+docker exec mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev -e "SELECT COUNT(*) FROM activityLog;"
 ```
 
 ### 2. Development Setup
 
-Start the development environment:
+Start the complete development environment:
 
 ```bash
+# Start all services
 docker-compose -f docker-compose.dev.yml up -d
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f fitness-tracker-backend
 ```
 
-This will:
-- Start MariaDB with `fitness_tracker_dev` database
-- Run database migrations automatically
-- Start Python backend on port 5001
-- Start nginx proxy
-
 Access the app:
-- Frontend: http://localhost/fitnessTracker/
-- Backend API: http://localhost:5001/api
-- Health Check: http://localhost:5001/api/health
+- **Frontend**: http://mitchellnet.dev.local/fitnessTracker/
+- **Backend API**: http://localhost:5001/api
+- **Health Check**: http://localhost:5001/api/health
 
-### 3. Production Setup
+The frontend will automatically detect the dev environment and use `http://localhost:5001/api` for API calls.
 
-Start the production environment:
+### 3. Production Deployment
+
+**Option A: Automated Deployment Script**
+
+Use the provided deployment script to sync all files to production:
 
 ```bash
-docker-compose up -d
+./deploy-to-prod.sh
 ```
 
-This will:
-- Start MariaDB with `fitness_tracker_prod` database
-- Run database migrations automatically
-- Start Python backend on port 5000
-- Start nginx proxy with SSL
+This script will:
+1. Copy updated HTML/CSS/JS files to production server
+2. Copy backend Python code to production server
+3. Copy database SQL files to production server
+4. Copy docker-compose.yml to production server
+5. Pull latest Docker images
+6. Start mariadb-prod and fitness-tracker-backend-prod containers
+7. Run database setup scripts
+8. Restart nginx containers
 
-Access the app:
-- Frontend: https://your-domain.com/fitnessTracker/
-- Backend API: http://localhost:5000/api
+**Option B: Manual Deployment**
 
-### 4. Database Migrations
+SSH to production server and set up manually:
 
-Database migrations are automatically run when the MariaDB container starts. Place SQL files in `database/migrations/` and they will be executed in alphabetical order.
+```bash
+# SSH to production server
+ssh andrew@192.168.2.10
 
-Example migration file naming:
-- `01_create_items_table.sql`
-- `02_add_users_table.sql`
-- `03_add_indexes.sql`
+# Navigate to web server directory
+cd /home/andrew/web_server
+
+# Pull/copy latest code (deployment method varies - see notes below)
+
+# Start containers
+docker-compose up -d mariadb fitness-tracker-backend
+
+# Wait for MariaDB
+sleep 10
+
+# Run database scripts
+docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod < database/fitnessTracker/structure/units.sql
+docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod < database/fitnessTracker/structure/activities.sql
+docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod < database/fitnessTracker/structure/activityLog.sql
+
+# Restart nginx to pick up changes
+docker-compose restart nginx-proxy nginx-prod
+```
+
+**Note**: The production server directory `/home/andrew/web_server` is NOT a git repository. Files must be copied via SCP or rsync.
+
+Access the production app:
+- **Frontend**: https://mitchellnet.local/fitnessTracker/
+- **API**: https://mitchellnet.local/api (proxied through nginx)
 
 ## API Endpoints
 
@@ -132,136 +198,566 @@ Example migration file naming:
 ```
 GET /api/health
 ```
+Returns backend health status and database connection info.
 
-### Items
+### Activities
 ```
-GET    /api/items         # Get all items
-POST   /api/items         # Create new item
-DELETE /api/items/:id     # Delete item by ID
+GET /api/activities
+```
+Returns all available activities with their associated units.
+
+**Response Example:**
+```json
+[
+  {
+    "id": 1,
+    "name": "Swimming",
+    "unit": "Laps"
+  },
+  {
+    "id": 2,
+    "name": "Cycling",
+    "unit": "Minutes"
+  }
+]
 ```
 
-Example POST request:
+### Activity Log - Get Dates with Activities
+```
+GET /api/activity-log?month=YYYY-MM
+```
+Returns array of dates (YYYY-MM-DD) that have logged activities for the specified month.
+
+**Response Example:**
+```json
+["2025-12-01", "2025-12-03", "2025-12-15"]
+```
+
+### Activity Log - Get Activities for a Date
+```
+GET /api/activity-log?date=YYYY-MM-DD
+```
+Returns all logged activities for a specific date.
+
+**Response Example:**
+```json
+[
+  {
+    "id": 123,
+    "date": "2025-12-15",
+    "activity_id": 1,
+    "activity_name": "Swimming",
+    "unit": "Laps",
+    "value": 20
+  },
+  {
+    "id": 124,
+    "date": "2025-12-15",
+    "activity_id": 2,
+    "activity_name": "Cycling",
+    "unit": "Minutes",
+    "value": 45
+  }
+]
+```
+
+### Activity Log - Create Entry
+```
+POST /api/activity-log
+Content-Type: application/json
+```
+
+**Request Body:**
 ```json
 {
-  "name": "My Item",
-  "description": "Item description"
+  "date": "2025-12-22",
+  "activity_id": 1,
+  "value": 25
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "id": 671
+}
+```
+
+### Activity Log - Update Entry
+```
+PUT /api/activity-log/<id>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "value": 30
+}
+```
+
+**Response:**
+```json
+{
+  "success": true
+}
+```
+
+### Activity Log - Delete Entry
+```
+DELETE /api/activity-log/<id>
+```
+
+**Response:**
+```json
+{
+  "success": true
 }
 ```
 
 ## Common Commands
 
-### View Logs
+### View Container Logs
 ```bash
-# Development
+# Development - Backend
 docker-compose -f docker-compose.dev.yml logs -f fitness-tracker-backend
 
-# Production
-docker-compose logs -f fitness-tracker-backend
+# Development - Database
+docker-compose -f docker-compose.dev.yml logs -f mariadb
+
+# Production - Backend (on server)
+ssh andrew@192.168.2.10 "docker logs -f fitness-tracker-backend-prod"
+
+# Production - Database (on server)
+ssh andrew@192.168.2.10 "docker logs -f mariadb-prod"
 ```
 
-### Access Database
+### Access Database Console
 ```bash
 # Development
 docker exec -it mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev
 
-# Production
+# Production (via SSH)
+ssh andrew@192.168.2.10
 docker exec -it mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod
 ```
 
-### Rebuild Backend
+### Useful Database Queries
+```sql
+-- Count total activity log entries
+SELECT COUNT(*) FROM activityLog;
+
+-- View all activities
+SELECT * FROM activities;
+
+-- Get activity log for specific date
+SELECT al.*, a.name as activity_name, u.name as unit
+FROM activityLog al
+JOIN activities a ON al.activity_id = a.id
+JOIN units u ON a.unit_id = u.id
+WHERE al.date = '2025-12-15';
+
+-- Count activities by type
+SELECT a.name, COUNT(*) as count
+FROM activityLog al
+JOIN activities a ON al.activity_id = a.id
+GROUP BY a.name;
+```
+
+### Rebuild Backend Container
 ```bash
 # Development
 docker-compose -f docker-compose.dev.yml build fitness-tracker-backend
-docker-compose -f docker-compose.dev.yml up -d
+docker-compose -f docker-compose.dev.yml up -d fitness-tracker-backend
 
-# Production
+# Production (via SSH)
+ssh andrew@192.168.2.10
+cd /home/andrew/web_server
 docker-compose build fitness-tracker-backend
-docker-compose up -d
+docker-compose up -d fitness-tracker-backend
 ```
 
-### Stop Everything
+### Restart Services
 ```bash
-# Development
+# Development - Restart backend only
+docker-compose -f docker-compose.dev.yml restart fitness-tracker-backend
+
+# Production - Restart all fitness tracker services (via SSH)
+ssh andrew@192.168.2.10 "cd /home/andrew/web_server && docker-compose restart mariadb-prod fitness-tracker-backend-prod nginx-proxy"
+```
+
+### Stop Services
+```bash
+# Development - Stop all
 docker-compose -f docker-compose.dev.yml down
 
-# Production
-docker-compose down
+# Development - Stop specific service
+docker-compose -f docker-compose.dev.yml stop fitness-tracker-backend
+
+# Production - Stop fitness tracker services (via SSH)
+ssh andrew@192.168.2.10 "cd /home/andrew/web_server && docker-compose stop mariadb-prod fitness-tracker-backend-prod"
 ```
 
-### Remove Volumes (CAUTION: Deletes all data)
+### Check Running Containers
 ```bash
 # Development
-docker-compose -f docker-compose.dev.yml down -v
+docker ps | grep -E '(mariadb-dev|fitness-tracker-backend-dev)'
 
-# Production
-docker-compose down -v
+# Production (via SSH)
+ssh andrew@192.168.2.10 "docker ps | grep -E '(mariadb-prod|fitness-tracker-backend-prod)'"
 ```
 
 ## Development Workflow
 
-1. **Make changes** to your code in `backend/fitnessTracker/` or `html/prod/fitnessTracker/`
-2. **Backend changes**: Restart the container (changes auto-reload if FLASK_DEBUG=1)
-3. **Frontend changes**: Refresh your browser (no restart needed)
-4. **Database changes**: Add a new migration file in `database/migrations/`
+1. **Make code changes** in your local development environment
+   - Backend: `backend/fitnessTracker/`
+   - Frontend: `html/prod/fitnessTracker/`
+   - Database: `database/fitnessTracker/structure/`
+
+2. **Test locally** using development environment
+   ```bash
+   # Restart backend if needed (Flask auto-reloads with FLASK_DEBUG=1)
+   docker-compose -f docker-compose.dev.yml restart fitness-tracker-backend
+   
+   # Frontend changes: Just refresh browser
+   ```
+
+3. **Verify changes** at http://mitchellnet.dev.local/fitnessTracker/
+
+4. **Deploy to production** when ready
+   ```bash
+   ./deploy-to-prod.sh
+   ```
+
+5. **Test production** at https://mitchellnet.local/fitnessTracker/
+
+### Frontend Environment Detection
+
+The frontend JavaScript (`app.js`) automatically detects the environment:
+
+```javascript
+const isDevEnv = /mitchellnet\.dev\.local$/i.test(window.location.hostname) || 
+                 window.location.hostname === 'localhost';
+const API_BASE_URL = isDevEnv
+    ? 'http://localhost:5001/api'  // Development - direct backend access
+    : '/api';                       // Production - nginx proxy
+```
+
+This means:
+- **Development**: API calls go directly to `http://localhost:5001/api`
+- **Production**: API calls use relative path `/api` (proxied through nginx to backend)
 
 ## Nginx Configuration
 
-To make the app accessible via nginx proxy, add to your nginx configuration:
+### Production API Proxy Setup
+
+The production nginx configuration (`nginx/conf.d/prod.conf`) includes API proxying:
 
 ```nginx
-# In nginx/conf.d/prod.conf or appropriate config file
-
-location /fitnessTracker/ {
-    alias /usr/share/nginx/html/fitnessTracker/;
-    index index.html;
-}
-
+# API proxy to fitness tracker backend
 location /api/ {
-    proxy_pass http://fitness-tracker-backend:5000/api/;
+    proxy_pass http://fitness-tracker-backend-prod:5000/api/;
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+# Frontend static files
+location / {
+    ssi on;
+    proxy_set_header Accept-Encoding "";
+    proxy_pass http://nginx-prod;
+    add_header X-Upstream production;
 }
 ```
+
+**Important**: This configuration:
+- Routes `/api/*` requests to the backend container
+- Prevents CORS issues by keeping all requests on the same origin
+- Adds proper proxy headers for request tracking
+- The backend is NOT directly accessible from outside the Docker network
+
+### Development Nginx Configuration
+
+In development, the proxy configuration in `proxy/default.conf` handles routing to the dev containers.
 
 ## Troubleshooting
 
 ### Backend won't start
-- Check logs: `docker-compose logs myapp-backend`
-- Verify database is running: `docker ps | grep mariadb`
-- Check environment variables in `.env`
+```bash
+# Check logs
+docker-compose -f docker-compose.dev.yml logs fitness-tracker-backend
+
+# Common issues:
+# 1. Database not running
+docker ps | grep mariadb
+
+# 2. Port already in use
+lsof -i :5001  # For development
+lsof -i :5000  # For production
+
+# 3. Python dependencies missing
+docker-compose -f docker-compose.dev.yml build --no-cache fitness-tracker-backend
+```
 
 ### Database connection failed
-- Ensure MariaDB container is healthy
-- Verify credentials in environment variables
-- Check that database name matches (fitness_tracker_dev or fitness_tracker_prod)
+```bash
+# Verify MariaDB is running and healthy
+docker ps | grep mariadb
+
+# Check database exists
+docker exec mariadb-dev mysql -u fitness_user -pfitness_password -e "SHOW DATABASES;"
+
+# Test connection from backend container
+docker exec fitness-tracker-backend-dev python -c "from config.database import get_db_connection; print(get_db_connection())"
+```
 
 ### Frontend can't reach API
-- Verify backend is running: `curl http://localhost:5001/api/health`
-- Check CORS settings in backend
-- Verify API_BASE_URL in frontend JavaScript
+
+**Development:**
+```bash
+# Test backend health
+curl http://localhost:5001/api/health
+
+# Check CORS headers
+curl -H "Origin: http://mitchellnet.dev.local" -v http://localhost:5001/api/health
+
+# Verify API_BASE_URL in browser console
+# Should show: http://localhost:5001/api
+```
+
+**Production:**
+```bash
+# Test from production server
+ssh andrew@192.168.2.10 "curl http://localhost:5000/api/health"
+
+# Test through nginx proxy
+curl https://mitchellnet.local/api/health
+
+# Check nginx configuration
+ssh andrew@192.168.2.10 "cat /home/andrew/web_server/nginx/conf.d/prod.conf"
+
+# Verify API_BASE_URL in browser console
+# Should show: /api
+```
+
+### Calendar not showing activity highlights
+
+```bash
+# Check if data exists in database
+docker exec mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev -e "SELECT COUNT(*) FROM activityLog;"
+
+# Test month query endpoint
+curl "http://localhost:5001/api/activity-log?month=2025-12"
+
+# Check browser console for errors
+# Look for: "Error loading active dates"
+```
+
+### CORS errors in production
+
+If you see CORS errors in production:
+1. Verify nginx proxy is routing `/api/` correctly
+2. Check that app.js uses relative path `/api` for production
+3. Restart nginx-proxy container:
+   ```bash
+   ssh andrew@192.168.2.10 "docker restart nginx-proxy"
+   ```
+
+### Date formatting issues
+
+The backend uses parameterized queries for date formatting:
+```python
+# Correct (in api_routes.py)
+cursor.execute("""
+    SELECT DISTINCT DATE_FORMAT(date, %s) as date 
+    FROM activityLog 
+    WHERE DATE_FORMAT(date, %s) = %s
+""", ('%Y-%m-%d', '%Y-%m', month))
+
+# Incorrect - DO NOT USE %%Y-%%m-%%d with mysql-connector-python
+```
+
+## Database Schema
+
+### Units Table
+```sql
+CREATE TABLE units (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE
+);
+```
+
+**Data:**
+- Minutes
+- Meters
+- Laps
+- Reps
+
+### Activities Table
+```sql
+CREATE TABLE activities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    unit_id INT NOT NULL,
+    FOREIGN KEY (unit_id) REFERENCES units(id)
+);
+```
+
+**Data:**
+- Swimming (Laps)
+- Cycling (Minutes)
+- Running (Meters)
+- Gym (Reps)
+- Walking (Meters)
+
+### Activity Log Table
+```sql
+CREATE TABLE activityLog (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    date DATE NOT NULL,
+    activity_id INT NOT NULL,
+    value INT NOT NULL,
+    FOREIGN KEY (activity_id) REFERENCES activities(id),
+    INDEX idx_date (date)
+);
+```
+
+**Sample Data:** 670+ activity log entries spanning multiple months
 
 ## Security Notes
 
-For production:
-1. Change all default passwords in `.env`
-2. Use strong passwords for database
-3. Enable HTTPS with proper SSL certificates
-4. Consider adding authentication to API endpoints
-5. Review and restrict CORS settings
-6. Never commit `.env` file to git (it's in `.gitignore`)
+### Current Setup
+- Uses HTTP in development, HTTPS in production
+- Self-signed SSL certificate in production
+- Database credentials configured in docker-compose files
+- Backend only accessible through nginx proxy in production
+- No authentication/authorization currently implemented
 
-## Next Steps
+### Production Recommendations
+1. **SSL Certificate**: Replace self-signed certificate with proper CA-signed certificate
+2. **Database Passwords**: Use strong passwords in production
+3. **Authentication**: Add user authentication to protect activity data
+4. **API Security**: Consider adding API key or JWT authentication
+5. **Network Isolation**: Backend containers not directly exposed outside Docker network
+6. **CORS Settings**: Currently allows all origins in development, restricted in production via nginx
 
-1. Customize the app for your use case
-2. Add authentication/authorization
-3. Implement additional API endpoints
-4. Add more frontend features
-5. Set up automated backups for production database
-6. Configure CI/CD pipeline
+### Backup Strategy
 
-## Support
+**Development:**
+```bash
+# Backup dev database
+docker exec mariadb-dev mysqldump -u fitness_user -pfitness_password fitness_tracker_dev > backup_dev_$(date +%Y%m%d).sql
 
-For issues or questions, refer to:
-- Flask documentation: https://flask.palletsprojects.com/
-- MariaDB documentation: https://mariadb.org/documentation/
-- Docker Compose documentation: https://docs.docker.com/compose/
+# Restore dev database
+docker exec -i mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev < backup_dev_20251222.sql
+```
+
+**Production:**
+```bash
+# Backup production database (via SSH)
+ssh andrew@192.168.2.10 "docker exec mariadb-prod mysqldump -u fitness_user -pfitness_password fitness_tracker_prod" > backup_prod_$(date +%Y%m%d).sql
+
+# Restore production database (via SSH)
+cat backup_prod_20251222.sql | ssh andrew@192.168.2.10 "docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod"
+```
+
+## Technology Stack
+
+### Backend
+- **Language**: Python 3.11
+- **Framework**: Flask 3.0.0
+- **Database Driver**: mysql-connector-python 8.2.0
+- **CORS**: Flask-CORS 4.0.0
+- **Environment**: python-dotenv 1.0.0
+
+### Frontend
+- **Languages**: HTML5, CSS3, JavaScript (ES6+)
+- **Styling**: Custom CSS with CSS Grid for calendar layout
+- **API Communication**: Fetch API
+- **No frameworks**: Pure vanilla JavaScript
+
+### Database
+- **Development**: MariaDB 10.7
+- **Production**: MariaDB 10.7
+- **Data Persistence**: Docker volumes (`mariadb_dev_data`, `mariadb_prod_data`)
+
+### Infrastructure
+- **Containerization**: Docker & Docker Compose
+- **Reverse Proxy**: Nginx 1.29
+- **Development Platform**: macOS with Docker Desktop
+- **Production Platform**: Ubuntu 24.04.2 LTS
+
+## Browser Compatibility
+
+The application uses modern JavaScript features:
+- Fetch API
+- Template Literals
+- Arrow Functions
+- Async/Await
+- CSS Grid
+
+**Recommended Browsers:**
+- Chrome/Edge 90+
+- Firefox 88+
+- Safari 14+
+
+## Performance Notes
+
+- Calendar loads activities for current month only
+- Database queries use indexed date column
+- Activities and units cached in frontend after initial load
+- API responses are lightweight JSON
+- Static assets served directly by nginx
+
+## Known Limitations
+
+1. **No User Authentication**: Activity data is accessible to anyone with network access
+2. **Single Database**: All activity data in one database (not multi-tenant)
+3. **No Data Export**: Must export manually via database tools
+4. **No Activity Graphs**: Only calendar view and daily lists
+5. **Mobile Responsive**: Basic responsiveness, optimized for desktop
+6. **Time Zone**: Uses server's time zone, no user time zone selection
+
+## Future Enhancements
+
+Potential improvements:
+- User authentication and authorization
+- Activity graphs and statistics
+- Data export (CSV, PDF)
+- Mobile-optimized responsive design
+- User time zone support
+- Activity goals and tracking
+- Custom activity types
+- Dark mode theme
+- Progressive Web App (PWA) support
+
+## Version History
+
+- **V2.0** (December 2025) - Calendar-based interface with activity logging
+  - Complete redesign from item tracker to fitness tracker
+  - Calendar grid view with monthly navigation
+  - Activity highlighting and CRUD operations
+  - Database restructure with units, activities, and activityLog tables
+  - 670+ sample activity entries
+
+- **V1.0** (Earlier) - Basic item tracker
+  - Simple item list management
+  - Add/delete items functionality
+
+## Support & Documentation
+
+- **Flask**: https://flask.palletsprojects.com/
+- **MariaDB**: https://mariadb.org/documentation/
+- **Docker Compose**: https://docs.docker.com/compose/
+- **Nginx**: https://nginx.org/en/docs/
+
+## License
+
+See LICENSE file in the repository root.
+
+## Contributing
+
+This is a personal project. For questions or issues, contact the repository owner.

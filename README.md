@@ -21,6 +21,12 @@
 6. [Rollback Procedure](#rollback-procedure)
 7. [System Architecture](#system-architecture)
 8. [Custom Applications](#8-custom-applications)
+9. [SSL Certificate Setup for iOS Devices](#9-ssl-certificate-setup-for-ios-devices)
+   - [Certificate Details](#certificate-details)
+   - [Installing on iOS Devices](#installing-on-ios-devices)
+   - [Accessing the Website](#accessing-the-website)
+   - [Certificate Regeneration](#certificate-regeneration)
+   - [Troubleshooting iOS Certificate Issues](#troubleshooting-ios-certificate-issues)
 
 ---
 

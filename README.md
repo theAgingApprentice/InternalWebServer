@@ -911,6 +911,191 @@ See the [Fitness Tracker README](backend/fitnessTracker/README.md) for the compl
 
 ---
 
+## 9. SSL Certificate Setup for iOS Devices
+
+The production server uses a self-signed SSL certificate to enable HTTPS. This certificate must be installed and trusted on iOS devices (iPhone/iPad) to access the website without certificate warnings.
+
+### Certificate Details
+
+- **Location:** `sslCertificates/mitchellnet-ca.crt` (in this repository)
+- **Server Location:** `/etc/ssl/certs/selfsigned.crt` on 192.168.2.10
+- **Type:** Self-signed Certificate Authority (CA)
+- **Valid Domains/IPs:** 
+  - mitchellnet.local
+  - *.mitchellnet.local
+  - localhost
+  - 192.168.2.10
+  - 127.0.0.1
+
+### Installing Certificate on iOS
+
+#### Step 1: Transfer Certificate to iOS Device
+
+Choose one method:
+
+**Option A: AirDrop (Easiest)**
+1. On your Mac, locate `sslCertificates/mitchellnet-ca.crt`
+2. Right-click → Share → AirDrop
+3. Send to your iPhone/iPad
+
+**Option B: Email**
+1. Email `sslCertificates/mitchellnet-ca.crt` to yourself
+2. Open email on iOS device
+3. Tap the attachment
+
+**Option C: Convert to Configuration Profile (Most Reliable)**
+```bash
+# On your Mac, from project root:
+base64 -i sslCertificates/mitchellnet-ca.crt | tr -d '\n' > /tmp/cert_base64.txt
+
+# Create a .mobileconfig file (iOS configuration profile)
+# See sslCertificates/create-ios-profile.sh for automation
+```
+
+#### Step 2: Install Certificate
+
+1. When you open/tap the certificate, iOS shows **"Profile Downloaded"**
+2. Go to **Settings** on iOS device
+3. Tap **"Profile Downloaded"** (appears near top, under your Apple ID)
+4. Tap **"Install"** (top right)
+5. Enter device passcode
+6. Tap **"Install"** again (warning appears)
+7. Tap **"Install"** a third time to confirm
+8. Tap **"Done"**
+
+#### Step 3: Trust the Certificate (CRITICAL)
+
+This step is required for Safari to accept the certificate:
+
+1. Go to **Settings**
+2. **General**
+3. **About**
+4. Scroll down to **"Certificate Trust Settings"**
+5. Find **"MitchellNet Root CA"**
+6. **Toggle it ON** (turn green)
+7. Tap **"Continue"** when warned
+
+### Accessing the Website
+
+After certificate installation:
+
+**On Mac (Safari/Chrome/Edge):**
+- ✅ `https://mitchellnet.local`
+- ✅ `https://192.168.2.10`
+
+**On iPhone/iPad (Safari):**
+- ✅ `https://192.168.2.10` (recommended)
+- ❌ `https://mitchellnet.local` (DNS not configured for iOS)
+
+**Why the difference?**
+- Mac has a hosts file that resolves `mitchellnet.local` → `192.168.2.10`
+- iOS devices cannot resolve `mitchellnet.local` without additional DNS configuration
+- **Solution:** Use the IP address `https://192.168.2.10` on iOS devices
+
+### Regenerating the Certificate
+
+If you need to regenerate the certificate (e.g., to change domains or extend validity):
+
+```bash
+# SSH to production server
+ssh andrew@192.168.2.10
+
+# Create OpenSSL config with desired domains/IPs
+cat > /tmp/openssl-ca.cnf << 'EOF'
+[req]
+default_bits = 2048
+prompt = no
+default_md = sha256
+distinguished_name = dn
+x509_extensions = v3_ca
+
+[dn]
+C=CA
+ST=Ontario
+L=London
+O=TheAgingApprentice
+CN=MitchellNet Root CA
+emailAddress=va3wam@gmail.com
+
+[v3_ca]
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints = critical, CA:TRUE
+keyUsage = critical, digitalSignature, cRLSign, keyCertSign
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = mitchellnet.local
+DNS.2 = *.mitchellnet.local
+DNS.3 = localhost
+IP.1 = 192.168.2.10
+IP.2 = 127.0.0.1
+EOF
+
+# Generate certificate (valid for 10 years)
+sudo openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+  -keyout /etc/ssl/private/selfsigned.key \
+  -out /etc/ssl/certs/selfsigned.crt \
+  -config /tmp/openssl-ca.cnf
+
+# Verify certificate has CA flag and correct domains
+openssl x509 -in /etc/ssl/certs/selfsigned.crt -text -noout | grep -A 3 "CA:TRUE"
+openssl x509 -in /etc/ssl/certs/selfsigned.crt -text -noout | grep -A 6 "Subject Alternative Name"
+
+# Restart nginx to use new certificate
+cd /home/andrew/web_server
+docker-compose restart nginx-proxy
+
+# Exit server
+exit
+
+# Copy new certificate to repository
+ssh andrew@192.168.2.10 "cat /etc/ssl/certs/selfsigned.crt" > sslCertificates/mitchellnet-ca.crt
+```
+
+### Production Server Nginx Configuration
+
+For the certificate to work with both domain names and IP addresses, ensure nginx is configured properly:
+
+**Key Configuration Files:**
+- `/home/andrew/web_server/nginx/conf.d/prod.conf` - Main production config
+- `/home/andrew/web_server/nginx/conf.d/000-bareip.conf.off` - Disabled (was causing IP redirect issues)
+
+**Important:** The `000-bareip.conf` file should remain disabled (`.off` extension) to allow direct IP access. This file was redirecting all IP address requests to `mitchellnet.local`, preventing iOS devices from accessing the site.
+
+**Current prod.conf configuration:**
+```nginx
+server {
+    listen 443 ssl;
+    server_name mitchellnet.local 192.168.2.10;  # Both domain and IP
+    
+    ssl_certificate     /etc/nginx/ssl/selfsigned.crt;
+    ssl_certificate_key /etc/nginx/ssl/selfsigned.key;
+    
+    # ... rest of configuration
+}
+```
+
+### Troubleshooting iOS Access
+
+**Problem:** iOS Safari shows "Cannot connect to server" or infinite loading
+
+**Solution:** 
+1. Verify certificate is installed and trusted in Certificate Trust Settings
+2. Use `https://192.168.2.10` instead of domain name
+3. Clear Safari cache: Settings → Safari → Clear History and Website Data
+4. Try in Private Browsing mode first
+5. Check server logs: `ssh andrew@192.168.2.10 "docker logs nginx-proxy --tail 50"`
+
+**Problem:** Certificate not appearing in Certificate Trust Settings
+
+**Solution:**
+1. Remove old certificate profiles: Settings → General → VPN & Device Management
+2. Use the `.mobileconfig` format instead of raw `.crt` file
+3. Ensure certificate has `CA:TRUE` flag (required for iOS to trust it)
+
+---
+
 ## Additional Resources
 
 - **Cleanup Guide:** [CLEANUP.md](CLEANUP.md) - Remove old dev/test infrastructure

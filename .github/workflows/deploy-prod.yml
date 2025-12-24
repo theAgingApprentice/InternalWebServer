@@ -22,6 +22,7 @@ jobs:
       - name: Set variables
         run: |
           echo "PROD_ROOT=/home/andrew/web_server/html/prod" >> $GITHUB_ENV
+          echo "WEB_SERVER_ROOT=/home/andrew/web_server" >> $GITHUB_ENV
           echo "BACKUP_DIR=/home/andrew/web_server/backups/prod_backup_$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
           echo "HOST=mitchellnet.local" >> $GITHUB_ENV
           echo "PROXY_IP=127.0.0.1" >> $GITHUB_ENV
@@ -65,12 +66,41 @@ jobs:
           set -euo pipefail
           echo "=== Deploying html/prod -> $PROD_ROOT ==="
           rsync -av --delete html/prod/ "$PROD_ROOT"/
-          echo "Deployment completed successfully"
+          echo "HTML deployment completed"
+          
+          echo "=== Deploying backend code ==="
+          rsync -av --delete backend/ "$WEB_SERVER_ROOT/backend"/
+          echo "Backend deployment completed"
+          
+          echo "=== Deploying nginx configuration ==="
+          rsync -av --delete nginx/ "$WEB_SERVER_ROOT/nginx"/
+          echo "Nginx config deployment completed"
+          
+          echo "=== Deploying docker-compose and other configs ==="
+          rsync -av docker-compose.yml "$WEB_SERVER_ROOT/"
+          rsync -av database/ "$WEB_SERVER_ROOT/database"/
+          echo "All deployments completed successfully"
 
       - name: Restart nginx-prod container
         run: |
           echo "Restarting nginx-prod container..."
           docker restart nginx-prod || true
+          sleep 3
+          
+      - name: Rebuild and restart backend container
+        run: |
+          echo "Rebuilding fitness-tracker-backend..."
+          cd "$WEB_SERVER_ROOT"
+          docker-compose build fitness-tracker-backend
+          docker-compose stop fitness-tracker-backend
+          docker-compose rm -f fitness-tracker-backend
+          docker-compose up -d fitness-tracker-backend
+          echo "Backend container restarted"
+          
+      - name: Restart nginx-proxy container
+        run: |
+          echo "Restarting nginx-proxy container to load new config..."
+          docker restart nginx-proxy || true
           sleep 3
 
       - name: Verify production deployment

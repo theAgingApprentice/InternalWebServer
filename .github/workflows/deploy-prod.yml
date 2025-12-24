@@ -78,7 +78,8 @@ jobs:
           
           echo "=== Deploying docker-compose and other configs ==="
           rsync -av docker-compose.yml "$WEB_SERVER_ROOT/"
-          rsync -av database/ "$WEB_SERVER_ROOT/database"/
+          echo "Docker-compose deployment completed"
+          echo "Note: Database migrations are not auto-deployed. Handle manually if needed."
           echo "All deployments completed successfully"
 
       - name: Restart nginx-prod container

@@ -23,10 +23,15 @@
 8. [Custom Applications](#8-custom-applications)
 9. [SSL Certificate Setup for iOS Devices](#9-ssl-certificate-setup-for-ios-devices)
    - [Certificate Details](#certificate-details)
-   - [Installing on iOS Devices](#installing-on-ios-devices)
+   - [Installing Certificate on iOS](#installing-certificate-on-ios)
    - [Accessing the Website](#accessing-the-website)
-   - [Certificate Regeneration](#certificate-regeneration)
-   - [Troubleshooting iOS Certificate Issues](#troubleshooting-ios-certificate-issues)
+   - [Regenerating the Certificate](#regenerating-the-certificate)
+   - [Troubleshooting iOS Access](#troubleshooting-ios-access)
+10. [SSL Certificate Setup for macOS Devices](#10-ssl-certificate-setup-for-macos-devices)
+   - [Quick Installation](#quick-installation)
+   - [GUI Installation](#gui-installation)
+   - [Verification](#verification)
+   - [Troubleshooting macOS Certificate Issues](#troubleshooting-macos-certificate-issues)
 
 ---
 
@@ -1130,4 +1135,137 @@ server {
 ---
 
 **Questions or Issues?** Check the [Troubleshooting](#5-troubleshooting) section above.
+
+---
+
+## 10. SSL Certificate Setup for macOS Devices
+
+The production server uses a self-signed SSL certificate. To prevent Safari and other browsers from showing security warnings on your Mac, install and trust the certificate in macOS Keychain.
+
+### Quick Installation
+
+The fastest way to install the certificate on macOS is via terminal:
+
+```bash
+# From the project root directory
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain sslCertificates/mitchellnet-ca.crt
+```
+
+This command:
+- Adds the certificate to the System keychain
+- Marks it as a trusted root certificate
+- Requires your macOS password
+- Takes effect immediately (no restart needed)
+
+**After installation:**
+- Safari, Chrome, and Edge will trust the certificate
+- No more security warnings when accessing https://mitchellnet.local or https://192.168.2.10
+
+### GUI Installation
+
+If you prefer using the graphical interface:
+
+#### Step 1: Open Keychain Access
+
+```bash
+open -a "Keychain Access"
+```
+
+Or find it in Applications → Utilities → Keychain Access
+
+#### Step 2: Import Certificate
+
+**Option A: Drag and Drop**
+1. Navigate to `sslCertificates/mitchellnet-ca.crt` in Finder
+2. Drag the `.crt` file into the Keychain Access window
+3. Select **System** keychain when prompted
+4. Enter your password
+
+**Option B: Import Menu**
+1. In Keychain Access, select **File → Import Items**
+2. Navigate to `sslCertificates/mitchellnet-ca.crt`
+3. Select **System** keychain as the destination
+4. Click **Open**
+5. Enter your password
+
+#### Step 3: Trust the Certificate
+
+1. In Keychain Access, make sure **System** keychain is selected (left sidebar)
+2. Find **"MitchellNet Root CA"** in the certificate list
+3. Double-click the certificate to open it
+4. Expand the **Trust** section
+5. Change **"When using this certificate"** to **"Always Trust"**
+6. Close the window
+7. Enter your password when prompted
+
+### Verification
+
+Verify the certificate is properly installed and trusted:
+
+```bash
+# Check if certificate exists in System keychain
+security find-certificate -c "MitchellNet Root CA" -a /Library/Keychains/System.keychain
+
+# Verify SSL connection (should show "Verify return code: 0 (ok)")
+openssl s_client -connect 192.168.2.10:443 -CAfile sslCertificates/mitchellnet-ca.crt < /dev/null
+```
+
+**Test in browser:**
+1. Open Safari (or Chrome/Edge)
+2. Navigate to https://mitchellnet.local or https://192.168.2.10
+3. Check the address bar - should show a lock icon (🔒) with no warnings
+4. Click the lock icon → Certificate should show as valid
+
+### Troubleshooting macOS Certificate Issues
+
+**Problem:** Safari still shows "Not Secure" warning
+
+**Solutions:**
+1. Verify certificate is in **System** keychain (not Login keychain)
+2. Check trust settings: Should be "Always Trust"
+3. Clear browser cache: Safari → Preferences → Privacy → Manage Website Data → Remove All
+4. Restart Safari
+5. Check that you installed the correct certificate (`mitchellnet-ca.crt`, not `dev.crt`)
+
+**Problem:** Certificate appears but trust settings are grayed out
+
+**Solutions:**
+1. Make sure you opened the certificate in the **System** keychain
+2. Try removing and reinstalling with the terminal command (requires sudo)
+3. Check System Preferences → Security & Privacy - you may need to unlock settings
+
+**Problem:** Terminal command fails with permission denied
+
+**Solutions:**
+1. Ensure you're using `sudo` with the command
+2. Enter your macOS administrator password when prompted
+3. If still failing, try the GUI method instead
+
+**Problem:** Firefox still shows warnings
+
+**Solutions:**
+- Firefox uses its own certificate store, separate from macOS Keychain
+- Option 1: Accept the certificate exception in Firefox (click "Advanced" → "Accept Risk")
+- Option 2: Import certificate directly into Firefox:
+  1. Firefox → Preferences → Privacy & Security
+  2. Scroll to **Certificates** → Click **View Certificates**
+  3. Go to **Authorities** tab
+  4. Click **Import**
+  5. Select `sslCertificates/mitchellnet-ca.crt`
+  6. Check "Trust this CA to identify websites"
+  7. Click **OK**
+
+**To remove the certificate (if needed):**
+
+```bash
+# Terminal method
+sudo security delete-certificate -c "MitchellNet Root CA" /Library/Keychains/System.keychain
+
+# Or use Keychain Access GUI:
+# 1. Find "MitchellNet Root CA" in System keychain
+# 2. Right-click → Delete
+# 3. Enter password to confirm
+```
+
+---
 

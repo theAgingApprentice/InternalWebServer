@@ -4,12 +4,21 @@ A full-stack fitness tracking web application featuring a calendar-based interfa
 
 ## Features
 
+### User Features
 - **Calendar Interface**: Monthly calendar view with navigation
 - **Activity Highlighting**: Days with logged activities are highlighted in green
 - **Activity Logging**: Track multiple activities per day with values and units
 - **CRUD Operations**: Add, edit, and delete activity log entries
-- **Activity Types**: Pre-configured activities (Swimming, Cycling, Running, Gym, Walking) with units
+- **Activity Types**: Pre-configured activities (Walk, Plank, Wall Sits, Crunches, Push-ups) with units
 - **Real-time Updates**: Calendar automatically refreshes after adding/deleting activities
+
+### Admin Features
+- **Admin Dashboard**: Dedicated admin interface for managing the fitness tracker system
+- **Unit Types Management**: Add, edit, and delete unit types (e.g., Number-whole, Time, Distance)
+- **Units Management**: Create and manage measurement units with specific types
+- **Activities Management**: Add custom activities with configurable units and default values
+- **Data Protection**: Prevents deletion of units/activities that are in use
+- **Dynamic Updates**: Changes to activities immediately reflect in the main tracker interface
 
 ## Architecture
 
@@ -28,10 +37,13 @@ InternalWebServer/
 ├── deploy-to-prod.sh               # Deployment script to production server
 ├── backend/
 │   └── fitnessTracker/
-│       ├── Dockerfile              # Python backend container
-│       ├── app.py                  # Main Flask application
-│       ├── requirements.txt        # Python dependencies
-│       ├── config/
+│       admin.html                  # Admin dashboard for managing activities/units
+│   ├── css/
+│   │   ├── style.css               # Calendar grid and activity styles
+│   │   └── admin.css               # Admin interface styles
+│   └── js/
+│       ├── app.js                  # Calendar rendering and API calls
+│       └── admin.js                # Admin dashboard functionality
 │       │   └── database.py         # Database connection config
 │       └── routes/
 │           └── api_routes.py       # REST API endpoints
@@ -200,7 +212,9 @@ GET /api/health
 ```
 Returns backend health status and database connection info.
 
-### Activities
+### Public Endpoints
+
+#### Get All Activities
 ```
 GET /api/activities
 ```
@@ -208,18 +222,19 @@ Returns all available activities with their associated units.
 
 **Response Example:**
 ```json
-[
-  {
-    "id": 1,
-    "name": "Swimming",
-    "unit": "Laps"
-  },
-  {
-    "id": 2,
-    "name": "Cycling",
-    "unit": "Minutes"
-  }
-]
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Walk",
+      "default_amt": 30,
+      "fkUnitID": 3,
+      "unit_name": "Time-Minutes",
+      "unit_type": "Number-whole"
+    }
+  ]
+}
 ```
 
 ### Activity Log - Get Dates with Activities
@@ -230,7 +245,10 @@ Returns array of dates (YYYY-MM-DD) that have logged activities for the specifie
 
 **Response Example:**
 ```json
-["2025-12-01", "2025-12-03", "2025-12-15"]
+{
+  "success": true,
+  "data": ["2025-12-01", "2025-12-03", "2025-12-15"]
+}
 ```
 
 ### Activity Log - Get Activities for a Date
@@ -241,24 +259,19 @@ Returns all logged activities for a specific date.
 
 **Response Example:**
 ```json
-[
-  {
-    "id": 123,
-    "date": "2025-12-15",
-    "activity_id": 1,
-    "activity_name": "Swimming",
-    "unit": "Laps",
-    "value": 20
-  },
-  {
-    "id": 124,
-    "date": "2025-12-15",
-    "activity_id": 2,
-    "activity_name": "Cycling",
-    "unit": "Minutes",
-    "value": 45
-  }
-]
+{
+  "success": true,
+  "data": [
+    {
+      "id": 123,
+      "date": "2025-12-15",
+      "fkActivityId": 1,
+      "activity_name": "Walk",
+      "unit_name": "Time-Minutes",
+      "duration": 30
+    }
+  ]
+}
 ```
 
 ### Activity Log - Create Entry
@@ -270,9 +283,9 @@ Content-Type: application/json
 **Request Body:**
 ```json
 {
+  "activityId": 1,
   "date": "2025-12-22",
-  "activity_id": 1,
-  "value": 25
+  "duration": 25
 }
 ```
 
@@ -280,7 +293,12 @@ Content-Type: application/json
 ```json
 {
   "success": true,
-  "id": 671
+  "data": {
+    "id": 671,
+    "activityId": 1,
+    "date": "2025-12-22",
+    "duration": 25
+  }
 }
 ```
 
@@ -289,6 +307,148 @@ Content-Type: application/json
 PUT /api/activity-log/<id>
 Content-Type: application/json
 ```
+
+**Request Body:**
+```json
+{
+  "duration": 45
+}
+```
+
+### Activity Log - Delete Entry
+```
+DELETE /api/activity-log/<id>
+```
+
+### Admin Endpoints
+
+#### Unit Types Management
+
+**Get All Unit Types**
+```
+GET /api/admin/unit-types
+```
+Returns all unique unit types currently in use.
+
+**Response Example:**
+```json
+{
+  "success": true,
+  "data": ["Number-whole", "Time", "Distance"]
+}
+```
+
+**Add Unit Type**
+```
+POST /api/admin/unit-types
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Weight"
+}
+```
+
+**Delete Unit Type**
+```
+DELETE /api/admin/unit-types/<type_name>
+```
+Only succeeds if no units are using this type.
+
+#### Units Management
+
+**Get All Units**
+```
+GET /api/admin/units
+```
+
+**Response Example:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Count",
+      "unit": "Number-whole"
+    }
+  ]
+}
+```
+
+**Create Unit**
+```
+POST /api/admin/units
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Distance-Kilometers",
+  "unit": "Distance"
+}
+```
+
+**Update Unit**
+```
+PUT /api/admin/units/<id>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Distance-Kilometers",
+  "unit": "Distance"
+}
+```
+
+**Delete Unit**
+```
+DELETE /api/admin/units/<id>
+```
+Only succeeds if no activities are using this unit.
+
+#### Activities Management
+
+**Create Activity**
+```
+POST /api/admin/activities
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Squats",
+  "unitId": 1,
+  "defaultAmt": 20
+}
+```
+
+**Update Activity**
+```
+PUT /api/admin/activities/<id>
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "Squats",
+  "unitId": 1,
+  "defaultAmt": 25
+}
+```
+
+**Delete Activity**
+```
+DELETE /api/admin/activities/<id>
+```
+Only succeeds if no activity log entries exist for this activity.
 
 **Request Body:**
 ```json

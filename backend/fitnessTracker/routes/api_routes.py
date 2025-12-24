@@ -312,3 +312,339 @@ def delete_activity_log(log_id):
             'success': False,
             'error': str(e)
         }), 500
+
+# ============ ADMIN ENDPOINTS ============
+
+@api_bp.route('/admin/unit-types', methods=['GET'])
+def get_unit_types():
+    """Get all unique unit types"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT DISTINCT unit FROM units ORDER BY unit")
+        rows = cursor.fetchall()
+        close_db_connection(conn)
+        
+        unit_types = [row[0] for row in rows]
+        
+        return jsonify({
+            'success': True,
+            'data': unit_types
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/admin/unit-types', methods=['POST'])
+def create_unit_type():
+    """Add a new unit type (just validates it doesn't exist)"""
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        
+        if not name:
+            return jsonify({
+                'success': False,
+                'error': 'Unit type name is required'
+            }), 400
+        
+        # Unit types are just stored in the units table, so we just return success
+        # The actual unit type will be created when a unit uses it
+        return jsonify({
+            'success': True,
+            'message': 'Unit type registered successfully'
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/admin/unit-types/<string:type_name>', methods=['DELETE'])
+def delete_unit_type(type_name):
+    """Delete a unit type (only if not used by any units)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if unit type is used by any units
+        cursor.execute("SELECT COUNT(*) as count FROM units WHERE unit = %s", (type_name,))
+        result = cursor.fetchone()
+        close_db_connection(conn)
+        
+        if result[0] > 0:
+            return jsonify({
+                'success': False,
+                'error': 'Cannot delete unit type that is used by units'
+            }), 400
+        
+        # Since unit types are just distinct values, nothing to delete
+        # They disappear automatically when no units use them
+        return jsonify({
+            'success': True,
+            'message': 'Unit type can be safely removed (no units use it)'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/admin/units', methods=['GET'])
+def get_units():
+    """Get all units"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM units ORDER BY name")
+        units = cursor.fetchall()
+        close_db_connection(conn)
+        
+        return jsonify({
+            'success': True,
+            'data': units
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/admin/units', methods=['POST'])
+def create_unit():
+    """Create a new unit"""
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        unit = data.get('unit')
+        
+        if not name or not unit:
+            return jsonify({
+                'success': False,
+                'error': 'Name and unit type are required'
+            }), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO units (name, unit) VALUES (%s, %s)",
+            (name, unit)
+        )
+        conn.commit()
+        unit_id = cursor.lastrowid
+        close_db_connection(conn)
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'id': unit_id,
+                'name': name,
+                'unit': unit
+            }
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/admin/units/<int:unit_id>', methods=['PUT'])
+def update_unit(unit_id):
+    """Update a unit"""
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        unit = data.get('unit')
+        
+        if not name or not unit:
+            return jsonify({
+                'success': False,
+                'error': 'Name and unit type are required'
+            }), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE units SET name = %s, unit = %s WHERE id = %s",
+            (name, unit, unit_id)
+        )
+        conn.commit()
+        affected = cursor.rowcount
+        close_db_connection(conn)
+        
+        if affected == 0:
+            return jsonify({
+                'success': False,
+                'error': 'Unit not found'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'message': 'Unit updated successfully'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/admin/units/<int:unit_id>', methods=['DELETE'])
+def delete_unit(unit_id):
+    """Delete a unit (only if not used by any activities)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if unit is used by any activities
+        cursor.execute("SELECT COUNT(*) as count FROM activities WHERE fkUnitID = %s", (unit_id,))
+        result = cursor.fetchone()
+        
+        if result[0] > 0:
+            close_db_connection(conn)
+            return jsonify({
+                'success': False,
+                'error': 'Cannot delete unit that is used by activities'
+            }), 400
+        
+        cursor.execute("DELETE FROM units WHERE id = %s", (unit_id,))
+        conn.commit()
+        affected = cursor.rowcount
+        close_db_connection(conn)
+        
+        if affected == 0:
+            return jsonify({
+                'success': False,
+                'error': 'Unit not found'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'message': 'Unit deleted successfully'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/admin/activities', methods=['POST'])
+def create_activity():
+    """Create a new activity"""
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        unit_id = data.get('unitId')
+        default_amt = data.get('defaultAmt')
+        
+        if not name or not unit_id or not default_amt:
+            return jsonify({
+                'success': False,
+                'error': 'Name, unit ID, and default amount are required'
+            }), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO activities (name, fkUnitID, default_amt) VALUES (%s, %s, %s)",
+            (name, unit_id, default_amt)
+        )
+        conn.commit()
+        activity_id = cursor.lastrowid
+        close_db_connection(conn)
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'id': activity_id,
+                'name': name,
+                'unitId': unit_id,
+                'defaultAmt': default_amt
+            }
+        }), 201
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/admin/activities/<int:activity_id>', methods=['PUT'])
+def update_activity(activity_id):
+    """Update an activity"""
+    try:
+        data = request.get_json()
+        name = data.get('name')
+        unit_id = data.get('unitId')
+        default_amt = data.get('defaultAmt')
+        
+        if not name or not unit_id or not default_amt:
+            return jsonify({
+                'success': False,
+                'error': 'Name, unit ID, and default amount are required'
+            }), 400
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE activities SET name = %s, fkUnitID = %s, default_amt = %s WHERE id = %s",
+            (name, unit_id, default_amt, activity_id)
+        )
+        conn.commit()
+        affected = cursor.rowcount
+        close_db_connection(conn)
+        
+        if affected == 0:
+            return jsonify({
+                'success': False,
+                'error': 'Activity not found'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'message': 'Activity updated successfully'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@api_bp.route('/admin/activities/<int:activity_id>', methods=['DELETE'])
+def delete_activity(activity_id):
+    """Delete an activity (only if not used in any activity logs)"""
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Check if activity is used in any logs
+        cursor.execute("SELECT COUNT(*) as count FROM activityLog WHERE fkActivityId = %s", (activity_id,))
+        result = cursor.fetchone()
+        
+        if result[0] > 0:
+            close_db_connection(conn)
+            return jsonify({
+                'success': False,
+                'error': 'Cannot delete activity that has logged entries'
+            }), 400
+        
+        cursor.execute("DELETE FROM activities WHERE id = %s", (activity_id,))
+        conn.commit()
+        affected = cursor.rowcount
+        close_db_connection(conn)
+        
+        if affected == 0:
+            return jsonify({
+                'success': False,
+                'error': 'Activity not found'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'message': 'Activity deleted successfully'
+        })
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500

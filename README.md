@@ -37,7 +37,7 @@
 
 ## 1. Overview
 
-**InternalWebServer** is a simplified NGINX-based web hosting solution for MitchellNET. This repository uses a streamlined deployment process:
+**InternalWebServer** is a simplified NGINX-based web hosting solution for MitchellNET. It is hosted on a [2019 iMac)(https://github.com/theAgingApprentice/2019iMacServer). This repository uses a streamlined deployment process:
 
 ✅ **Single Branch:** Work directly on `main` branch or feature branches  
 ✅ **Automated Deployment:** Merging PR to `main` auto-deploys to production  

@@ -36,4 +36,10 @@ for branch in $(git branch -r | grep "${REPO_URL}/" | grep -v "${REPO_URL}/${MAI
   fi
   done
 
+
 echo "Cleanup complete. Only '$MAIN_BRANCH' branch remains locally and remotely."
+
+# Pull latest main branch from remote
+echo "No errors occurred. Pulling latest '$MAIN_BRANCH' from remote to local repo..."
+git pull origin "$MAIN_BRANCH"
+echo "Main branch is now up to date with remote."

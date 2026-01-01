@@ -17,14 +17,232 @@
 
   <main class="content">
     <section>
+      <h1>Project Best Practices & Guidelines</h1>
+      This page contains a set of best practices and guidelines to help ensure that Aging Apprentice projects are well-organized, 
+      maintainable, and successful. 
+
+      <h2>GitHub Repositories vs. Projects</h2>
+      The *Repository* is the core unit on GitHub. It stores project's code, files, commit history, issues, pull requests, and more. 
+      Each repo is typically dedicated to a single codebase or component.
+
+      The *Project* is a flexible planning and tracking tool (like a Kanban board, table, or roadmap) for organizing work. Projects live 
+      at the user, organization, or repository level and manage issues and pull requests (PRs).
+
+      Projects do not contain code or repositories—they reference issues and PRs from repositories.
+      
+      <h2>How Repositories Are Linked to Projects</h2>
+      <ul>
+        <li>In GitHub Projects, repositories are not directly "linked" like in classic projects.</li>
+        <li>Linkage occurs indirectly by adding individual issues and pull requests from any accessible repository to the project.</li>
+        <li>When creating a new item in a project, you can select the target repository to create the issue/PR there.</li>
+        <li>Draft issues can exist in the project without belonging to any repository initially.</li>
+      </ul>
+      
+      <h2>Many-to-Many Relationships</h2>
+      <ul>
+        <li>
+          One project → many repositories: Yes. A single project can include issues and PRs from multiple repositories, ideal for cross-repo 
+          coordination (e.g., microservices or multi-component apps).
+        </li>
+        <li>
+          One repository → many projects: Yes. Issues and PRs from one repository can be added to multiple projects (e.g., a team backlog project 
+          and a release-specific project).
+        </li>
+      </ul>
+
+      <h2>Recommended Management Practices</h2>
+      <ul>
+        
+        <li>
+          Creating and Managing Issues
+          <li>
+            Always open issues (tasks, bugs, features) directly in the relevant repository. This keeps discussions, code references, and history tied to the specific codebase.
+          </li>
+          <li>
+            Then, add those repository issues to one or more projects for higher-level planning and tracking. This effectively "links" the repository to the project(s) as needed.
+          </li>
+        </li>
+        
+        <li>
+          Tracking Planned Feature Work vs Bug Fixes:
+          <li>
+            Use labels (e.g., feature, enhancement, bug, critical, good first issue, help wanted) in repositories to categorize issues.
+          </li>
+          <li>
+            In projects, create dedicated views, boards, or columns filtered by these labels—e.g., separate boards/sections for features 
+            (roadmap-focused) and bugs (triage/priority queue).
+          </li>
+          <li>
+            Prioritize bugs separately for quick fixes and stability; group features into 
+            epics, milestones, or iterations for planned releases. 
+          </li>
+          <li> 
+            Consider custom fields in projects (e.g., "Type: Feature/Bug", "Priority") 
+            for better sorting and automation.
+          </li>
+        </li>
+       
+        <li>
+          Setting Up Labels and Milestones:
+          <li
+            Labels: These are repository-level and help categorize issues/PRs. Set them up early to ensure consistency across repos. During 
+            project creation (or repo setup), go to each repository's Issues tab > Labels (on the right sidebar) > New label or edit 
+            existing ones.
+          </li>
+          <li> 
+            Recommended labels for volunteer-driven projects: bug (for defects), enhancement or feature (for new work), documentation 
+            (for docs updates), good first issue (easy tasks for newcomers), help wanted (open for contributions), priority:high/medium/low (for urgency), duplicate (to mark repeats), wontfix (for issues not to pursue).
+          </li>
+          <li>
+            Use colors for visual distinction (e.g., red for bugs, green for features).
+          </li>
+          <li>
+            Apply labels when creating issues, and use them in project filters for automated workflows.
+          </li>
+        </li>
+        
+        <li>
+          Milestones: These group issues/PRs into releases or phases and are also repository-level. Set them up via Issues tab > Milestones 
+          (on the right) > New milestone.
+          <li>
+            Recommended for "when ready" releases: Create open-ended milestones like "Next Release" (no due date, for upcoming stable features), 
+            "Backlog" (for future ideas), or "v1.0" (for version-specific goals).
+          </li>
+          <li>
+            Assign issues to milestones when adding them to projects. Since no fixed sprints, use milestones flexibly to signal readiness 
+            rather than time-bound deadlines. 
+          </li>
+          <li>
+            In projects, filter views by milestones for release planning.
+          </li>
+        </li>
+
+        <li>
+          Setting Up a New Project (Especially for Volunteer-Driven Work):
+        </li>
+        <ol>
+          <li>
+            In your organization or user profile, go to Projects and click New project.
+          </li>
+          <li>
+            Choose a blank project or template (start with a Board for simple Kanban-style tracking). 
+          </li>
+          <li>
+            Name the project (e.g., "Roadmap and Backlog").
+          </li>
+          <li>
+            After creation, go to project Settings (menu in top-right):Add a short description.
+            <ul>
+            <li>
+              Add a short description.
+            </li>  
+            <li>
+              Add a detailed README (supports Markdown) explaining:
+              <ul>
+                <li>
+                  Project overview and goals.
+                </li>
+                <li>
+                  How volunteers can contribute (e.g., pick issues labeled good first issue or help wanted).
+                </li>
+                <li>
+                  Contribution guidelines (link to CONTRIBUTING.md if available).
+                </li>
+                <li>
+                  Note that this is volunteer-driven: no fixed sprints or deadlines; work progresses asynchronously and releases happen 
+                  "when ready" once features are stable and reviewed.
+                </li>
+                <li>
+                  Communication channels (e.g., issues, discussions).
+                </li>
+                <li>
+                  Tips for newcomers: start small, ask questions in issues.
+                </li>
+              </ul>
+            </li>
+            </ul>
+          <li>
+            Set up views:
+          </li>
+          <ul>
+            <li>
+              Use a Board layout with columns like: New, To Do, In Progress, Review, Done.
+            </li>
+            <li>
+              In Board view, set up columns like New, To Do, In Progress, Review, Done.
+            </li>
+            <li>
+              Avoid time-bound iterations/sprints; instead, use status columns and priority sorting for asynchronous flow.
+            </li>
+            <li>
+              Add a Roadmap view for high-level feature planning without dates.
+            </li>
+          <li>
+            Make the project public or visible to encourage volunteer participation.
+          </li>
+        </ol>
+        <li>
+          Creating a Project Template for Faster Setups:
+          <ol>
+            <li>
+              First, set up a complete project as described above, including views, 
+              custom fields, automations, and a README tailored for your volunteer workflow.
+            </li>
+            <li>
+              Navigate to the project.
+            </li>
+            <li>
+              Click the menu (three dots) next to the project name.
+            </li>
+            <li>
+              Select Save as template (available for organization-owned projects).
+            </li>
+            <li>
+              Provide a name and description for the template.
+            </li>
+            <li>
+              To use it: When creating a new project, select New project > choose your template from the list. This copies the structure, views, 
+              fields, and automations for quick starts.
+            </li>
+          </ol>
+        </li>
+        <li>
+          General Tips for Volunteer Projects:
+          <ul>
+            <li>
+              Use organization-level projects for cross-repository oversight.
+            </li>
+            <li>
+              Label issues generously to attract contributors (e.g., good first issue for beginners).
+            </li>
+            <li>
+              Leverage automations, custom fields, and insights for efficiency.
+            </li>
+            <li>
+              Add clear READMEs to repositories and projects for context.
+            </li>
+            <li>
+              Emphasize patience and clear communication, as contributors work on their own time.
+            </li>
+          </ul>
+        </li>
+      </ul>
+      This approach ensures issues stay close to the code while projects provide flexible, high-level visibility—perfect for volunteer-driven open source without rigid schedules. For official details, see GitHub Docs on Projects and Repositories.
+
+    </p>
+    </section>
+    
+    <section>
       <h2>My Projects</h2>
       <p>
-        This page contains a list of current and past projects. I use GitHUb Projects to manage my work, and most of my projects are open source. 
-        You can find the code repositories for my projects on my 
+        This page contains detailes about the Aging Apprentice project best practicves as well as providing a list of current and past projects. 
+        I use GitHub Projects to manage my work, and most of my projects are open source. You can find the repository that serves as the master 
+        list of my projects code repositories for my projects on my 
         <a href="https://github.com/theAgingApprentice?tab=projects" target="_blank" rel="noopener noreferrer">GitHub Projects page</a>. 
-        Note that by default only ther open projects are listed there; to see all projects, click on the "Closed" tab.
+        Note that by default only thee open projects are listed there; to see all projects, click on the "Closed" tab.
       </p>
       
+
       <table class="center"> 
         <tr style="background-color:lightgray;">
           <th>Category</th>

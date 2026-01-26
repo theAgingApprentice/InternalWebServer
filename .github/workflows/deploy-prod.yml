@@ -1,6 +1,9 @@
+on:
+
 name: Deploy to Production
 
 on:
+  workflow_dispatch:
   pull_request:
     types: [closed]
     branches:

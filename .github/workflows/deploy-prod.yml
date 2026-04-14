@@ -72,7 +72,7 @@ jobs:
           echo "Backend deployment completed"
           
           echo "=== Deploying nginx configuration ==="
-          rsync -av --delete nginx/ "$WEB_SERVER_ROOT/nginx"/
+          rsync -av --delete --exclude='certs/' nginx/ "$WEB_SERVER_ROOT/nginx"/
           echo "Nginx config deployment completed"
           
           echo "=== Deploying docker-compose and other configs ==="

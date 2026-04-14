@@ -97,10 +97,12 @@ jobs:
           docker compose up -d fitness-tracker-backend
           echo "Backend container restarted"
           
-      - name: Restart nginx-proxy container
+      - name: Recreate nginx-proxy container
         run: |
-          echo "Restarting nginx-proxy container to load new config..."
-          docker restart nginx-proxy || true
+          echo "Recreating nginx-proxy container to pick up new config and cert mounts..."
+          cd "$WEB_SERVER_ROOT"
+          docker rm -f nginx-proxy || true
+          docker compose up -d nginx-proxy
           sleep 3
 
       - name: Verify production deployment

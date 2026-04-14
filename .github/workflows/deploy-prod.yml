@@ -91,10 +91,10 @@ jobs:
         run: |
           echo "Rebuilding fitness-tracker-backend..."
           cd "$WEB_SERVER_ROOT"
-          docker-compose build fitness-tracker-backend
-          docker-compose stop fitness-tracker-backend
-          docker-compose rm -f fitness-tracker-backend
-          docker-compose up -d fitness-tracker-backend
+          docker compose build fitness-tracker-backend
+          docker compose stop fitness-tracker-backend
+          docker compose rm -f fitness-tracker-backend
+          docker compose up -d fitness-tracker-backend
           echo "Backend container restarted"
           
       - name: Restart nginx-proxy container

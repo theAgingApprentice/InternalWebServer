@@ -924,19 +924,17 @@ See the [Fitness Tracker README](backend/fitnessTracker/README.md) for the compl
 
 ## 9. SSL Certificate Setup for iOS Devices
 
-The production server uses a self-signed SSL certificate to enable HTTPS. This certificate must be installed and trusted on iOS devices (iPhone/iPad) to access the website without certificate warnings.
+The production server uses an **mkcert**-generated SSL certificate trusted by the Mac's keychain. iOS devices still require the legacy CA cert to be installed manually (see below).
 
 ### Certificate Details
 
-- **Location:** `sslCertificates/mitchellnet-ca.crt` (in this repository)
-- **Server Location:** `/etc/ssl/certs/selfsigned.crt` on 192.168.2.10
-- **Type:** Self-signed Certificate Authority (CA)
+- **Active cert on server:** `/home/andrew/web_server/nginx/certs/server.crt` (and `server.key`)
+- **Tool used:** mkcert (Mac keychain-trusted — no browser warnings on Mac)
+- **Legacy CA cert (iOS use):** `sslCertificates/mitchellnet-ca.crt` (in this repository)
 - **Valid Domains/IPs:** 
   - mitchellnet.local
-  - *.mitchellnet.local
-  - localhost
   - 192.168.2.10
-  - 127.0.0.1
+- **Expires:** July 2028
 
 ### Installing Certificate on iOS
 
@@ -1003,66 +1001,31 @@ After certificate installation:
 - iOS devices cannot resolve `mitchellnet.local` without additional DNS configuration
 - **Solution:** Use the IP address `https://192.168.2.10` on iOS devices
 
-### Regenerating the Certificate
+### Renewing the Certificate
 
-If you need to regenerate the certificate (e.g., to change domains or extend validity):
+When the cert expires (July 2028) or a browser update breaks trust again, do **only these steps** — no nginx config changes are needed:
 
 ```bash
-# SSH to production server
-ssh andrew@192.168.2.10
+# On your Mac: generate new mkcert cert (creates files in current directory)
+mkcert mitchellnet.local 192.168.2.10
 
-# Create OpenSSL config with desired domains/IPs
-cat > /tmp/openssl-ca.cnf << 'EOF'
-[req]
-default_bits = 2048
-prompt = no
-default_md = sha256
-distinguished_name = dn
-x509_extensions = v3_ca
+# Copy cert files to the server
+scp ~/mitchellnet.local+1.pem ~/mitchellnet.local+1-key.pem andrew@192.168.2.10:/home/andrew/web_server/nginx/certs/
 
-[dn]
-C=CA
-ST=Ontario
-L=London
-O=TheAgingApprentice
-CN=MitchellNet Root CA
-emailAddress=va3wam@gmail.com
-
-[v3_ca]
-subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid:always,issuer
-basicConstraints = critical, CA:TRUE
-keyUsage = critical, digitalSignature, cRLSign, keyCertSign
-subjectAltName = @alt_names
-
-[alt_names]
-DNS.1 = mitchellnet.local
-DNS.2 = *.mitchellnet.local
-DNS.3 = localhost
-IP.1 = 192.168.2.10
-IP.2 = 127.0.0.1
-EOF
-
-# Generate certificate (valid for 10 years)
-sudo openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
-  -keyout /etc/ssl/private/selfsigned.key \
-  -out /etc/ssl/certs/selfsigned.crt \
-  -config /tmp/openssl-ca.cnf
-
-# Verify certificate has CA flag and correct domains
-openssl x509 -in /etc/ssl/certs/selfsigned.crt -text -noout | grep -A 3 "CA:TRUE"
-openssl x509 -in /etc/ssl/certs/selfsigned.crt -text -noout | grep -A 6 "Subject Alternative Name"
-
-# Restart nginx to use new certificate
-cd /home/andrew/web_server
-docker-compose restart nginx-proxy
-
-# Exit server
-exit
-
-# Copy new certificate to repository
-ssh andrew@192.168.2.10 "cat /etc/ssl/certs/selfsigned.crt" > sslCertificates/mitchellnet-ca.crt
+# On the server: rename to the expected filenames and restart nginx
+ssh andrew@192.168.2.10 "cd /home/andrew/web_server/nginx/certs && \
+  mv mitchellnet.local+1.pem server.crt && \
+  mv mitchellnet.local+1-key.pem server.key && \
+  cd /home/andrew/web_server && docker compose restart nginx-proxy"
 ```
+
+> **Why mkcert?** After a browser update, Edge stopped trusting the old self-signed OpenSSL CA cert. mkcert registers its own root CA with the Mac's system keychain at install time, so certs it generates are automatically trusted by Safari, Chrome, and Edge without any manual keychain steps.
+
+> **If mkcert is not installed on your Mac:**
+> ```bash
+> brew install mkcert
+> mkcert -install   # registers mkcert CA with macOS keychain (one-time)
+> ```
 
 ### Production Server Nginx Configuration
 
@@ -1070,18 +1033,22 @@ For the certificate to work with both domain names and IP addresses, ensure ngin
 
 **Key Configuration Files:**
 - `/home/andrew/web_server/nginx/conf.d/prod.conf` - Main production config
-- `/home/andrew/web_server/nginx/conf.d/000-bareip.conf.off` - Disabled (was causing IP redirect issues)
+- `/home/andrew/web_server/nginx/conf.d/000-bareip.conf` - Bare IP access config
 
-**Important:** The `000-bareip.conf` file should remain disabled (`.off` extension) to allow direct IP access. This file was redirecting all IP address requests to `mitchellnet.local`, preventing iOS devices from accessing the site.
+Both files reference the mkcert cert at:
+- `ssl_certificate     /etc/nginx/ssl/server.crt;`
+- `ssl_certificate_key /etc/nginx/ssl/server.key;`
 
-**Current prod.conf configuration:**
+(The cert files live on the host at `/home/andrew/web_server/nginx/certs/` and are volume-mounted into the container as `/etc/nginx/ssl/`.)
+
+**Example prod.conf configuration:**
 ```nginx
 server {
     listen 443 ssl;
     server_name mitchellnet.local 192.168.2.10;  # Both domain and IP
     
-    ssl_certificate     /etc/nginx/ssl/selfsigned.crt;
-    ssl_certificate_key /etc/nginx/ssl/selfsigned.key;
+    ssl_certificate     /etc/nginx/ssl/server.crt;
+    ssl_certificate_key /etc/nginx/ssl/server.key;
     
     # ... rest of configuration
 }
@@ -1140,132 +1107,57 @@ server {
 
 ## 10. SSL Certificate Setup for macOS Devices
 
-The production server uses a self-signed SSL certificate. To prevent Safari and other browsers from showing security warnings on your Mac, install and trust the certificate in macOS Keychain.
+The production server now uses an **mkcert**-generated certificate. mkcert registers its own root CA with the Mac's system keychain at install time, so Safari, Chrome, and Edge all trust the cert automatically — no manual keychain steps needed.
 
-### Quick Installation
+> **Already working?** If your Mac browsers show a lock icon at https://mitchellnet.local and https://192.168.2.10, nothing to do here.
 
-The fastest way to install the certificate on macOS is via terminal:
-
-```bash
-# From the project root directory
-sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain sslCertificates/mitchellnet-ca.crt
-```
-
-This command:
-- Adds the certificate to the System keychain
-- Marks it as a trusted root certificate
-- Requires your macOS password
-- Takes effect immediately (no restart needed)
-
-**After installation:**
-- Safari, Chrome, and Edge will trust the certificate
-- No more security warnings when accessing https://mitchellnet.local or https://192.168.2.10
-
-### GUI Installation
-
-If you prefer using the graphical interface:
-
-#### Step 1: Open Keychain Access
+### One-Time Mac Setup (if mkcert not yet installed)
 
 ```bash
-open -a "Keychain Access"
+brew install mkcert
+mkcert -install   # adds mkcert's CA to macOS Keychain — one time only
 ```
 
-Or find it in Applications → Utilities → Keychain Access
-
-#### Step 2: Import Certificate
-
-**Option A: Drag and Drop**
-1. Navigate to `sslCertificates/mitchellnet-ca.crt` in Finder
-2. Drag the `.crt` file into the Keychain Access window
-3. Select **System** keychain when prompted
-4. Enter your password
-
-**Option B: Import Menu**
-1. In Keychain Access, select **File → Import Items**
-2. Navigate to `sslCertificates/mitchellnet-ca.crt`
-3. Select **System** keychain as the destination
-4. Click **Open**
-5. Enter your password
-
-#### Step 3: Trust the Certificate
-
-1. In Keychain Access, make sure **System** keychain is selected (left sidebar)
-2. Find **"MitchellNet Root CA"** in the certificate list
-3. Double-click the certificate to open it
-4. Expand the **Trust** section
-5. Change **"When using this certificate"** to **"Always Trust"**
-6. Close the window
-7. Enter your password when prompted
+After this, any cert generated by `mkcert` on this Mac is automatically trusted by Safari, Chrome, and Edge.
 
 ### Verification
 
-Verify the certificate is properly installed and trusted:
-
 ```bash
-# Check if certificate exists in System keychain
-security find-certificate -c "MitchellNet Root CA" -a /Library/Keychains/System.keychain
-
-# Verify SSL connection (should show "Verify return code: 0 (ok)")
-openssl s_client -connect 192.168.2.10:443 -CAfile sslCertificates/mitchellnet-ca.crt < /dev/null
+# Verify SSL connection to the server (should show "Verify return code: 0 (ok)")
+openssl s_client -connect 192.168.2.10:443 < /dev/null 2>/dev/null | grep -E "Verify return|subject"
 ```
 
 **Test in browser:**
-1. Open Safari (or Chrome/Edge)
+1. Open Safari, Chrome, or Edge
 2. Navigate to https://mitchellnet.local or https://192.168.2.10
-3. Check the address bar - should show a lock icon (🔒) with no warnings
-4. Click the lock icon → Certificate should show as valid
+3. The address bar should show a lock icon with no warnings
 
 ### Troubleshooting macOS Certificate Issues
 
-**Problem:** Safari still shows "Not Secure" warning
+**Problem:** Edge (or another browser) suddenly shows "Not Secure" after a browser update
+
+**Solution:** The cert is probably still valid but the browser's trust model changed. Renew the cert using mkcert — see the "Renewing the Certificate" section above (section 9). This happened in April 2026 after an Edge update broke trust for the old self-signed CA.
+
+**Problem:** Browser shows "Not Secure" and mkcert is installed
 
 **Solutions:**
-1. Verify certificate is in **System** keychain (not Login keychain)
-2. Check trust settings: Should be "Always Trust"
-3. Clear browser cache: Safari → Preferences → Privacy → Manage Website Data → Remove All
-4. Restart Safari
-5. Check that you installed the correct certificate (`mitchellnet-ca.crt`, not `dev.crt`)
-
-**Problem:** Certificate appears but trust settings are grayed out
-
-**Solutions:**
-1. Make sure you opened the certificate in the **System** keychain
-2. Try removing and reinstalling with the terminal command (requires sudo)
-3. Check System Preferences → Security & Privacy - you may need to unlock settings
-
-**Problem:** Terminal command fails with permission denied
-
-**Solutions:**
-1. Ensure you're using `sudo` with the command
-2. Enter your macOS administrator password when prompted
-3. If still failing, try the GUI method instead
+1. Check mkcert CA is still in Keychain: `mkcert -CAROOT` then verify that path exists
+2. Re-run `mkcert -install` to re-register the CA
+3. Renew the server cert (see section 9 — Renewing the Certificate)
+4. Clear browser cache and restart the browser
 
 **Problem:** Firefox still shows warnings
 
 **Solutions:**
 - Firefox uses its own certificate store, separate from macOS Keychain
 - Option 1: Accept the certificate exception in Firefox (click "Advanced" → "Accept Risk")
-- Option 2: Import certificate directly into Firefox:
-  1. Firefox → Preferences → Privacy & Security
-  2. Scroll to **Certificates** → Click **View Certificates**
-  3. Go to **Authorities** tab
-  4. Click **Import**
-  5. Select `sslCertificates/mitchellnet-ca.crt`
-  6. Check "Trust this CA to identify websites"
-  7. Click **OK**
-
-**To remove the certificate (if needed):**
-
-```bash
-# Terminal method
-sudo security delete-certificate -c "MitchellNet Root CA" /Library/Keychains/System.keychain
-
-# Or use Keychain Access GUI:
-# 1. Find "MitchellNet Root CA" in System keychain
-# 2. Right-click → Delete
-# 3. Enter password to confirm
-```
+- Option 2: Import the mkcert CA into Firefox:
+  1. Find the mkcert CA file: `mkcert -CAROOT` (shows directory; look for `rootCA.pem`)
+  2. Firefox → Preferences → Privacy & Security
+  3. Scroll to **Certificates** → Click **View Certificates**
+  4. Go to **Authorities** tab → **Import**
+  5. Select `rootCA.pem` from the mkcert CA root directory
+  6. Check "Trust this CA to identify websites" → **OK**
 
 ---
 

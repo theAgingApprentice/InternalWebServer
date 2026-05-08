@@ -1,447 +1,94 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mac Studio — Windows App Setup Guide</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --bg: #0f0f0f;
-    --surface: #1a1a1a;
-    --surface2: #222222;
-    --border: #2e2e2e;
-    --accent: #e8d5b0;
-    --accent2: #7eb8c9;
-    --accent3: #c9907e;
-    --text: #e8e6e1;
-    --muted: #888;
-    --parallels: #7eb8c9;
-    --crossover: #c9907e;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 300;
-    line-height: 1.7;
-    min-height: 100vh;
-  }
-
-  /* Subtle grid texture */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
-    background-size: 48px 48px;
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  .wrap {
-    position: relative;
-    z-index: 1;
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 64px 32px 96px;
-  }
-
-  /* Header */
-  header {
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 48px;
-    margin-bottom: 64px;
-  }
-
-  .eyebrow {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 20px;
-  }
-
-  h1 {
-    font-family: 'DM Serif Display', serif;
-    font-size: clamp(36px, 6vw, 56px);
-    font-weight: 400;
-    line-height: 1.1;
-    color: var(--accent);
-    margin-bottom: 16px;
-  }
-
-  .subtitle {
-    color: var(--muted);
-    font-size: 15px;
-    max-width: 480px;
-  }
-
-  /* Section headings */
-  h2 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 26px;
-    font-weight: 400;
-    color: var(--accent);
-    margin-bottom: 24px;
-  }
-
-  h3 {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-
-  section {
-    margin-bottom: 64px;
-  }
-
-  p {
-    font-size: 15px;
-    color: #ccc;
-    margin-bottom: 16px;
-  }
-
-  /* App cards */
-  .app-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 40px;
-  }
-
-  @media (max-width: 600px) {
-    .app-cards { grid-template-columns: 1fr; }
-  }
-
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 28px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-  }
-
-  .card.parallels::before { background: var(--parallels); }
-  .card.crossover::before { background: var(--crossover); }
-
-  .card:hover {
-    border-color: #444;
-  }
-
-  .card-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-
-  .card.parallels .card-label { color: var(--parallels); }
-  .card.crossover .card-label { color: var(--crossover); }
-
-  .card h3 {
-    font-family: 'DM Serif Display', serif;
-    font-size: 22px;
-    letter-spacing: 0;
-    text-transform: none;
-    color: var(--text);
-    margin-bottom: 12px;
-  }
-
-  .card p {
-    font-size: 14px;
-    line-height: 1.65;
-    color: #aaa;
-    margin-bottom: 0;
-  }
-
-  /* Current use blocks */
-  .use-block {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-
-  .use-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .use-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .use-block.parallels .use-dot { background: var(--parallels); }
-  .use-block.crossover .use-dot { background: var(--crossover); }
-
-  .use-app {
-    font-family: 'DM Serif Display', serif;
-    font-size: 18px;
-    color: var(--text);
-  }
-
-  .use-via {
-    margin-left: auto;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .use-block.parallels .use-via { color: var(--parallels); }
-  .use-block.crossover .use-via { color: var(--crossover); }
-
-  .use-body {
-    padding: 20px 24px;
-    background: var(--surface);
-  }
-
-  .use-body p {
-    font-size: 14px;
-    color: #aaa;
-    margin-bottom: 0;
-  }
-
-  /* Comparison table */
-  .comparison {
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-
-  .comp-head {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .comp-head div {
-    padding: 14px 20px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  .comp-head div:not(:last-child) {
-    border-right: 1px solid var(--border);
-  }
-
-  .comp-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
-  }
-
-  .comp-row:last-child { border-bottom: none; }
-  .comp-row:hover { background: var(--surface2); }
-
-  .comp-row div {
-    padding: 14px 20px;
-    font-size: 13.5px;
-    color: #bbb;
-    line-height: 1.5;
-  }
-
-  .comp-row div:not(:last-child) {
-    border-right: 1px solid var(--border);
-  }
-
-  .comp-row div:first-child {
-    color: var(--muted);
-    font-size: 12px;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .yes { color: #7ec99b !important; }
-  .no  { color: var(--accent3) !important; }
-
-  /* Note box */
-  .note {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 4px 4px 0;
-    padding: 18px 22px;
-    font-size: 14px;
-    color: #aaa;
-    margin-top: 32px;
-  }
-
-  .note strong {
-    color: var(--accent);
-    font-weight: 500;
-  }
-
-  /* Footer */
-  footer {
-    border-top: 1px solid var(--border);
-    padding-top: 32px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    color: var(--muted);
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  /* Fade in */
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  header, section {
-    animation: fadeUp 0.5s ease both;
-  }
-
-  section:nth-child(2) { animation-delay: 0.08s; }
-  section:nth-child(3) { animation-delay: 0.14s; }
-  section:nth-child(4) { animation-delay: 0.20s; }
-</style>
+<!-- saved from url=(0053)file:///Users/andrewmitchell/Downloads/macStudio.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mac Studio — Windows App Setup</title>
+  <link rel="stylesheet" href="file:///css/style.css">
 </head>
+
 <body>
-<div class="wrap">
+  <!-- Environment Banner -->
+  <div id="env-banner" class="env-prod">
+  </div>
 
-  <header>
-    <div class="eyebrow">Mac Studio · Windows Apps Reference</div>
-    <h1>CrossOver &amp;<br>Parallels</h1>
-    <p class="subtitle">A personal reference guide to what each solution does, when to use it, and what you're currently running on each.</p>
-  </header>
+  <!-- Include Header -->
+  <div data-include="/header.html"></div>
 
-  <section>
-    <h2>What Each Solution Is</h2>
-    <div class="app-cards">
-      <div class="card parallels">
-        <div class="card-label">Virtual Machine</div>
-        <h3>Parallels</h3>
-        <p>Runs a full Windows 11 installation on your Mac. You get a complete Windows environment — its own desktop, file system, and settings — and Windows apps run inside it exactly as they would on a real Windows PC.</p>
-      </div>
-      <div class="card crossover">
-        <div class="card-label">Compatibility Layer</div>
-        <h3>CrossOver</h3>
-        <p>Translates Windows application calls into Mac-native ones in real time, inside lightweight isolated containers called "bottles." No full Windows OS required — faster and lighter than a VM, but not every app is compatible.</p>
-      </div>
-    </div>
-  </section>
+  <main class="content">
+    <section>
+      <h2>Mac Studio — CrossOver &amp; Parallels</h2>
+      <p>
+        A personal reference guide to running Windows applications on the Mac Studio M4 Max.
+        Two solutions are in use: <strong>Parallels</strong> (full Windows virtual machine) and
+        <strong>CrossOver</strong> (lightweight Windows compatibility layer). This document explains
+        what each does, what is currently running on each, and the general rule for deciding which
+        to use going forward.
+      </p>
 
-  <section>
-    <h2>What You're Currently Running</h2>
+      <h3>What Each Solution Is</h3>
 
-    <div class="use-block parallels">
-      <div class="use-header">
-        <div class="use-dot"></div>
-        <span class="use-app">Vectric Aspire</span>
-        <span class="use-via">via Parallels</span>
-      </div>
-      <div class="use-body">
-        <p>Your 3D relief carving and CNC toolpath design tool, displayed full-screen on one monitor inside a Windows 11 VM. This is the right call: Aspire relies heavily on 3D viewport rendering and gadgets (like the dog-bone fillet tool) that have known issues in CrossOver. Complex professional apps like this need a fully faithful Windows environment.</p>
-      </div>
-    </div>
+      <h4>Parallels — Full Virtual Machine</h4>
+      <p>
+        Parallels runs a complete Windows 11 installation on your Mac. You get an entire Windows
+        environment with its own desktop, file system, and settings. Windows apps run inside it
+        exactly as they would on a real Windows PC. It is the safest compatibility option but
+        carries more overhead since it boots and maintains a full OS.
+      </p>
 
-    <div class="use-block crossover">
-      <div class="use-header">
-        <div class="use-dot"></div>
-        <span class="use-app">Steam + Hogwarts Legacy</span>
-        <span class="use-via">via CrossOver</span>
-      </div>
-      <div class="use-body">
-        <p>Steam is installed inside a CrossOver bottle, with Hogwarts Legacy installed through it. CrossOver was the better choice here because Parallels has known DirectX 12 issues on Apple Silicon, while CrossOver handles the game well — around 45 FPS baseline, nearly doubling with frame generation enabled.</p>
-      </div>
-    </div>
-  </section>
+      <h4>CrossOver — Compatibility Layer</h4>
+      <p>
+        CrossOver (made by CodeWeavers, built on Wine) translates Windows application calls into
+        Mac-native ones in real time, inside lightweight isolated containers called "bottles."
+        No full Windows OS is required — it is faster to launch and uses fewer resources than a VM,
+        but not every Windows app is compatible. Check the
+        <a href="https://www.codeweavers.com/compatibility" target="_blank">CrossOver compatibility database</a>
+        before committing a new app to it.
+      </p>
 
-  <section>
-    <h2>The General Rule Going Forward</h2>
-    <div class="comparison">
-      <div class="comp-head">
-        <div>Situation</div>
-        <div>Parallels</div>
-        <div>CrossOver</div>
-      </div>
-      <div class="comp-row">
-        <div>Complex/professional apps</div>
-        <div class="yes">✓ Preferred</div>
-        <div class="no">✗ Risky</div>
-      </div>
-      <div class="comp-row">
-        <div>3D viewports &amp; gadgets/plugins</div>
-        <div class="yes">✓ Preferred</div>
-        <div class="no">✗ Known issues</div>
-      </div>
-      <div class="comp-row">
-        <div>Full Windows OS access needed</div>
-        <div class="yes">✓ Preferred</div>
-        <div class="no">✗ Not available</div>
-      </div>
-      <div class="comp-row">
-        <div>Unknown compatibility</div>
-        <div class="yes">✓ Safety net</div>
-        <div>Check list first</div>
-      </div>
-      <div class="comp-row">
-        <div>Steam / PC gaming</div>
-        <div class="no">✗ DirectX 12 issues</div>
-        <div class="yes">✓ Preferred</div>
-      </div>
-      <div class="comp-row">
-        <div>Self-contained apps</div>
-        <div>Works fine</div>
-        <div class="yes">✓ Lower overhead</div>
-      </div>
-      <div class="comp-row">
-        <div>Resource usage</div>
-        <div class="no">Heavier (full VM)</div>
-        <div class="yes">Lighter (no OS)</div>
-      </div>
-      <div class="comp-row">
-        <div>Running simultaneously</div>
-        <div class="yes">✓ No conflict</div>
-        <div class="yes">✓ No conflict</div>
-      </div>
-    </div>
+      <h3>What Is Currently Running on Each</h3>
 
-    <div class="note">
-      <strong>Your M4 Max with 36 GB RAM</strong> can run both Parallels and CrossOver simultaneously without performance issues — most Macs would struggle, but yours is well-specced for it. Aspire on one monitor, gaming on the other is a perfectly valid setup.
-    </div>
-  </section>
+      <h4>Vectric Aspire — via Parallels</h4>
+      <p>
+        Aspire is the 3D relief carving and CNC toolpath design tool, displayed full-screen on one
+        monitor inside the Windows 11 VM. Parallels is the correct choice here: Aspire relies heavily
+        on 3D viewport rendering and gadgets (such as the dog-bone fillet tool) that have known
+        compatibility problems in CrossOver. Complex professional design software like this needs a
+        fully faithful Windows environment.
+      </p>
 
-  <footer>
-    <span>Mac Studio · M4 Max · 36 GB</span>
-    <span>Generated May 2026</span>
-  </footer>
+      <h4>Steam + Hogwarts Legacy — via CrossOver</h4>
+      <p>
+        Steam is installed inside a CrossOver bottle, with Hogwarts Legacy installed through it.
+        CrossOver is the better choice for gaming on Apple Silicon because Parallels has known
+        DirectX 12 issues that cause problems with this title. CrossOver handles it well —
+        approximately 45 FPS at baseline, with frame generation nearly doubling that figure.
+        Other Steam games can be added to the same CrossOver bottle.
+      </p>
 
-</div>
-</body>
-</html>
+      <h3>General Rule — Which to Use Going Forward</h3>
+      <ul>
+        <li><strong>Use Parallels</strong> for complex or professional applications (CAD, accounting, creative tools), anything that uses 3D viewports or plugins/gadgets, anything that needs full Windows OS access, and any app of unknown compatibility where you need a reliable safety net.</li>
+        <li><strong>Use CrossOver</strong> for Steam games and PC gaming generally, self-contained apps that are confirmed on the compatibility list, and any situation where lower resource overhead matters.</li>
+        <li><strong>Both can run simultaneously</strong> without conflict. The M4 Max with 36 GB RAM handles both running at the same time without performance issues — Aspire on one monitor in Parallels and a game in CrossOver on the other is a valid everyday setup.</li>
+      </ul>
+
+      <h3>Quick Reference</h3>
+      <ul>
+        <li><strong>Parallels website:</strong> <a href="https://www.parallels.com/" target="_blank">parallels.com</a></li>
+        <li><strong>CrossOver website:</strong> <a href="https://www.codeweavers.com/crossover" target="_blank">codeweavers.com/crossover</a></li>
+        <li><strong>CrossOver compatibility database:</strong> <a href="https://www.codeweavers.com/compatibility" target="_blank">codeweavers.com/compatibility</a></li>
+        <li><strong>Hardware:</strong> Mac Studio · M4 Max · 36 GB unified memory</li>
+      </ul>
+
+    </section>
+  </main>
+
+  <!-- Include Footer -->
+  <div data-include="/footer.html"></div>
+
+  <!-- Scripts -->
+  <script src="file:///js/includes.js" defer=""></script>
+
+
+</body></html>

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- saved from url=(0053)file:///Users/andrewmitchell/Downloads/macStudio.html -->
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mac Studio — Windows App Setup</title>
-  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 
 <body>
@@ -66,6 +66,18 @@
         Other Steam games can be added to the same CrossOver bottle.
       </p>
 
+      <h4>QSPICE — via Parallels</h4>
+      <p>
+        QSPICE is a professional-grade SPICE circuit simulator made by Qorvo (created by Mike
+        Engelhardt, the original author of LTspice). It is Windows-only and runs cleanly inside
+        the Parallels Windows 11 VM. QSPICE is used for serious electronics simulation work
+        including RC/RL transient analysis, frequency sweep and Bode plots, and AC/DC circuit
+        behaviour. Download from <a href="https://www.qorvo.com/design-hub/design-tools/interactive/qspice" target="_blank">qorvo.com</a>
+        and install it inside Windows exactly as you would on a real Windows PC. Save circuit
+        files (.qsch) to your Mac Documents folder via the shared drive that Parallels makes
+        visible inside Windows Explorer under "This PC."
+      </p>
+
       <h3>General Rule — Which to Use Going Forward</h3>
       <ul>
         <li><strong>Use Parallels</strong> for complex or professional applications (CAD, accounting, creative tools), anything that uses 3D viewports or plugins/gadgets, anything that needs full Windows OS access, and any app of unknown compatibility where you need a reliable safety net.</li>
@@ -81,6 +93,135 @@
         <li><strong>Hardware:</strong> Mac Studio · M4 Max · 36 GB unified memory</li>
       </ul>
 
+      <!-- ============================================================ -->
+      <h3>Electronics Simulators</h3>
+      <p>
+        Three circuit simulators are in use, each suited to a different level of complexity and
+        use case. The general progression is: start with Falstad for quick visual intuition, step
+        up to EveryCircuit for interactive learning with proper Bode plots, and use QSPICE for
+        serious SPICE-class analysis.
+      </p>
+
+      <h4>Falstad CircuitJS — Browser (No Install)</h4>
+      <p>
+        Falstad runs entirely in your Mac browser — no installation, no account, no cost. It is
+        the best tool for quick visual sketching and building intuition about how a circuit behaves.
+        Electricity is animated in real time: moving yellow dots show current flow, green indicates
+        positive voltage, red is negative, and gray is ground. An oscilloscope probe can be attached
+        to any wire with a right-click to show live waveforms.
+      </p>
+      <p>
+        <strong>Best for:</strong> quick sketches, visualising AC/DC coexistence, bias tee and
+        RC/RL circuits where animated current flow helps understanding. Not suitable for Bode plots,
+        precise frequency sweeps, or mixed-signal work.
+      </p>
+      <ul>
+        <li><strong>How to run:</strong> open in any browser on your Mac — no setup required.</li>
+        <li><strong>URL:</strong> <a href="https://www.falstad.com/circuit/circuitjs.html" target="_blank">falstad.com/circuit/circuitjs.html</a></li>
+        <li><strong>Cost:</strong> free.</li>
+      </ul>
+
+      <h4>EveryCircuit — Browser or iOS App (No Install)</h4>
+      <p>
+        EveryCircuit is a step up from Falstad in analytical capability while remaining visually
+        approachable. It runs natively on your Mac in two ways: as a web app in Chrome at
+        <a href="https://everycircuit.com/app" target="_blank">everycircuit.com/app</a>, or as
+        the iOS app installed directly from the Mac App Store (your M4 Max supports iOS apps
+        natively — no Parallels needed). It adds proper frequency sweep and Bode plot support,
+        interactive component value sliders, and cloud save with sync across devices.
+      </p>
+      <p>
+        <strong>Best for:</strong> RC/RL filter characterisation, interactive exploration of
+        component values, and work that benefits from animated visualisation combined with
+        proper AC analysis. Ceiling is lower than QSPICE — complex mixed-signal or precision
+        SPICE work will eventually need QSPICE instead.
+      </p>
+      <ul>
+        <li><strong>How to run on Mac:</strong> browser at everycircuit.com/app (Chrome), or install iOS app from Mac App Store. No Parallels required.</li>
+        <li><strong>Also available on:</strong> iPad and iPhone (synced via account).</li>
+        <li><strong>URL:</strong> <a href="https://everycircuit.com" target="_blank">everycircuit.com</a></li>
+        <li><strong>Cost:</strong> free with circuit size limits; full unlock ~$14.99 one-time (unlocks all platforms simultaneously).</li>
+      </ul>
+
+      <h4>QSPICE — Windows via Parallels</h4>
+      <p>
+        QSPICE is a full professional SPICE simulator — the same class of tool used by working
+        electronics engineers. It was created by Mike Engelhardt (original author of LTspice) and
+        is published free by Qorvo. It is Windows-only and runs inside the Parallels Windows 11 VM.
+      </p>
+      <p>
+        <strong>Best for:</strong> RC/RL time-constant transient analysis, frequency sweep and
+        Bode plot generation, AC analysis of filter circuits, mixed-signal simulation, and any
+        work that needs accurate SPICE-level mathematics. This is the right tool once Falstad or
+        EveryCircuit feel limiting. QSPICE saves circuits as <code>.qsch</code> files and
+        also accepts standard SPICE netlist <code>.cir</code> files.
+      </p>
+      <ul>
+        <li><strong>How to run:</strong> start the Parallels Windows 11 VM, download the installer from the Qorvo website inside Windows, and install normally. No CrossOver needed — Parallels gives it a complete Windows environment.</li>
+        <li><strong>Saving files:</strong> save <code>.qsch</code> project files to your Mac Documents folder via the shared drive visible in Windows Explorer under "This PC." This keeps circuit files on the Mac side, included in Time Machine backups.</li>
+        <li><strong>SCPI integration:</strong> for automated test sequences, Python scripts on the Mac can drive the bench instruments (oscilloscope, signal generator, DMM, power supply) via SCPI/LXI while QSPICE runs the corresponding simulation — compare real bench results against the SPICE model.</li>
+        <li><strong>URL:</strong> <a href="https://www.qorvo.com/design-hub/design-tools/interactive/qspice" target="_blank">qorvo.com — QSPICE</a></li>
+        <li><strong>Cost:</strong> free.</li>
+      </ul>
+
+      <h4>Simulator Comparison Summary</h4>
+      <table style="width:100%; border-collapse:collapse; font-size:0.9em; margin-top:8px;">
+        <tr style="background:#f3f4f6;">
+          <th style="border:1px solid #d1d5db; padding:8px 12px; text-align:left;">Feature</th>
+          <th style="border:1px solid #d1d5db; padding:8px 12px; text-align:left;">Falstad</th>
+          <th style="border:1px solid #d1d5db; padding:8px 12px; text-align:left;">EveryCircuit</th>
+          <th style="border:1px solid #d1d5db; padding:8px 12px; text-align:left;">QSPICE</th>
+        </tr>
+        <tr>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Runs on Mac natively</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Browser</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Browser / iOS app</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Parallels required</td>
+        </tr>
+        <tr style="background:#f9fafb;">
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Animated current flow</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Excellent</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Good</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">— Waveform plots only</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Bode plots / freq sweep</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">— Limited</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Yes</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Full AC analysis</td>
+        </tr>
+        <tr style="background:#f9fafb;">
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">True SPICE engine</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">— Approximate</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">— Near-SPICE</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Full SPICE</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">RC / RL transient</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Visual</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Good</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Precise</td>
+        </tr>
+        <tr style="background:#f9fafb;">
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Save / recall circuits</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">URL export</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ Cloud sync</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">✓ .qsch / .cir files</td>
+        </tr>
+        <tr>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Cost</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Free</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Free / $14.99 unlock</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Free</td>
+        </tr>
+        <tr style="background:#f9fafb;">
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Best use</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Quick sketching</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Interactive learning</td>
+          <td style="border:1px solid #e5e7eb; padding:8px 12px;">Serious analysis</td>
+        </tr>
+      </table>
+
     </section>
   </main>
 
@@ -88,7 +229,6 @@
   <div data-include="/footer.html"></div>
 
   <!-- Scripts -->
-  <script src="/js/includes.js" defer=""></script>
-
-
-</body></html>
+  <script src="/js/includes.js" defer></script>
+</body>
+</html>

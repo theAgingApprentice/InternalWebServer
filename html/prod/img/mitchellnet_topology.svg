@@ -1,0 +1,192 @@
+<svg viewBox="0 0 900 780" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#555"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#9ca3af"/>
+    </marker>
+    <marker id="arrow-orange" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#ea580c"/>
+    </marker>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#00000022"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="900" height="780" fill="#f8fafc"/>
+
+  <!-- Title -->
+  <text x="450" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="#1e293b">MitchellNET — Future Network Design v2.0</text>
+  <text x="450" y="48" text-anchor="middle" font-size="11" fill="#64748b">London, Ontario — High-Performance Segmented Network with Test Bench</text>
+
+  <!-- =================== INTERNET =================== -->
+  <ellipse cx="450" cy="90" rx="52" ry="28" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="87" text-anchor="middle" font-size="11" font-weight="bold" fill="#1d4ed8">INTERNET</text>
+  <text x="450" y="100" text-anchor="middle" font-size="9" fill="#3b82f6">Bell Fibre WAN</text>
+
+  <!-- =================== BELL HH3000 =================== -->
+  <rect x="350" y="135" width="200" height="40" rx="4" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="152" text-anchor="middle" font-size="11" font-weight="bold" fill="#854d0e">Bell HH3000</text>
+  <text x="450" y="166" text-anchor="middle" font-size="9" fill="#a16207">Bridge/PPPoE Passthrough</text>
+
+  <!-- Internet → Bell -->
+  <line x1="450" y1="118" x2="450" y2="135" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- =================== FIREWALL =================== -->
+  <rect x="330" y="210" width="240" height="44" rx="4" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="228" text-anchor="middle" font-size="11" font-weight="bold" fill="#991b1b">OPNsense Firewall</text>
+  <text x="450" y="243" text-anchor="middle" font-size="9" fill="#b91c1c">Netgate 6100 · DHCP/DNS · IDS/IPS · VLAN Gateway</text>
+
+  <!-- Bell → Firewall -->
+  <line x1="450" y1="175" x2="450" y2="210" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="460" y="196" font-size="8" fill="#6b7280">RJ45 Cat6</text>
+
+  <!-- =================== CORE SWITCH =================== -->
+  <rect x="295" y="290" width="310" height="44" rx="4" fill="#dcfce7" stroke="#16a34a" stroke-width="2" filter="url(#shadow)"/>
+  <text x="450" y="308" text-anchor="middle" font-size="11" font-weight="bold" fill="#14532d">MikroTik CRS317 — Core 10G Switch</text>
+  <text x="450" y="323" text-anchor="middle" font-size="9" fill="#166534">16x SFP+ (10GbE) · VLAN Trunk · SNMP · SwOS/RouterOS</text>
+
+  <!-- Firewall → Core Switch -->
+  <line x1="450" y1="254" x2="450" y2="290" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="460" y="275" font-size="8" fill="#2563eb">SFP+ DAC 10G</text>
+
+  <!-- =================== OOB SWITCH =================== -->
+  <rect x="690" y="290" width="175" height="44" rx="4" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="778" y="308" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">OOB Switch</text>
+  <text x="778" y="323" text-anchor="middle" font-size="9" fill="#4b5563">TP-Link TL-SG108E · 1GbE</text>
+
+  <!-- Firewall → OOB -->
+  <line x1="570" y1="232" x2="778" y2="290" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-gray)"/>
+  <text x="700" y="258" font-size="8" fill="#6b7280">Mgmt RJ45</text>
+
+  <!-- Core → OOB -->
+  <line x1="605" y1="312" x2="690" y2="312" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-gray)"/>
+  <text x="630" y="308" font-size="8" fill="#6b7280">Console</text>
+
+  <!-- =================== ROW: NAS, MAC STUDIO, UBUNTU =================== -->
+
+  <!-- NAS -->
+  <rect x="50" y="390" width="150" height="52" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="125" y="410" text-anchor="middle" font-size="11" font-weight="bold" fill="#4c1d95">NAS</text>
+  <text x="125" y="424" text-anchor="middle" font-size="9" fill="#5b21b6">10GbE Storage</text>
+  <text x="125" y="436" text-anchor="middle" font-size="9" fill="#5b21b6">VLAN 20 (Storage)</text>
+
+  <!-- Mac Studio -->
+  <rect x="230" y="390" width="150" height="52" rx="4" fill="#cffafe" stroke="#0891b2" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="305" y="410" text-anchor="middle" font-size="11" font-weight="bold" fill="#164e63">Mac Studio</text>
+  <text x="305" y="424" text-anchor="middle" font-size="9" fill="#0e7490">M4 Max · 36GB</text>
+  <text x="305" y="436" text-anchor="middle" font-size="9" fill="#0e7490">VLAN 20 (Storage)</text>
+
+  <!-- Ubuntu iMac -->
+  <rect x="410" y="390" width="165" height="52" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="493" y="407" text-anchor="middle" font-size="11" font-weight="bold" fill="#78350f">Ubuntu iMac Server</text>
+  <text x="493" y="421" text-anchor="middle" font-size="9" fill="#92400e">Nginx · Mosquitto · Grafana</text>
+  <text x="493" y="433" text-anchor="middle" font-size="9" fill="#92400e">Prometheus · LibreNMS</text>
+  <text x="493" y="444" text-anchor="middle" font-size="9" fill="#92400e">VLAN 10/40 (Mgmt/DMZ)</text>
+
+  <!-- UniFi APs -->
+  <rect x="600" y="390" width="140" height="52" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="670" y="408" text-anchor="middle" font-size="11" font-weight="bold" fill="#064e3b">UniFi APs</text>
+  <text x="670" y="422" text-anchor="middle" font-size="9" fill="#065f46">Main / IoT / Guest</text>
+  <text x="670" y="434" text-anchor="middle" font-size="9" fill="#065f46">VLAN 10/30/99</text>
+  <text x="670" y="444" text-anchor="middle" font-size="9" fill="#065f46">SSID → VLAN Trunk</text>
+
+  <!-- Core → NAS -->
+  <line x1="340" y1="334" x2="125" y2="390" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="195" y="358" font-size="8" fill="#2563eb">SFP+ 10G</text>
+
+  <!-- Core → Mac Studio -->
+  <line x1="380" y1="334" x2="305" y2="390" stroke="#2563eb" stroke-width="2" marker-end="url(#arrow-blue)"/>
+  <text x="315" y="368" font-size="8" fill="#2563eb">10G</text>
+
+  <!-- Core → Ubuntu -->
+  <line x1="450" y1="334" x2="475" y2="390" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="448" y="368" font-size="8" fill="#d97706">Cat6 1G</text>
+
+  <!-- Core → APs -->
+  <line x1="530" y1="334" x2="630" y2="390" stroke="#059669" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="568" y="358" font-size="8" fill="#059669">Cat6 Trunk</text>
+
+  <!-- NAS → OOB (IPMI) -->
+  <line x1="200" y1="416" x2="690" y2="320" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-gray)"/>
+  <text x="430" y="375" font-size="7" fill="#9ca3af">IPMI → OOB</text>
+
+  <!-- Ubuntu → OOB -->
+  <line x1="575" y1="416" x2="720" y2="334" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow-gray)"/>
+
+  <!-- =================== TEST BENCH SWITCH =================== -->
+  <rect x="50" y="510" width="210" height="44" rx="4" fill="#fce7f3" stroke="#db2777" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="155" y="528" text-anchor="middle" font-size="11" font-weight="bold" fill="#831843">Bench Switch</text>
+  <text x="155" y="543" text-anchor="middle" font-size="9" fill="#9d174d">Unmanaged GbE · Lab VLAN 50</text>
+
+  <!-- Core → Bench Switch -->
+  <line x1="310" y1="334" x2="155" y2="510" stroke="#db2777" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="195" y="430" font-size="8" fill="#db2777">Cat6 1G</text>
+
+  <!-- =================== TEST INSTRUMENTS =================== -->
+
+  <!-- Oscilloscope -->
+  <rect x="20" y="600" width="130" height="50" rx="4" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="85" y="618" text-anchor="middle" font-size="10" font-weight="bold" fill="#9f1239">Oscilloscope</text>
+  <text x="85" y="631" text-anchor="middle" font-size="8" fill="#be123c">Siglent SDS1202X-E</text>
+  <text x="85" y="643" text-anchor="middle" font-size="8" fill="#be123c">SCPI/LXI · Eth</text>
+
+  <!-- Signal Generator -->
+  <rect x="165" y="600" width="130" height="50" rx="4" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="230" y="618" text-anchor="middle" font-size="10" font-weight="bold" fill="#9f1239">Signal Gen</text>
+  <text x="230" y="631" text-anchor="middle" font-size="8" fill="#be123c">Siglent SDG-2042X</text>
+  <text x="230" y="643" text-anchor="middle" font-size="8" fill="#be123c">SCPI/LXI · Eth</text>
+
+  <!-- DMM -->
+  <rect x="310" y="600" width="130" height="50" rx="4" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="375" y="618" text-anchor="middle" font-size="10" font-weight="bold" fill="#9f1239">Multimeter</text>
+  <text x="375" y="631" text-anchor="middle" font-size="8" fill="#be123c">Siglent SDM3055</text>
+  <text x="375" y="643" text-anchor="middle" font-size="8" fill="#be123c">SCPI/LXI · Eth</text>
+
+  <!-- Power Supply -->
+  <rect x="455" y="600" width="130" height="50" rx="4" fill="#fff1f2" stroke="#f43f5e" stroke-width="1.2" filter="url(#shadow)"/>
+  <text x="520" y="618" text-anchor="middle" font-size="10" font-weight="bold" fill="#9f1239">DC Power Supply</text>
+  <text x="520" y="631" text-anchor="middle" font-size="8" fill="#be123c">Rigol DP832</text>
+  <text x="520" y="643" text-anchor="middle" font-size="8" fill="#be123c">SCPI/LXI · Eth</text>
+
+  <!-- Bench Switch → instruments -->
+  <line x1="85" y1="554" x2="85" y2="600" stroke="#f43f5e" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="130" y1="554" x2="230" y2="600" stroke="#f43f5e" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="155" y1="554" x2="375" y2="600" stroke="#f43f5e" stroke-width="1.2" marker-end="url(#arrow)"/>
+  <line x1="180" y1="554" x2="465" y2="600" stroke="#f43f5e" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+  <!-- Mac Studio ↔ Bench Switch (control path) -->
+  <line x1="230" y1="442" x2="155" y2="510" stroke="#db2777" stroke-width="1.2" stroke-dasharray="5,3" marker-end="url(#arrow)"/>
+  <text x="162" y="484" font-size="8" fill="#db2777">SCPI ctrl</text>
+
+  <!-- =================== LEGEND =================== -->
+  <rect x="620" y="470" width="248" height="160" rx="4" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+  <text x="744" y="488" text-anchor="middle" font-size="10" font-weight="bold" fill="#1e293b">Legend</text>
+
+  <line x1="635" y1="502" x2="665" y2="502" stroke="#2563eb" stroke-width="2"/>
+  <text x="672" y="506" font-size="9" fill="#374151">10GbE SFP+ / DAC</text>
+
+  <line x1="635" y1="518" x2="665" y2="518" stroke="#555" stroke-width="1.5"/>
+  <text x="672" y="522" font-size="9" fill="#374151">1GbE Cat6 (data)</text>
+
+  <line x1="635" y1="534" x2="665" y2="534" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="672" y="538" font-size="9" fill="#374151">OOB / Mgmt (1GbE)</text>
+
+  <line x1="635" y1="550" x2="665" y2="550" stroke="#db2777" stroke-width="1.5"/>
+  <text x="672" y="554" font-size="9" fill="#374151">Lab bench network</text>
+
+  <line x1="635" y1="566" x2="665" y2="566" stroke="#db2777" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="672" y="570" font-size="9" fill="#374151">SCPI remote control</text>
+
+  <line x1="635" y1="582" x2="665" y2="582" stroke="#059669" stroke-width="1.5"/>
+  <text x="672" y="586" font-size="9" fill="#374151">WiFi trunk (VLAN-tagged)</text>
+
+  <!-- VLAN Key -->
+  <text x="635" y="604" font-size="9" font-weight="bold" fill="#374151">VLANs:</text>
+  <text x="635" y="618" font-size="8" fill="#374151">10=Mgmt  20=Storage  30=IoT  40=DMZ  50=Lab  99=Guest</text>
+</svg>

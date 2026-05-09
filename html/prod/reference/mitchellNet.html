@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MitchellNET — Network Design v2.0</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    /* Local overrides for tables and diagrams — uses site's existing base styles */
+    .diagram-block {
+      margin: 24px 0;
+      text-align: center;
+    }
+    .diagram-block img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 4px;
+    }
+    .diagram-caption {
+      font-size: 0.85em;
+      color: #6b7280;
+      margin-top: 6px;
+      font-style: italic;
+    }
+    table.bom {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9em;
+      margin: 16px 0;
+    }
+    table.bom th {
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+    table.bom td {
+      border: 1px solid #e5e7eb;
+      padding: 8px 12px;
+      vertical-align: top;
+    }
+    table.bom tr:nth-child(even) td {
+      background: #f9fafb;
+    }
+    .checklist li {
+      margin-bottom: 6px;
+    }
+    .checklist li::marker {
+      content: "☐  ";
+    }
+    .vlan-tag {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 3px;
+      font-size: 0.8em;
+      font-weight: 600;
+      margin-right: 4px;
+    }
+    .vlan-10 { background:#e0f2fe; color:#0c4a6e; }
+    .vlan-20 { background:#ede9fe; color:#4c1d95; }
+    .vlan-30 { background:#fef3c7; color:#78350f; }
+    .vlan-40 { background:#fee2e2; color:#7f1d1d; }
+    .vlan-50 { background:#fce7f3; color:#831843; }
+    .vlan-99 { background:#f3f4f6; color:#374151; }
+    .warn { color: #b45309; font-weight: 600; }
+    code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
+    pre { background: #f3f4f6; padding: 14px; border-radius: 4px; overflow-x: auto; font-size: 0.88em; line-height: 1.6; }
+  </style>
+</head>
+
+<body>
+  <!-- Environment Banner -->
+  <div id="env-banner" class="env-prod"></div>
+
+  <!-- Include Header -->
+  <div data-include="/header.html"></div>
+
+  <main class="content">
+    <section>
+
+      <h2>MitchellNET — Home Network Design v2.0</h2>
+      <p>
+        This document is the master design specification for the MitchellNET home network rebuild.
+        It covers architecture, component roles, VLAN segmentation, the test bench ethernet integration,
+        bill of materials, deployment checklist, and rationale for all major decisions.
+        Location: London, Ontario, Canada.
+      </p>
+
+      <!-- ============================================================ -->
+      <h3>1. Architectural Overview</h3>
+      <p>
+        The design implements a high-performance, segmented network with two distinct planes:
+      </p>
+      <ul>
+        <li><strong>10Gbps Data Plane</strong> — connects the Mac Studio, NAS, and core infrastructure via SFP+ DAC cables through the MikroTik core switch for maximum throughput on video editing and storage workloads.</li>
+        <li><strong>1Gbps Management Plane (Out-of-Band)</strong> — a physically separate TP-Link switch provides a recovery lifeline to every device's management interface. Even if the core 10G network goes down or suffers a broadcast storm, the OOB rail remains reachable.</li>
+        <li><strong>1Gbps Lab Plane</strong> — a dedicated bench switch connects all four test instruments to the network, with a SCPI/LXI control path back to the Mac Studio on its own VLAN 50 segment.</li>
+      </ul>
+      <p>
+        Core services (DHCP, DNS, IDS/IPS, VLAN routing) live on the hardware firewall. Application-level
+        services (MQTT, reverse proxy, monitoring) run as Docker containers on the Ubuntu iMac server.
+      </p>
+
+      <div class="diagram-block">
+        <img src="/img/mitchellnet_topology.svg" alt="MitchellNET Network Topology Diagram"/>
+        <div class="diagram-caption">Figure 1 — MitchellNET full network topology including test bench</div>
+      </div>
+
+      <!-- ============================================================ -->
+      <h3>2. Component Roles &amp; Connections</h3>
+
+      <table class="bom">
+        <tr>
+          <th>Component</th>
+          <th>Primary Role</th>
+          <th>Data Connection</th>
+          <th>OOB / Mgmt Connection</th>
+        </tr>
+        <tr>
+          <td>Bell HH3000</td>
+          <td>ISP modem — PPPoE passthrough / bridge mode</td>
+          <td>RJ45 Cat6 → Firewall WAN</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>OPNsense Firewall (Netgate 6100)</td>
+          <td>Gateway, DHCP, DNS, IDS/IPS, VLAN routing</td>
+          <td>SFP+ 10G → Core Switch</td>
+          <td>RJ45 → OOB Switch</td>
+        </tr>
+        <tr>
+          <td>MikroTik CRS317</td>
+          <td>Core Layer 2/3 switching · 10GbE fabric</td>
+          <td>16x SFP+ (10G) — all devices</td>
+          <td>RJ45 console → OOB Switch</td>
+        </tr>
+        <tr>
+          <td>TP-Link TL-SG108E</td>
+          <td>Out-of-Band management rail</td>
+          <td>N/A (management only)</td>
+          <td>Self — all mgmt IPs land here</td>
+        </tr>
+        <tr>
+          <td>Ubuntu iMac Server (2019)</td>
+          <td>Nginx, Mosquitto MQTT, Grafana, Prometheus, LibreNMS, InfluxDB</td>
+          <td>RJ45 1G → Core Switch</td>
+          <td>USB–Ethernet adapter → OOB Switch</td>
+        </tr>
+        <tr>
+          <td>NAS</td>
+          <td>10GbE storage for video editing and backups</td>
+          <td>SFP+ 10G → Core Switch</td>
+          <td>IPMI port → OOB Switch</td>
+        </tr>
+        <tr>
+          <td>Mac Studio (M4 Max)</td>
+          <td>Primary workstation — video editing, CNC design, development</td>
+          <td>SFP+ 10G or 10G-BaseT → Core Switch</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>UniFi APs (U6 Pro)</td>
+          <td>VLAN-aware WiFi · multiple SSIDs mapped to VLANs</td>
+          <td>Cat6 trunk → Core Switch</td>
+          <td>N/A (managed by UniFi controller)</td>
+        </tr>
+        <tr>
+          <td>Bench Switch (unmanaged GbE)</td>
+          <td>Dedicated test bench LAN segment · VLAN 50</td>
+          <td>Cat6 1G → Core Switch</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>Siglent SDS1202X-E</td>
+          <td>Oscilloscope — SCPI/LXI remote control</td>
+          <td>RJ45 → Bench Switch</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>Siglent SDG-2042X</td>
+          <td>Signal generator — SCPI/LXI remote control</td>
+          <td>RJ45 → Bench Switch</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>Siglent SDM3055</td>
+          <td>Digital multimeter — SCPI/LXI remote control</td>
+          <td>RJ45 → Bench Switch</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>Rigol DP832</td>
+          <td>Programmable DC power supply — SCPI/LXI remote control</td>
+          <td>RJ45 → Bench Switch</td>
+          <td>N/A</td>
+        </tr>
+        <tr>
+          <td>Raspberry Pi 5</td>
+          <td>DMZ server — hardened, HTTPS inbound only</td>
+          <td>Cat6 1G → Core Switch</td>
+          <td>N/A</td>
+        </tr>
+      </table>
+
+      <!-- ============================================================ -->
+      <h3>3. VLAN Segmentation &amp; WiFi SSID Mapping</h3>
+      <p>
+        Every device lands on exactly one VLAN. OPNsense is the gateway for all VLANs and enforces
+        strict inter-VLAN firewall rules. The UniFi APs broadcast all SSIDs simultaneously — the SSID
+        a device connects to determines its VLAN, regardless of which physical AP it uses.
+      </p>
+
+      <ul>
+        <li><span class="vlan-tag vlan-10">VLAN 10</span> <strong>Management</strong> — 10.10.10.0/24. Infrastructure devices, OOB switch, management interfaces. Not reachable from other VLANs.</li>
+        <li><span class="vlan-tag vlan-20">VLAN 20</span> <strong>Storage</strong> — 10.10.20.0/24. Mac Studio and NAS only. MTU 9000 (jumbo frames) for maximum NFS/SMB throughput.</li>
+        <li><span class="vlan-tag vlan-30">VLAN 30</span> <strong>IoT</strong> — 10.10.30.0/24. ESP32 devices, smart home, seasonal devices (Christmas tree, candy cane pillars). Firewall allows only outbound to Mosquitto port 1883. Client isolation on the IoT SSID prevents device-to-device communication.</li>
+        <li><span class="vlan-tag vlan-40">VLAN 40</span> <strong>DMZ</strong> — 10.10.40.0/24. Raspberry Pi server. Inbound HTTPS only from internet. Cannot initiate connections to LAN.</li>
+        <li><span class="vlan-tag vlan-50">VLAN 50</span> <strong>Lab / Test Bench</strong> — 10.10.50.0/24. All four bench instruments (oscilloscope, signal generator, multimeter, power supply). Mac Studio permitted inbound SCPI connections on port 5025. No other LAN access.</li>
+        <li><span class="vlan-tag vlan-99">VLAN 99</span> <strong>Guest</strong> — 10.10.99.0/24. Internet access only. Fully blocked from all internal resources. Maps to <em>AgingApprentice-Guest</em> SSID.</li>
+      </ul>
+
+      <div class="diagram-block">
+        <img src="/img/mitchellnet_vlans.svg" alt="VLAN Segmentation and SSID Mapping Diagram"/>
+        <div class="diagram-caption">Figure 2 — VLAN segmentation, SSID-to-VLAN mapping, and inter-VLAN firewall rules</div>
+      </div>
+
+      <!-- ============================================================ -->
+      <h3>4. Test Bench — Ethernet Remote Control</h3>
+      <p>
+        All four bench instruments support remote control over ethernet using <strong>SCPI</strong>
+        (Standard Commands for Programmable Instruments) over the <strong>LXI</strong> (LAN eXtensions
+        for Instrumentation) standard. A dedicated unmanaged gigabit switch on the bench connects all
+        instruments and uplinks to the MikroTik core switch on <span class="vlan-tag vlan-50">VLAN 50</span>.
+        The Mac Studio is permitted to reach instrument SCPI ports (TCP 5025) from its VLAN 20 address
+        via a specific OPNsense firewall rule.
+      </p>
+
+      <h4>Software: LXI Tools</h4>
+      <p>
+        Install on Mac via Homebrew. Provides both a GUI and command-line tool for instrument discovery,
+        SCPI commands, screenshots, and data logging. All four instruments are on the confirmed
+        compatibility list.
+      </p>
+      <pre>brew install lxi-tools</pre>
+
+      <h4>What Each Instrument Supports Remotely</h4>
+      <ul>
+        <li><strong>Siglent SDS1202X-E (Oscilloscope)</strong> — capture screenshots to Mac, pull waveform data as files, set timebase/voltage/trigger remotely, automate measurements and log results, run headless data capture.</li>
+        <li><strong>Siglent SDG-2042X (Signal Generator)</strong> — set frequency, amplitude, waveform type, and DC offset; configure sweep sequences; save and recall waveform setups.</li>
+        <li><strong>Siglent SDM3055 (Multimeter)</strong> — <code>READ?</code> command returns live measurements; log voltage/current/resistance to CSV over time; automate repetitive measurements.</li>
+        <li><strong>Rigol DP832 (DC Power Supply)</strong> — set voltage and current limits precisely; enable/disable outputs under software control; log actual output over time; automate power sequencing.</li>
+      </ul>
+
+      <h4>Python Automation</h4>
+      <p>
+        The <code>pyvisa</code> library allows Python scripts on the Mac to control all four
+        instruments simultaneously for automated test sequences:
+      </p>
+      <pre>pip install pyvisa pyvisa-py</pre>
+      <p>
+        Example use case — RC time constant experiment: a single script tells the SDG to output a
+        0.2Hz square wave, the DP832 to hold exactly 5.000V, the SDM to log capacitor voltage every
+        100ms, and the SDS to capture a screenshot at the end — all without touching any front panel.
+      </p>
+
+      <!-- ============================================================ -->
+      <h3>5. Application Stack (Ubuntu iMac Server)</h3>
+      <p>
+        All services run as Docker containers on the 2019 iMac running Ubuntu Server.
+      </p>
+      <ul>
+        <li><strong>Nginx Reverse Proxy</strong> — entry point for external web services; traffic isolated to DMZ VLAN 40.</li>
+        <li><strong>Mosquitto MQTT Broker</strong> — logic hub for all IoT devices; firewall rules allow VLAN 30 devices to reach port 1883 only on this host.</li>
+        <li><strong>Grafana + Prometheus + InfluxDB</strong> — monitoring dashboards; Prometheus scrapes device metrics; InfluxDB stores time-series data from instruments and IoT devices.</li>
+        <li><strong>LibreNMS</strong> — polls the MikroTik switch and all network devices via SNMP over the OOB management rail; provides per-port traffic, SFP temperatures, and device health.</li>
+      </ul>
+      <ul>
+        <li><a href="http://192.168.2.10:3000/d/mitchellnet-health/mitchellnet-health-monitoring?orgId=1&from=now-90d&to=now&timezone=browser&refresh=5m" target="_blank">Grafana MitchellNET Health Dashboard</a></li>
+        <li><a href="http://192.168.2.10:9090/graph" target="_blank">Prometheus Console</a></li>
+        <li><a href="https://github.com/theAgingApprentice/InternalWebServer" target="_blank">Ubuntu iMac Server GitHub</a></li>
+      </ul>
+
+      <!-- ============================================================ -->
+      <h3>6. Firewall &amp; Security</h3>
+      <p>
+        <strong>OPNsense</strong> is recommended over pfSense for this build. It has native Suricata
+        integration with policy-based rule management, more frequent updates, a cleaner GUI, and
+        stronger community development. Key security features:
+      </p>
+      <ul>
+        <li><strong>Suricata IDS/IPS</strong> — runs in IPS mode with ET Open/Pro rules. Noisy rule categories (coin mining, DNS/TLS) are disabled to maintain throughput. Scheduled daily rule updates.</li>
+        <li><strong>Stateful packet inspection</strong> — all inter-VLAN traffic goes through the firewall; default-deny with explicit allow rules per VLAN.</li>
+        <li><strong>PPPoE passthrough</strong> — Bell HH3000 in bridge mode. OPNsense holds the public IP directly, eliminating double-NAT.</li>
+        <li><strong>VPN</strong> — WireGuard for remote access; AES-NI hardware offloading on the Netgate 6100 keeps VPN overhead minimal.</li>
+      </ul>
+
+      <h4>Key Firewall Rules Summary</h4>
+      <ul>
+        <li>VLAN 20 (Storage) → Any: <strong>allow</strong>. Mac Studio and NAS communicate freely.</li>
+        <li>VLAN 30 (IoT) → Mosquitto port 1883 only: <strong>restricted</strong>. All other IoT traffic blocked.</li>
+        <li>VLAN 40 (DMZ) → LAN: <strong>blocked</strong>. Inbound HTTPS 443 from internet permitted; Pi cannot reach LAN.</li>
+        <li>VLAN 50 (Lab) → Mac Studio SCPI port 5025 only: <strong>restricted</strong>. Instruments isolated from all other network segments.</li>
+        <li>VLAN 99 (Guest) → LAN: <strong>blocked</strong>. Internet only.</li>
+      </ul>
+
+      <!-- ============================================================ -->
+      <h3>7. Rack Elevation</h3>
+
+      <div class="diagram-block">
+        <img src="/img/mitchellnet_rack.svg" alt="MitchellNET Rack Elevation Diagram"/>
+        <div class="diagram-caption">Figure 3 — Rack elevation showing all 1RU and 2RU components. Bell HH3000, Mac Studio, UniFi APs, and bench switch/instruments are off-rack.</div>
+      </div>
+
+      <!-- ============================================================ -->
+      <h3>8. Bill of Materials — Canada</h3>
+
+      <table class="bom">
+        <tr>
+          <th>Component</th>
+          <th>Recommendation</th>
+          <th>Notes</th>
+          <th>Source</th>
+        </tr>
+        <tr>
+          <td>Firewall Appliance</td>
+          <td>Netgate 6100 (SFP+ ports) <em>or</em> Protectli Vault i5</td>
+          <td>AES-NI, QAT, fanless, IDS/IPS at line rate. Netgate ships with OPNsense-compatible hardware.</td>
+          <td>DeployDepot.ca</td>
+        </tr>
+        <tr>
+          <td>Core Switch</td>
+          <td>MikroTik CRS317-1G-16S+RM</td>
+          <td>16x SFP+ 10GbE, VLAN trunk, SNMP, SwOS/RouterOS. ~$600–700 CAD. Silent under normal load.</td>
+          <td>MikroTikCanada.ca</td>
+        </tr>
+        <tr>
+          <td>OOB Switch</td>
+          <td>TP-Link TL-SG108E (Easy Smart)</td>
+          <td>8-port 1GbE managed. Dedicated management rail. Low power, set-and-forget.</td>
+          <td>Amazon.ca</td>
+        </tr>
+        <tr>
+          <td>SFP+ DAC Cables</td>
+          <td>10Gtek Passive DAC (1m / 2m)</td>
+          <td>Lower latency and cooler than 10G-BaseT RJ45 transceivers. Cost-effective for short rack runs.</td>
+          <td>Amazon.ca</td>
+        </tr>
+        <tr>
+          <td>Mac Studio 10G Adapter</td>
+          <td>10Gtek SFP+ to RJ45 transceiver <em>or</em> Sonnet Solo 10G Thunderbolt</td>
+          <td>Required if Mac Studio does not have native SFP+ port.</td>
+          <td>Amazon.ca</td>
+        </tr>
+        <tr>
+          <td>OOB USB Adapter</td>
+          <td>Anker or StarTech USB 3.0 to Gigabit Ethernet</td>
+          <td>Second NIC for Ubuntu iMac onto OOB rail.</td>
+          <td>Amazon.ca</td>
+        </tr>
+        <tr>
+          <td>NAS</td>
+          <td>Synology DS1823xs+ or QNAP TVS-h874 with 10GbE</td>
+          <td>SFP+ for 10G data; IPMI for OOB. SSD cache recommended for sustained throughput.</td>
+          <td>B&amp;H / Amazon.ca</td>
+        </tr>
+        <tr>
+          <td>WiFi Access Points</td>
+          <td>Ubiquiti UniFi U6 Pro (×3)</td>
+          <td>VLAN-aware. Multiple SSIDs mapped to VLANs. Managed via free UniFi Network Application (Docker on iMac).</td>
+          <td>Amazon.ca / Ubiquiti</td>
+        </tr>
+        <tr>
+          <td>Bench Switch</td>
+          <td>Any unmanaged 8-port GbE switch</td>
+          <td>Dedicated to test instruments. Uplinks to MikroTik core on VLAN 50.</td>
+          <td>Amazon.ca</td>
+        </tr>
+        <tr>
+          <td>Raspberry Pi 5</td>
+          <td>Raspberry Pi 5 (4GB or 8GB)</td>
+          <td>DMZ server. Hardened Ubuntu; HTTPS inbound only via OPNsense NAT rule.</td>
+          <td>PiShop.ca</td>
+        </tr>
+        <tr>
+          <td>Cabling</td>
+          <td>CAT6a (for 10G-BaseT runs) / CAT6 (for 1G runs)</td>
+          <td>CAT6a required for stable 10G over copper longer than 1m. DAC cables used inside rack.</td>
+          <td>Amazon.ca / local</td>
+        </tr>
+      </table>
+
+      <!-- ============================================================ -->
+      <h3>9. Key Design Decisions — Rationale</h3>
+
+      <h4>MikroTik CRS317 vs. Enterprise Alternatives</h4>
+      <p>
+        Enterprise 16-port 10GbE switches (Cisco, Juniper, Arista) cost $3,000–$5,000 CAD and are
+        loud enough to be a dealbreaker in a home office. The CRS317 delivers wire-speed 10GbE
+        switching for ~$650 CAD with intelligent fan control (quiet or off under normal video editing
+        loads), dual-boot SwOS/RouterOS flexibility, and deep SNMP telemetry ideal for Grafana dashboards.
+        It draws 20–40W vs. 150W+ for older enterprise hardware — meaningful in Ontario where hydro
+        costs are variable. <span class="warn">Note:</span> MikroTik's interface is engineer-first with a steeper
+        learning curve than Ubiquiti. Familiarity with Docker and OPNsense helps significantly.
+      </p>
+
+      <h4>OPNsense vs. pfSense</h4>
+      <p>
+        OPNsense is the stronger choice for this build in 2025–2026: native Suricata integration with
+        policy-based rule management, more frequent security updates, a modern GUI, and active
+        community development without the commercial pressures that have complicated pfSense/Netgate's
+        relationship with the community. Both are capable — pfSense remains solid if its documentation
+        or WireGuard implementation is preferred.
+      </p>
+
+      <h4>DAC Cables vs. 10G-BaseT</h4>
+      <p>
+        Direct Attach Copper (DAC) cables have lower latency, consume less power, and stay cool
+        compared to 10G-BaseT (RJ45) transceivers. RJ45 10GbE modules can reach temperatures that
+        cause thermal throttling during long renders. For all rack-internal connections DAC is
+        preferred; 10G-BaseT adapters are used only where a device (Mac Studio) lacks an SFP+ port.
+      </p>
+
+      <h4>Dedicated Bench Switch for Test Instruments</h4>
+      <p>
+        A separate switch for the test bench keeps instrument traffic isolated on VLAN 50 and
+        provides a clean physical boundary between the lab and the main network. The OPNsense
+        firewall enforces that only the Mac Studio can reach instrument SCPI ports, preventing any
+        other device from accidentally interacting with the bench equipment. This also makes it easy
+        to add future instruments without touching the core switch configuration.
+      </p>
+
+      <!-- ============================================================ -->
+      <h3>10. Day 1 Deployment Checklist</h3>
+
+      <h4>Phase 1 — Bench Prep &amp; Physical Labelling</h4>
+      <ul class="checklist">
+        <li>Unbox and inspect all hardware. Verify power cables, mounting ears, and SFP+ modules.</li>
+        <li>Label every cable with a label maker before installation (e.g. CORE-TO-NAS, OOB-TO-FIREWALL, BENCH-TO-CORE).</li>
+        <li>Update firmware on each device (Firewall, Core Switch, OOB Switch) via existing internet before complex configuration begins.</li>
+      </ul>
+
+      <h4>Phase 2 — OOB Management Rail (Safety Net First)</h4>
+      <ul class="checklist">
+        <li>Initialize TP-Link OOB switch. Set static management IP: 10.10.10.2.</li>
+        <li>Connect MikroTik console/MGMT port → OOB Switch.</li>
+        <li>Connect NAS IPMI port → OOB Switch.</li>
+        <li>Connect Firewall MGMT NIC → OOB Switch.</li>
+        <li>Connect Ubuntu iMac USB–Ethernet adapter → OOB Switch.</li>
+        <li>Test: laptop on OOB switch can ping all management interfaces. Do not proceed until all devices have a lifeline.</li>
+      </ul>
+
+      <h4>Phase 3 — Core VLAN &amp; Data Plane</h4>
+      <ul class="checklist">
+        <li>Define VLANs on OPNsense: VLAN 10 (10.10.10.1/24), VLAN 20 (10.10.20.1/24, MTU 9000), VLAN 30 (10.10.30.1/24), VLAN 40 (10.10.40.1/24), VLAN 50 (10.10.50.1/24), VLAN 99 (10.10.99.1/24).</li>
+        <li>Configure SFP+ firewall ↔ MikroTik port as VLAN trunk (tagged for all VLANs).</li>
+        <li>Set MikroTik ports for NAS and Mac Studio to access mode — untagged on VLAN 20.</li>
+        <li>Set MikroTik port for bench switch to access mode — untagged on VLAN 50.</li>
+        <li>Configure MikroTik trunk port to UniFi APs (tagged for VLANs 10, 30, 99).</li>
+      </ul>
+
+      <h4>Phase 4 — ISP Integration</h4>
+      <ul class="checklist">
+        <li>Input Bell b1xxxxxx PPPoE credentials into OPNsense WAN interface.</li>
+        <li>Verify OPNsense shows a public IP address (not 192.168.x.x — that means double-NAT).</li>
+        <li>Disable Bell HH3000 WiFi, DHCP, and UPnP completely.</li>
+      </ul>
+
+      <h4>Phase 5 — Service Migration</h4>
+      <ul class="checklist">
+        <li>Assign Ubuntu iMac a static IP on VLAN 10 (management).</li>
+        <li>Verify Nginx serves one test site reachable from the internet via public IP.</li>
+        <li>Verify LibreNMS successfully polls MikroTik via SNMP over OOB rail.</li>
+        <li>Verify Grafana/Prometheus dashboards are reachable from Mac Studio.</li>
+      </ul>
+
+      <h4>Phase 6 — Test Bench Integration</h4>
+      <ul class="checklist">
+        <li>Enable DHCP on each instrument: Utility → I/O → LAN → DHCP on.</li>
+        <li>Note each instrument's assigned IP from its front panel menu.</li>
+        <li>Verify each instrument's built-in web interface loads in Mac browser.</li>
+        <li>Install LXI Tools on Mac: <code>brew install lxi-tools</code>.</li>
+        <li>Run LXI Tools discovery scan — all four instruments should appear.</li>
+        <li>Add OPNsense firewall rule: VLAN 20 (Mac Studio) → VLAN 50 (instruments) port 5025 allow.</li>
+      </ul>
+
+      <!-- ============================================================ -->
+      <h3>11. Risks &amp; Key Considerations</h3>
+      <ul>
+        <li><span class="warn">Bell HH3000 bridge mode</span> — must be in true PPPoE passthrough; otherwise double-NAT will break VLAN firewall setup and external connectivity.</li>
+        <li><span class="warn">NAS throughput</span> — ensure SSD cache tier or RAID with fast drives for sustained 10Gbps editing. Without caching, spinning disks will bottleneck well below 10G.</li>
+        <li><span class="warn">Suricata throughput</span> — IDS/IPS in full inspection mode can reduce throughput on weaker hardware. Tune noisy rule categories (coin mining, DNS, TLS) to maintain line rate on the Netgate 6100.</li>
+        <li><span class="warn">MikroTik learning curve</span> — RouterOS is engineer-first. Start with SwOS for simplicity; migrate to RouterOS when comfortable with VLAN and routing concepts.</li>
+        <li><span class="warn">IoT device MAC tracking</span> — seasonal devices (Christmas lights, candy cane pillars) will get new DHCP leases each season. Track devices in Grafana/LibreNMS by MAC address, not IP.</li>
+        <li><span class="warn">Log storage for SNMP + IDS</span> — plan log rotation. SNMP polling + Suricata alert logs can consume storage quickly without retention policies in InfluxDB/Prometheus.</li>
+        <li><span class="warn">Ontario hydro costs</span> — 24/7 rack power draw matters. CRS317 (~30W) + Netgate 6100 (~15W) + TP-Link (~5W) + Pi (~7W) ≈ 57W continuous. NAS and iMac server dominate total draw.</li>
+      </ul>
+
+      <!-- ============================================================ -->
+      <h3>12. To-Do / Future Work</h3>
+      <ul>
+        <li>SSL certificate expiry tracker that alerts when certs are approaching renewal.</li>
+        <li>Grafana dashboard panel showing all aging apprentice devices on the network — including seasonal devices (Christmas tree, candy cane pillars) — with last-seen timestamps.</li>
+        <li>Define MQTT topic hierarchy: consider segments like <code>agingapprentice/seasonal/</code>, <code>agingapprentice/workshop/</code>, <code>agingapprentice/lab/</code>, <code>agingapprentice/house/</code>.</li>
+        <li>Automated test bench scripts using pyvisa for RC experiment data capture.</li>
+        <li>Zeek network behavioral analysis — evaluate adding alongside Suricata once base build is stable.</li>
+        <li>Full BOM pricing pass in CAD once final component selections are confirmed.</li>
+      </ul>
+
+      <!-- ============================================================ -->
+      <h3>Reference Documents</h3>
+      <ul>
+        <li><a href="/reference/mitchellNetNewDesign.pdf" target="_blank">MitchellNET New Design PDF</a> (source document)</li>
+        <li><a href="/reference/networkMonitoring.md" target="_blank">Network Monitoring Notes</a></li>
+        <li><a href="/reference/mqttBroker.md" target="_blank">MQTT Broker Setup</a></li>
+        <li><a href="/reference/imacServer.md" target="_blank">iMac Server Configuration</a></li>
+        <li><a href="/reference/testbenchEthernet.html" target="_blank">Test Bench Ethernet Remote Control</a></li>
+        <li><a href="https://github.com/theAgingApprentice/InternalWebServer" target="_blank">Ubuntu iMac Server GitHub</a></li>
+        <li><a href="https://github.com/theAgingApprentice/localScripts" target="_blank">Local Script Automation GitHub</a></li>
+        <li><a href="http://192.168.2.10:3000/d/mitchellnet-health/mitchellnet-health-monitoring?orgId=1&from=now-90d&to=now&timezone=browser&refresh=5m" target="_blank">Grafana Health Dashboard (internal)</a></li>
+        <li><a href="http://192.168.2.10:9090/graph" target="_blank">Prometheus Console (internal)</a></li>
+      </ul>
+
+    </section>
+  </main>
+
+  <!-- Include Footer -->
+  <div data-include="/footer.html"></div>
+
+  <!-- Scripts -->
+  <script src="/js/includes.js" defer></script>
+</body>
+</html>

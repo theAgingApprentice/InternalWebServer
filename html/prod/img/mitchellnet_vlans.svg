@@ -1,0 +1,120 @@
+<svg viewBox="0 0 780 420" xmlns="http://www.w3.org/2000/svg" font-family="'Segoe UI', Arial, sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L0,6 L8,3 z" fill="#555"/>
+    </marker>
+    <filter id="sh" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#00000022"/>
+    </filter>
+  </defs>
+
+  <rect width="780" height="420" fill="#f8fafc"/>
+  <text x="390" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="#1e293b">MitchellNET — VLAN Segmentation &amp; SSID Mapping</text>
+
+  <!-- ========= AP COLUMN ========= -->
+  <text x="140" y="55" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">UniFi Access Points</text>
+  <text x="140" y="68" text-anchor="middle" font-size="9" fill="#6b7280">(broadcast all SSIDs)</text>
+
+  <rect x="60" y="78" width="160" height="36" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="140" y="93" text-anchor="middle" font-size="10" font-weight="bold" fill="#065f46">AP Floor 1</text>
+  <text x="140" y="107" text-anchor="middle" font-size="9" fill="#047857">UniFi U6 Pro</text>
+
+  <rect x="60" y="130" width="160" height="36" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="140" y="145" text-anchor="middle" font-size="10" font-weight="bold" fill="#065f46">AP Floor 2</text>
+  <text x="140" y="159" text-anchor="middle" font-size="9" fill="#047857">UniFi U6 Pro</text>
+
+  <rect x="60" y="182" width="160" height="36" rx="4" fill="#d1fae5" stroke="#059669" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="140" y="197" text-anchor="middle" font-size="10" font-weight="bold" fill="#065f46">AP Workshop</text>
+  <text x="140" y="211" text-anchor="middle" font-size="9" fill="#047857">UniFi U6 Pro</text>
+
+  <!-- ========= SSID LABELS ========= -->
+  <text x="330" y="55" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">SSIDs</text>
+
+  <!-- Main SSID -->
+  <rect x="240" y="78" width="185" height="36" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="333" y="93" text-anchor="middle" font-size="10" font-weight="bold" fill="#1d4ed8">AgingApprentice-Main</text>
+  <text x="333" y="107" text-anchor="middle" font-size="9" fill="#3b82f6">2.4GHz + 5GHz</text>
+
+  <!-- IoT SSID -->
+  <rect x="240" y="130" width="185" height="36" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="333" y="145" text-anchor="middle" font-size="10" font-weight="bold" fill="#92400e">AgingApprentice-IoT</text>
+  <text x="333" y="159" text-anchor="middle" font-size="9" fill="#b45309">2.4GHz only · Client isolation ON</text>
+
+  <!-- Guest SSID -->
+  <rect x="240" y="182" width="185" height="36" rx="4" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="333" y="197" text-anchor="middle" font-size="10" font-weight="bold" fill="#374151">AgingApprentice-Guest</text>
+  <text x="333" y="211" text-anchor="middle" font-size="9" fill="#4b5563">Isolated · Internet only</text>
+
+  <!-- SSID → AP arrows (all APs carry all SSIDs) -->
+  <line x1="220" y1="96" x2="240" y2="96" stroke="#2563eb" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="220" y1="148" x2="240" y2="148" stroke="#d97706" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="220" y1="200" x2="240" y2="200" stroke="#6b7280" stroke-width="1.2" marker-end="url(#arr)"/>
+
+  <!-- ========= VLAN COLUMN ========= -->
+  <text x="580" y="55" text-anchor="middle" font-size="11" font-weight="bold" fill="#374151">VLANs (OPNsense)</text>
+
+  <!-- VLAN 10 Mgmt -->
+  <rect x="460" y="64" width="240" height="30" rx="4" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="580" y="78" text-anchor="middle" font-size="10" font-weight="bold" fill="#0c4a6e">VLAN 10 — Management</text>
+  <text x="580" y="90" text-anchor="middle" font-size="8" fill="#0369a1">10.10.10.0/24 · OOB switch · infra devices</text>
+
+  <!-- VLAN 20 Storage -->
+  <rect x="460" y="100" width="240" height="30" rx="4" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="580" y="114" text-anchor="middle" font-size="10" font-weight="bold" fill="#4c1d95">VLAN 20 — Storage</text>
+  <text x="580" y="126" text-anchor="middle" font-size="8" fill="#5b21b6">10.10.20.0/24 · NAS · Mac Studio · MTU 9000</text>
+
+  <!-- VLAN 30 IoT -->
+  <rect x="460" y="136" width="240" height="30" rx="4" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="580" y="150" text-anchor="middle" font-size="10" font-weight="bold" fill="#78350f">VLAN 30 — IoT</text>
+  <text x="580" y="162" text-anchor="middle" font-size="8" fill="#92400e">10.10.30.0/24 · ESP32 · seasonal devices · Mosquitto only</text>
+
+  <!-- VLAN 40 DMZ -->
+  <rect x="460" y="172" width="240" height="30" rx="4" fill="#fee2e2" stroke="#dc2626" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="580" y="186" text-anchor="middle" font-size="10" font-weight="bold" fill="#7f1d1d">VLAN 40 — DMZ</text>
+  <text x="580" y="198" text-anchor="middle" font-size="8" fill="#991b1b">10.10.40.0/24 · Pi server · Nginx · HTTPS inbound only</text>
+
+  <!-- VLAN 50 Lab -->
+  <rect x="460" y="208" width="240" height="30" rx="4" fill="#fce7f3" stroke="#db2777" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="580" y="222" text-anchor="middle" font-size="10" font-weight="bold" fill="#831843">VLAN 50 — Lab / Test Bench</text>
+  <text x="580" y="234" text-anchor="middle" font-size="8" fill="#9d174d">10.10.50.0/24 · SCPI instruments · Mac Studio ctrl</text>
+
+  <!-- VLAN 99 Guest -->
+  <rect x="460" y="244" width="240" height="30" rx="4" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5" filter="url(#sh)"/>
+  <text x="580" y="258" text-anchor="middle" font-size="10" font-weight="bold" fill="#374151">VLAN 99 — Guest</text>
+  <text x="580" y="270" text-anchor="middle" font-size="8" fill="#4b5563">10.10.99.0/24 · Internet only · fully isolated</text>
+
+  <!-- SSID → VLAN mapping arrows -->
+  <!-- Main → VLAN 10 (primary) -->
+  <line x1="425" y1="90" x2="460" y2="79" stroke="#2563eb" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- IoT → VLAN 30 -->
+  <line x1="425" y1="148" x2="460" y2="151" stroke="#d97706" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Guest → VLAN 99 -->
+  <line x1="425" y1="200" x2="460" y2="259" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- Trunk label on AP cable -->
+  <text x="435" y="122" font-size="8" fill="#555" text-anchor="middle">VLAN</text>
+  <text x="435" y="133" font-size="8" fill="#555" text-anchor="middle">tagged</text>
+  <text x="435" y="144" font-size="8" fill="#555" text-anchor="middle">trunk</text>
+
+  <!-- ========= FIREWALL RULES BOX ========= -->
+  <rect x="60" y="260" width="680" height="140" rx="4" fill="white" stroke="#e2e8f0" stroke-width="1" filter="url(#sh)"/>
+  <text x="400" y="278" text-anchor="middle" font-size="11" font-weight="bold" fill="#1e293b">OPNsense Inter-VLAN Firewall Rules</text>
+
+  <!-- Rule rows -->
+  <rect x="75" y="288" width="650" height="18" rx="2" fill="#f0fdf4"/>
+  <text x="85" y="301" font-size="9" fill="#166534">✓  VLAN 20 (Storage)  →  Any           Allow full access. Mac Studio and NAS communicate freely.</text>
+
+  <rect x="75" y="310" width="650" height="18" rx="2" fill="#fef9c3"/>
+  <text x="85" y="323" font-size="9" fill="#78350f">⚠  VLAN 30 (IoT)      →  Mosquitto port 1883 only    Block everything else. ESP32 devices talk only to MQTT broker.</text>
+
+  <rect x="75" y="332" width="650" height="18" rx="2" fill="#fee2e2"/>
+  <text x="85" y="345" font-size="9" fill="#7f1d1d">⚠  VLAN 40 (DMZ)      →  Inbound HTTPS 443 only      Pi server reachable from internet; cannot reach LAN.</text>
+
+  <rect x="75" y="354" width="650" height="18" rx="2" fill="#fce7f3"/>
+  <text x="85" y="367" font-size="9" fill="#831843">⚠  VLAN 50 (Lab)      →  SCPI ports (5025) only      Instruments reachable from Mac Studio. Blocked from other VLANs.</text>
+
+  <rect x="75" y="376" width="650" height="18" rx="2" fill="#f3f4f6"/>
+  <text x="85" y="389" font-size="9" fill="#374151">✗  VLAN 99 (Guest)    →  LAN          Fully blocked. Internet only. Cannot reach any internal resource.</text>
+</svg>

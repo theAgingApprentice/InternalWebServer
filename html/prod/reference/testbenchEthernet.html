@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test Bench — Ethernet Remote Control</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+
+<body>
+  <!-- Environment Banner -->
+  <div id="env-banner" class="env-prod">
+  </div>
+
+  <!-- Include Header -->
+  <div data-include="/header.html"></div>
+
+  <main class="content">
+    <section>
+      <h2>Test Bench — Ethernet Remote Control from Mac Studio</h2>
+      <p>
+        All four bench instruments have ethernet ports and support remote control from the Mac Studio
+        over the local network. This page documents the protocol, software, and what can be done with
+        each instrument remotely.
+      </p>
+
+      <h3>Instruments</h3>
+      <ul>
+        <li>Siglent SDS1202X-E — Oscilloscope</li>
+        <li>Siglent SDG-2042X — Signal Generator</li>
+        <li>Siglent SDM3055 — Digital Multimeter</li>
+        <li>Rigol DP832 — Programmable DC Power Supply</li>
+      </ul>
+
+      <h3>The Protocol: SCPI over LXI</h3>
+      <p>
+        All four instruments speak <strong>SCPI</strong> (Standard Commands for Programmable
+        Instruments) — a universal command language for test equipment. Over ethernet they use the
+        <strong>LXI</strong> standard (LAN eXtensions for Instrumentation), which means they all
+        communicate the same way and can be controlled from the same software. Connect them all to
+        the network switch and the Mac Studio can talk to all of them simultaneously.
+      </p>
+      <p>
+        Each instrument also has a <strong>built-in web interface</strong> — type its IP address
+        into any browser on the Mac and a basic control panel appears immediately, with no software
+        installation required.
+      </p>
+
+      <h3>Software: LXI Tools</h3>
+      <p>
+        The recommended free tool is <strong>LXI Tools</strong> — open source, runs natively on
+        Mac, and explicitly supports all four instruments. Install it via Homebrew:
+      </p>
+      <pre><code>brew install lxi-tools</code></pre>
+      <p>
+        LXI Tools includes both a command-line tool and a GUI. The GUI lets you discover all
+        instruments on the network, send SCPI commands interactively, capture screenshots from
+        instrument displays, and record data — all from one interface.
+      </p>
+      <ul>
+        <li><a href="https://github.com/lxi-tools/lxi-tools" target="_blank">LXI Tools on GitHub</a></li>
+        <li><a href="https://siglentna.com/application-note/lxi-tools/" target="_blank">Siglent LXI Tools Application Note</a></li>
+      </ul>
+
+      <h3>What You Can Do With Each Instrument</h3>
+
+      <h4>Siglent SDS1202X-E — Oscilloscope</h4>
+      <ul>
+        <li>Capture screenshots of the display directly to the Mac — useful for adding to experiment documents</li>
+        <li>Pull waveform data off the scope as a file for analysis in Python or a spreadsheet</li>
+        <li>Set timebase, voltage scale, trigger level, and coupling remotely via SCPI</li>
+        <li>Automate measurements (frequency, rise time, voltage, etc.) and log results to a file</li>
+        <li>Run the scope headlessly while logging data from a long-running experiment</li>
+      </ul>
+
+      <h4>Siglent SDG-2042X — Signal Generator</h4>
+      <ul>
+        <li>Set frequency, amplitude, waveform type (sine, square, pulse, etc.) and DC offset from the Mac</li>
+        <li>Precisely configure the 0.2Hz square wave for RC experiments without touching the front panel</li>
+        <li>Sweep frequencies automatically — write a script that steps through 1Hz, 5Hz, 15.9Hz, 50Hz, 500Hz, and 5kHz and logs the oscilloscope reading at each step</li>
+        <li>Save and recall waveform configurations</li>
+      </ul>
+
+      <h4>Siglent SDM3055 — Digital Multimeter</h4>
+      <ul>
+        <li>Send a <code>READ?</code> SCPI command and get a live measurement returned to the Mac</li>
+        <li>Log voltage, current, or resistance readings over time to a CSV file</li>
+        <li>Watch the RC capacitor charge curve numerically while the scope shows it visually — both running simultaneously from one script</li>
+        <li>Automate repetitive measurements and export data for graphing</li>
+      </ul>
+
+      <h4>Rigol DP832 — Programmable DC Power Supply</h4>
+      <ul>
+        <li>Set output voltage and current limits precisely from the Mac</li>
+        <li>Enable and disable outputs under software control</li>
+        <li>Log actual output voltage and current over time to verify supply accuracy</li>
+        <li>Automate power sequencing for experiments — e.g. turn on supply, wait, take DMM reading, log it</li>
+      </ul>
+
+      <h3>Combining All Four: Automated Test Scripts</h3>
+      <p>
+        Once all instruments are on the network, a Python script on the Mac can control all four
+        together. For the RC time constant experiment, for example, a script could:
+      </p>
+      <ul>
+        <li>Tell the <strong>SDG</strong> to output a 0.2Hz square wave at 5V</li>
+        <li>Tell the <strong>DP832</strong> to set the supply to exactly 5.000V</li>
+        <li>Tell the <strong>SDM</strong> to take a voltage reading every 100ms and log it to a file</li>
+        <li>Tell the <strong>SDS</strong> scope to capture a screenshot at the end of the run</li>
+      </ul>
+      <p>
+        All automated, all from the Mac, with no touching any front panel. This is how professional
+        electronics labs run automated test sequences. The Python <code>pyvisa</code> library is the
+        standard tool for this:
+      </p>
+      <pre><code>pip install pyvisa pyvisa-py</code></pre>
+
+      <h3>First Steps: Getting Everything Connected</h3>
+      <ul>
+        <li>Plug all four instruments into the network switch via ethernet</li>
+        <li>On each instrument go to <strong>Utility → I/O → LAN</strong> and enable DHCP so they receive IP addresses automatically</li>
+        <li>Find each instrument's assigned IP address from its own front panel menu</li>
+        <li>Type each IP address into a browser on the Mac — the built-in web interface should appear immediately</li>
+        <li>Install LXI Tools via Homebrew and run a network discovery scan to confirm all four instruments appear</li>
+      </ul>
+
+      <h3>Reference Documentation</h3>
+      <ul>
+        <li><a href="/reference/SDS1000X-E User Manual.pdf" target="_blank">Siglent SDS1202X-E User Manual</a> (PDF)</li>
+        <li><a href="https://siglentna.com/wp-content/uploads/dlm_uploads/2017/10/ProgrammingGuide_forSDS-1-1.pdf" target="_blank">Siglent SDS Series SCPI Programming Guide</a> (PDF, external)</li>
+        <li><a href="https://github.com/lxi-tools/lxi-tools" target="_blank">LXI Tools GitHub Repository</a></li>
+        <li><a href="https://siglentna.com/application-note/lxi-tools/" target="_blank">Siglent LXI Tools Application Note</a></li>
+      </ul>
+
+    </section>
+  </main>
+
+  <!-- Include Footer -->
+  <div data-include="/footer.html"></div>
+
+  <!-- Scripts -->
+  <script src="/js/includes.js" defer></script>
+</body>
+</html>

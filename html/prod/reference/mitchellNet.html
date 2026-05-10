@@ -3,59 +3,257 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MitchellNET — Network Design v2.0</title>
+  <title>MitchellNET — Network Design v3.0</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css" />
   <style>
-    /* Local overrides for tables and diagrams — uses site's existing base styles */
+    /* ── Design tokens ──────────────────────────────────────────────── */
+    :root {
+      --ink:       #0d1117;
+      --ink-mid:   #24292f;
+      --ink-dim:   #57606a;
+      --rule:      #d0d7de;
+      --surface:   #f6f8fa;
+      --surface-2: #eaeef2;
+      --accent:    #0969da;
+      --accent-dk: #0550ae;
+      --green:     #1a7f37;
+      --amber:     #9a6700;
+      --red:       #cf222e;
+      --mono:      'IBM Plex Mono', monospace;
+      --sans:      'IBM Plex Sans', sans-serif;
+    }
+
+    /* ── Base ──────────────────────────────────────────────────────── */
+    body { font-family: var(--sans); color: var(--ink); }
+
+    /* ── Page header strip ─────────────────────────────────────────── */
+    .page-masthead {
+      background: var(--ink);
+      color: #fff;
+      padding: 36px 0 28px;
+      border-bottom: 3px solid var(--accent);
+      margin-bottom: 36px;
+    }
+    .masthead-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .masthead-wordmark {
+      font-family: var(--mono);
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color: #fff;
+      line-height: 1;
+    }
+    .masthead-wordmark span { color: #58a6ff; }
+    .masthead-sub {
+      font-size: 0.85rem;
+      color: #8b949e;
+      font-family: var(--mono);
+      padding-bottom: 2px;
+    }
+    .masthead-badge {
+      margin-left: auto;
+      background: rgba(88,166,255,0.15);
+      border: 1px solid #30363d;
+      color: #58a6ff;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────────── */
+    .doc-wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 24px 80px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 40px;
+    }
+    @media (max-width: 760px) {
+      .doc-wrap { grid-template-columns: 1fr; }
+      .doc-nav { display: none; }
+    }
+
+    /* ── Sidebar nav ───────────────────────────────────────────────── */
+    .doc-nav {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+      font-size: 0.82rem;
+    }
+    .doc-nav .nav-label {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--ink-dim);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--rule);
+    }
+    .doc-nav ul { list-style: none; padding: 0; margin: 0; }
+    .doc-nav li { margin: 0; }
+    .doc-nav a {
+      display: block;
+      padding: 5px 10px;
+      color: var(--ink-mid);
+      text-decoration: none;
+      border-left: 2px solid transparent;
+      line-height: 1.4;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .doc-nav a:hover { border-color: var(--accent); color: var(--accent); }
+    .doc-nav .nav-sub a { padding-left: 22px; font-size: 0.78rem; color: var(--ink-dim); }
+
+    /* ── Doc content ───────────────────────────────────────────────── */
+    .doc-content h2 {
+      font-family: var(--mono);
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin: 0 0 6px;
+      color: var(--ink);
+    }
+    .doc-content .doc-intro {
+      color: var(--ink-dim);
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 24px;
+    }
+    .doc-content h3 {
+      font-family: var(--mono);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--ink);
+      margin: 40px 0 12px;
+      padding-top: 32px;
+      border-top: 1px solid var(--rule);
+      scroll-margin-top: 20px;
+    }
+    .doc-content h3:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+    .doc-content h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink-mid);
+      margin: 20px 0 8px;
+    }
+    .doc-content p { font-size: 0.92rem; line-height: 1.7; margin: 0 0 14px; color: var(--ink-mid); }
+    .doc-content ul, .doc-content ol {
+      font-size: 0.92rem;
+      line-height: 1.7;
+      color: var(--ink-mid);
+      padding-left: 22px;
+      margin: 0 0 14px;
+    }
+    .doc-content li { margin-bottom: 5px; }
+
+    /* ── Diagram block ─────────────────────────────────────────────── */
     .diagram-block {
       margin: 24px 0;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 6px;
+      padding: 16px;
       text-align: center;
     }
-    .diagram-block img {
-      max-width: 100%;
-      height: auto;
-      border: 1px solid #e5e7eb;
+    .diagram-block img { max-width: 100%; height: auto; border-radius: 3px; }
+    .diagram-block a.diagram-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--accent);
+      text-decoration: none;
+      border: 1px solid var(--accent);
       border-radius: 4px;
+      padding: 4px 12px;
+      transition: background 0.15s;
     }
+    .diagram-block a.diagram-link:hover { background: rgba(9,105,218,0.08); }
     .diagram-caption {
-      font-size: 0.85em;
-      color: #6b7280;
-      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--ink-dim);
+      margin-top: 8px;
       font-style: italic;
     }
+
+    /* ── BOM table ─────────────────────────────────────────────────── */
+    .bom-wrap { overflow-x: auto; margin: 16px 0 24px; }
     table.bom {
       width: 100%;
       border-collapse: collapse;
-      font-size: 0.9em;
-      margin: 16px 0;
+      font-size: 0.82rem;
+      font-family: var(--sans);
     }
-    table.bom th {
-      background: #f3f4f6;
-      border: 1px solid #d1d5db;
-      padding: 8px 12px;
+    table.bom thead th {
+      background: var(--ink);
+      color: #fff;
+      padding: 9px 12px;
       text-align: left;
       font-weight: 600;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      white-space: nowrap;
     }
-    table.bom td {
-      border: 1px solid #e5e7eb;
-      padding: 8px 12px;
+    table.bom .section-row td {
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 12px;
+    }
+    table.bom tbody td {
+      border: 1px solid var(--rule);
+      padding: 7px 12px;
       vertical-align: top;
+      line-height: 1.5;
     }
-    table.bom tr:nth-child(even) td {
-      background: #f9fafb;
+    table.bom tbody tr:nth-child(even) td { background: var(--surface); }
+    table.bom .total-row td {
+      background: var(--ink);
+      color: #fff;
+      font-weight: 700;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 9px 12px;
+      border-color: var(--ink);
     }
-    .checklist li {
-      margin-bottom: 6px;
+    table.bom .price { font-family: var(--mono); white-space: nowrap; color: var(--green); }
+    table.bom .source { font-family: var(--mono); font-size: 0.75rem; color: var(--accent); }
+    .budget-note {
+      background: #fff8e6;
+      border-left: 4px solid var(--amber);
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: var(--amber);
+      border-radius: 0 4px 4px 0;
+      margin: 0 0 24px;
     }
-    .checklist li::marker {
-      content: "☐  ";
-    }
+
+    /* ── VLAN tags ─────────────────────────────────────────────────── */
     .vlan-tag {
       display: inline-block;
       padding: 1px 7px;
       border-radius: 3px;
-      font-size: 0.8em;
-      font-weight: 600;
+      font-size: 0.75rem;
+      font-weight: 700;
+      font-family: var(--mono);
       margin-right: 4px;
     }
     .vlan-10 { background:#e0f2fe; color:#0c4a6e; }
@@ -64,471 +262,726 @@
     .vlan-40 { background:#fee2e2; color:#7f1d1d; }
     .vlan-50 { background:#fce7f3; color:#831843; }
     .vlan-99 { background:#f3f4f6; color:#374151; }
-    .warn { color: #b45309; font-weight: 600; }
-    code { background: #f3f4f6; padding: 1px 5px; border-radius: 3px; font-size: 0.9em; }
-    pre { background: #f3f4f6; padding: 14px; border-radius: 4px; overflow-x: auto; font-size: 0.88em; line-height: 1.6; }
+
+    /* ── Code / pre ────────────────────────────────────────────────── */
+    code {
+      font-family: var(--mono);
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.85em;
+    }
+    pre {
+      font-family: var(--mono);
+      background: var(--ink);
+      color: #e6edf3;
+      padding: 14px 16px;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-size: 0.83em;
+      line-height: 1.6;
+    }
+
+    /* ── Callouts ──────────────────────────────────────────────────── */
+    .warn { color: var(--amber); font-weight: 600; }
+    .callout {
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-left: 4px solid var(--accent);
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.88rem;
+      margin: 12px 0 20px;
+      color: var(--ink-mid);
+    }
+    .callout.warn-box { border-left-color: var(--amber); background: #fff8e6; }
+    .callout.new-box  { border-left-color: var(--green);  background: #f0fdf4; }
+
+    /* ── Checklist ─────────────────────────────────────────────────── */
+    ul.checklist { list-style: none; padding-left: 0; }
+    ul.checklist li {
+      padding: 5px 0 5px 28px;
+      position: relative;
+      border-bottom: 1px solid var(--surface-2);
+    }
+    ul.checklist li::before {
+      content: "☐";
+      position: absolute;
+      left: 4px;
+      color: var(--accent);
+      font-size: 1em;
+    }
+
+    /* ── Phase headers ─────────────────────────────────────────────── */
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 24px 0 10px;
+    }
+    .phase-num {
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+    .phase-title { font-weight: 600; font-size: 0.92rem; }
+
+    /* ── Ref links ─────────────────────────────────────────────────── */
+    .ref-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 12px 0;
+    }
+    @media (max-width: 600px) { .ref-grid { grid-template-columns: 1fr; } }
+    .ref-grid a {
+      display: block;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--rule);
+      border-radius: 5px;
+      font-size: 0.83rem;
+      text-decoration: none;
+      color: var(--accent);
+      font-family: var(--mono);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .ref-grid a:hover { border-color: var(--accent); background: rgba(9,105,218,0.05); }
+    .ref-grid a .ref-desc {
+      display: block;
+      font-family: var(--sans);
+      color: var(--ink-dim);
+      font-size: 0.75rem;
+      margin-top: 2px;
+    }
+
+    /* ── Component table ───────────────────────────────────────────── */
+    table.comp { font-size: 0.82rem; width: 100%; border-collapse: collapse; }
+    table.comp th {
+      background: var(--surface-2);
+      border: 1px solid var(--rule);
+      padding: 7px 10px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: left;
+    }
+    table.comp td {
+      border: 1px solid var(--rule);
+      padding: 7px 10px;
+      vertical-align: top;
+      line-height: 1.5;
+    }
+    table.comp tr:nth-child(even) td { background: var(--surface); }
+
+    /* ── NEW badge ─────────────────────────────────────────────────── */
+    .badge-new {
+      display: inline-block;
+      background: var(--green);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .badge-updated {
+      display: inline-block;
+      background: var(--amber);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 
 <body>
-  <!-- Environment Banner -->
   <div id="env-banner" class="env-prod"></div>
-
-  <!-- Include Header -->
   <div data-include="/header.html"></div>
 
-  <main class="content">
-    <section>
+  <!-- ── Page masthead ─────────────────────────────────────────────── -->
+  <div class="page-masthead">
+    <div class="masthead-inner">
+      <div>
+        <div class="masthead-wordmark">Mitchell<span>NET</span></div>
+        <div class="masthead-sub">Home Network Design &amp; Bill of Materials</div>
+      </div>
+      <div class="masthead-badge">v3.0 · May 2026 · London, Ontario</div>
+    </div>
+  </div>
 
-      <h2>MitchellNET — Home Network Design v2.0</h2>
-      <p>
-        This document is the master design specification for the MitchellNET home network rebuild.
-        It covers architecture, component roles, VLAN segmentation, the test bench ethernet integration,
-        bill of materials, deployment checklist, and rationale for all major decisions.
-        Location: London, Ontario, Canada.
+  <!-- ── Two-column layout ─────────────────────────────────────────── -->
+  <div class="doc-wrap">
+
+    <!-- Sidebar nav -->
+    <nav class="doc-nav">
+      <div class="nav-label">Contents</div>
+      <ul>
+        <li><a href="#overview">1. Overview</a></li>
+        <li><a href="#components">2. Component Roles</a></li>
+        <li><a href="#vlans">3. VLAN Segmentation</a></li>
+        <li><a href="#electronics-room">4. Electronics Room <span class="badge-new">NEW</span></a></li>
+        <li><a href="#bench">5. Test Bench Control</a></li>
+        <li><a href="#appstack">6. Application Stack</a></li>
+        <li><a href="#security">7. Firewall &amp; Security</a></li>
+        <li><a href="#rack">8. Rack Elevation</a></li>
+        <li><a href="#bom">9. Bill of Materials <span class="badge-updated">UPD</span></a></li>
+        <li><a href="#rationale">10. Design Rationale</a></li>
+        <li><a href="#checklist">11. Deployment Checklist</a></li>
+        <li><a href="#risks">12. Risks</a></li>
+        <li><a href="#todo">13. To-Do</a></li>
+        <li><a href="#refs">Reference Docs</a></li>
+      </ul>
+    </nav>
+
+    <!-- Main content -->
+    <main class="doc-content">
+      <h2>MitchellNET — Network Design</h2>
+      <p class="doc-intro">
+        Master design specification for the MitchellNET home network rebuild. Covers architecture,
+        component roles, VLAN segmentation, the electronics room aggregation switch, test bench ethernet
+        integration, bill of materials with current Canadian pricing, deployment checklist, and rationale
+        for all major decisions. Location: London, Ontario, Canada.
       </p>
 
       <!-- ============================================================ -->
-      <h3>1. Architectural Overview</h3>
+      <h3 id="overview">1. Architectural Overview</h3>
       <p>
-        The design implements a high-performance, segmented network with two distinct planes:
+        The design implements a high-performance, segmented network spanning two rooms with three distinct planes:
       </p>
       <ul>
-        <li><strong>10Gbps Data Plane</strong> — connects the Mac Studio, NAS, and core infrastructure via SFP+ DAC cables through the MikroTik core switch for maximum throughput on video editing and storage workloads.</li>
-        <li><strong>1Gbps Management Plane (Out-of-Band)</strong> — a physically separate TP-Link switch provides a recovery lifeline to every device's management interface. Even if the core 10G network goes down or suffers a broadcast storm, the OOB rail remains reachable.</li>
-        <li><strong>1Gbps Lab Plane</strong> — a dedicated bench switch connects all four test instruments to the network, with a SCPI/LXI control path back to the Mac Studio on its own VLAN 50 segment.</li>
+        <li><strong>10 Gbps Data Plane</strong> — connects the Mac Studio, NAS, and core infrastructure via SFP+ DAC cables (rack) or OM3 multimode fibre (inter-room, 20–30 m runs) through the MikroTik CRS317 core switch.</li>
+        <li><strong>1 Gbps OOB Management Plane</strong> — a physically separate TP-Link TL-SG108E provides a recovery lifeline to every infrastructure device's management interface in the server room. Even if the core 10G network suffers a misconfiguration or broadcast storm, this rail remains reachable.</li>
+        <li><strong>1 Gbps Electronics Room Plane</strong> — a TP-Link TL-SG116E (16-port Easy Smart) in the electronics room aggregates all 8 devices in that room (4 bench instruments + 4 other network devices) and sends a single OM3 fibre uplink back to the CRS317 core switch.</li>
       </ul>
       <p>
-        Core services (DHCP, DNS, IDS/IPS, VLAN routing) live on the hardware firewall. Application-level
-        services (MQTT, reverse proxy, monitoring) run as Docker containers on the Ubuntu iMac server.
+        Core services (DHCP, DNS, IDS/IPS, VLAN routing) live on the Protectli VP2430 firewall running OPNsense.
+        Application services (MQTT, reverse proxy, monitoring) run as Docker containers on the Ubuntu iMac server.
       </p>
 
       <div class="diagram-block">
-        <img src="/img/mitchellnet_topology.svg" alt="MitchellNET Network Topology Diagram"/>
-        <div class="diagram-caption">Figure 1 — MitchellNET full network topology including test bench</div>
+        <img src="/img/mitchellNet_diagram.svg" alt="MitchellNET Full Network Topology Diagram" />
+        <div class="diagram-caption">Figure 1 — MitchellNET full network topology including server room, electronics room, and inter-room fibre runs</div>
+        <a class="diagram-link" href="mitchellNet_diagram.svg" target="_blank">
+          ↗ Open full-size diagram
+        </a>
       </div>
 
       <!-- ============================================================ -->
-      <h3>2. Component Roles &amp; Connections</h3>
+      <h3 id="components">2. Component Roles &amp; Connections</h3>
 
-      <table class="bom">
-        <tr>
-          <th>Component</th>
-          <th>Primary Role</th>
-          <th>Data Connection</th>
-          <th>OOB / Mgmt Connection</th>
-        </tr>
-        <tr>
-          <td>Bell HH3000</td>
-          <td>ISP modem — PPPoE passthrough / bridge mode</td>
-          <td>RJ45 Cat6 → Firewall WAN</td>
-          <td>N/A</td>
-        </tr>
-        <tr>
-          <td>OPNsense Firewall (Netgate 6100)</td>
-          <td>Gateway, DHCP, DNS, IDS/IPS, VLAN routing</td>
-          <td>SFP+ 10G → Core Switch</td>
-          <td>RJ45 → OOB Switch</td>
-        </tr>
-        <tr>
-          <td>MikroTik CRS317</td>
-          <td>Core Layer 2/3 switching · 10GbE fabric</td>
-          <td>16x SFP+ (10G) — all devices</td>
-          <td>RJ45 console → OOB Switch</td>
-        </tr>
-        <tr>
-          <td>TP-Link TL-SG108E</td>
-          <td>Out-of-Band management rail</td>
-          <td>N/A (management only)</td>
-          <td>Self — all mgmt IPs land here</td>
-        </tr>
-        <tr>
-          <td>Ubuntu iMac Server (2019)</td>
-          <td>Nginx, Mosquitto MQTT, Grafana, Prometheus, LibreNMS, InfluxDB</td>
-          <td>RJ45 1G → Core Switch</td>
-          <td>USB–Ethernet adapter → OOB Switch</td>
-        </tr>
-        <tr>
-          <td>NAS</td>
-          <td>10GbE storage for video editing and backups</td>
-          <td>SFP+ 10G → Core Switch</td>
-          <td>IPMI port → OOB Switch</td>
-        </tr>
-        <tr>
-          <td>Mac Studio (M4 Max)</td>
-          <td>Primary workstation — video editing, CNC design, development</td>
-          <td>SFP+ 10G or 10G-BaseT → Core Switch</td>
-          <td>N/A</td>
-        </tr>
-        <tr>
-          <td>UniFi APs (U6 Pro)</td>
-          <td>VLAN-aware WiFi · multiple SSIDs mapped to VLANs</td>
-          <td>Cat6 trunk → Core Switch</td>
-          <td>N/A (managed by UniFi controller)</td>
-        </tr>
-        <tr>
-          <td>Bench Switch (unmanaged GbE)</td>
-          <td>Dedicated test bench LAN segment · VLAN 50</td>
-          <td>Cat6 1G → Core Switch</td>
-          <td>N/A</td>
-        </tr>
-        <tr>
-          <td>Siglent SDS1202X-E</td>
-          <td>Oscilloscope — SCPI/LXI remote control</td>
-          <td>RJ45 → Bench Switch</td>
-          <td>N/A</td>
-        </tr>
-        <tr>
-          <td>Siglent SDG-2042X</td>
-          <td>Signal generator — SCPI/LXI remote control</td>
-          <td>RJ45 → Bench Switch</td>
-          <td>N/A</td>
-        </tr>
-        <tr>
-          <td>Siglent SDM3055</td>
-          <td>Digital multimeter — SCPI/LXI remote control</td>
-          <td>RJ45 → Bench Switch</td>
-          <td>N/A</td>
-        </tr>
-        <tr>
-          <td>Rigol DP832</td>
-          <td>Programmable DC power supply — SCPI/LXI remote control</td>
-          <td>RJ45 → Bench Switch</td>
-          <td>N/A</td>
-        </tr>
-        <tr>
-          <td>Raspberry Pi 5</td>
-          <td>DMZ server — hardened, HTTPS inbound only</td>
-          <td>Cat6 1G → Core Switch</td>
-          <td>N/A</td>
-        </tr>
-      </table>
+      <div class="bom-wrap">
+        <table class="comp">
+          <thead>
+            <tr>
+              <th>Component</th>
+              <th>Primary Role</th>
+              <th>Data Connection</th>
+              <th>OOB / Mgmt Connection</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Bell HH3000</td><td>ISP modem — PPPoE passthrough / bridge mode</td><td>RJ45 Cat6 → Firewall WAN</td><td>N/A</td></tr>
+            <tr><td><strong>Protectli VP2430</strong> <span class="badge-updated">UPD</span></td><td>OPNsense firewall, DHCP, DNS, IDS/IPS (Suricata), VLAN routing, WireGuard VPN</td><td>2.5GbE RJ45 → Core Switch (via RJ45 transceiver)</td><td>Dedicated mgmt port → OOB Switch</td></tr>
+            <tr><td>MikroTik CRS317-1G-16S+RM</td><td>Core Layer 2/3 switching · 10 GbE SFP+ fabric</td><td>16× SFP+ 10G — all devices</td><td>RJ45 console → OOB Switch</td></tr>
+            <tr><td>TP-Link TL-SG108E (server room)</td><td>Out-of-Band management rail</td><td>N/A (management only)</td><td>Self — all mgmt IPs land here</td></tr>
+            <tr><td>Ubuntu iMac Server (2019)</td><td>Nginx, Mosquitto MQTT, Grafana, Prometheus, LibreNMS, InfluxDB</td><td>SFP+→RJ45 transceiver 10G → Core Switch</td><td>USB–Ethernet adapter → OOB Switch</td></tr>
+            <tr><td>Synology DS1823xs+ NAS <span class="badge-new">NEW</span></td><td>10 GbE storage for video editing; OOB-capable management port</td><td>Built-in SFP+ 10G → Core Switch</td><td>OOB mgmt port → OOB Switch</td></tr>
+            <tr><td>Mac Studio (M4 Max)</td><td>Primary workstation — video editing, CNC design, development</td><td>Sonnet Solo 10G → OM3 fibre → Core Switch</td><td>N/A</td></tr>
+            <tr><td>UniFi U6 Pro APs (×3) <span class="badge-new">NEW</span></td><td>VLAN-aware WiFi 6 · multiple SSIDs mapped to VLANs · one per floor</td><td>Cat6 PoE trunk → Core Switch</td><td>N/A (managed by UniFi controller on iMac)</td></tr>
+            <tr><td><strong>TP-Link TL-SG116E</strong> <span class="badge-new">NEW</span></td><td>Electronics room aggregation switch — consolidates all 8 devices</td><td>OM3 fibre 10G uplink → Core Switch</td><td>N/A (no OOB devices in electronics room)</td></tr>
+            <tr><td>Siglent SDS1202X-E</td><td>Oscilloscope — SCPI/LXI remote control</td><td>RJ45 → TL-SG116E (VLAN 50)</td><td>N/A</td></tr>
+            <tr><td>Siglent SDG-2042X</td><td>Signal generator — SCPI/LXI remote control</td><td>RJ45 → TL-SG116E (VLAN 50)</td><td>N/A</td></tr>
+            <tr><td>Siglent SDM3055</td><td>Digital multimeter — SCPI/LXI remote control</td><td>RJ45 → TL-SG116E (VLAN 50)</td><td>N/A</td></tr>
+            <tr><td>Rigol DP832</td><td>Programmable DC power supply — SCPI/LXI remote control</td><td>RJ45 → TL-SG116E (VLAN 50)</td><td>N/A</td></tr>
+            <tr><td>4× Other room devices</td><td>General network devices previously on Archer A6 LAN ports</td><td>RJ45 → TL-SG116E (VLAN 1 or assigned)</td><td>N/A</td></tr>
+            <tr><td>Raspberry Pi 5</td><td>DMZ server — hardened, HTTPS inbound only</td><td>Cat6 1G → Core Switch (VLAN 40)</td><td>N/A</td></tr>
+            <tr><td>TP-Link Archer A6 <span class="badge-updated">RETIRED</span></td><td>Replaced by U6 Pro APs for WiFi; replaced by TL-SG116E for LAN ports</td><td>—</td><td>—</td></tr>
+          </tbody>
+        </table>
+      </div>
 
       <!-- ============================================================ -->
-      <h3>3. VLAN Segmentation &amp; WiFi SSID Mapping</h3>
+      <h3 id="vlans">3. VLAN Segmentation &amp; WiFi SSID Mapping</h3>
       <p>
         Every device lands on exactly one VLAN. OPNsense is the gateway for all VLANs and enforces
         strict inter-VLAN firewall rules. The UniFi APs broadcast all SSIDs simultaneously — the SSID
-        a device connects to determines its VLAN, regardless of which physical AP it uses.
+        a device connects to determines its VLAN, regardless of which physical AP serves it.
+        The TL-SG116E in the electronics room trunks all VLANs on its uplink port; individual ports
+        are assigned to the appropriate access VLAN.
       </p>
-
       <ul>
-        <li><span class="vlan-tag vlan-10">VLAN 10</span> <strong>Management</strong> — 10.10.10.0/24. Infrastructure devices, OOB switch, management interfaces. Not reachable from other VLANs.</li>
+        <li><span class="vlan-tag vlan-10">VLAN 10</span> <strong>Management</strong> — 10.10.10.0/24. Infrastructure OOB interfaces only. Not reachable from any other VLAN.</li>
         <li><span class="vlan-tag vlan-20">VLAN 20</span> <strong>Storage</strong> — 10.10.20.0/24. Mac Studio and NAS only. MTU 9000 (jumbo frames) for maximum NFS/SMB throughput.</li>
-        <li><span class="vlan-tag vlan-30">VLAN 30</span> <strong>IoT</strong> — 10.10.30.0/24. ESP32 devices, smart home, seasonal devices (Christmas tree, candy cane pillars). Firewall allows only outbound to Mosquitto port 1883. Client isolation on the IoT SSID prevents device-to-device communication.</li>
-        <li><span class="vlan-tag vlan-40">VLAN 40</span> <strong>DMZ</strong> — 10.10.40.0/24. Raspberry Pi server. Inbound HTTPS only from internet. Cannot initiate connections to LAN.</li>
-        <li><span class="vlan-tag vlan-50">VLAN 50</span> <strong>Lab / Test Bench</strong> — 10.10.50.0/24. All four bench instruments (oscilloscope, signal generator, multimeter, power supply). Mac Studio permitted inbound SCPI connections on port 5025. No other LAN access.</li>
-        <li><span class="vlan-tag vlan-99">VLAN 99</span> <strong>Guest</strong> — 10.10.99.0/24. Internet access only. Fully blocked from all internal resources. Maps to <em>AgingApprentice-Guest</em> SSID.</li>
+        <li><span class="vlan-tag vlan-30">VLAN 30</span> <strong>IoT</strong> — 10.10.30.0/24. ESP32 devices, smart home, seasonal devices. Firewall allows only outbound to Mosquitto port 1883. Client isolation on IoT SSID.</li>
+        <li><span class="vlan-tag vlan-40">VLAN 40</span> <strong>DMZ</strong> — 10.10.40.0/24. Raspberry Pi. Inbound HTTPS only. Cannot initiate connections to LAN.</li>
+        <li><span class="vlan-tag vlan-50">VLAN 50</span> <strong>Lab / Electronics Room</strong> — 10.10.50.0/24. All four bench instruments. 4 general devices in electronics room if they need lab-level isolation. Mac Studio permitted inbound SCPI on port 5025 only.</li>
+        <li><span class="vlan-tag vlan-99">VLAN 99</span> <strong>Guest</strong> — 10.10.99.0/24. Internet access only. Blocked from all internal resources. Maps to <em>AgingApprentice-Guest</em> SSID.</li>
       </ul>
 
-      <div class="diagram-block">
-        <img src="/img/mitchellnet_vlans.svg" alt="VLAN Segmentation and SSID Mapping Diagram"/>
-        <div class="diagram-caption">Figure 2 — VLAN segmentation, SSID-to-VLAN mapping, and inter-VLAN firewall rules</div>
+      <!-- ============================================================ -->
+      <h3 id="electronics-room">4. Electronics Room Network <span class="badge-new">NEW</span></h3>
+
+      <div class="callout new-box">
+        <strong>What changed:</strong> The TP-Link Archer A6 access point is retired. Its four LAN-connected devices now connect to the TL-SG116E. WiFi in the electronics room is provided by one of the three UniFi U6 Pro APs. All 8 ethernet devices in the room (4 bench instruments + 4 general devices) feed into a single 10 GbE OM3 fibre uplink back to the server room CRS317.
+      </div>
+
+      <h4>Why TL-SG116E instead of replacing the OOB switch</h4>
+      <p>
+        The TL-SG116E is a 16-port 802.1Q-capable Easy Smart switch — well-suited for in-band aggregation
+        of multiple devices onto a single trunked uplink. It is <strong>not</strong> appropriate as the
+        server-room OOB switch, which requires a dedicated management-only rail isolated from all production
+        traffic. The TL-SG108E in the server room stays as-is.
+      </p>
+      <p>
+        None of the electronics room devices (instruments, general room devices) need OOB connectivity —
+        OOB is reserved for infrastructure devices that need emergency management when the core network is
+        down. If a future device in the electronics room gains an IPMI or serial console port, a single
+        Cat6 run from the TL-SG116E back to the TL-SG108E is all that is needed.
+      </p>
+
+      <h4>Electronics Room Port Assignment (TL-SG116E)</h4>
+      <div class="bom-wrap">
+        <table class="comp">
+          <thead><tr><th>Port</th><th>Device</th><th>VLAN (access)</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Siglent SDS1202X-E (Oscilloscope)</td><td><span class="vlan-tag vlan-50">VLAN 50</span></td></tr>
+            <tr><td>2</td><td>Siglent SDG-2042X (Signal Generator)</td><td><span class="vlan-tag vlan-50">VLAN 50</span></td></tr>
+            <tr><td>3</td><td>Siglent SDM3055 (Multimeter)</td><td><span class="vlan-tag vlan-50">VLAN 50</span></td></tr>
+            <tr><td>4</td><td>Rigol DP832 (Power Supply)</td><td><span class="vlan-tag vlan-50">VLAN 50</span></td></tr>
+            <tr><td>5–8</td><td>4× general room devices (previously on Archer A6)</td><td>VLAN 1 or as assigned</td></tr>
+            <tr><td>9</td><td>UniFi U6 Pro AP (electronics room)</td><td>Trunk (VLANs 1, 30, 99 tagged)</td></tr>
+            <tr><td>10–15</td><td>Spare</td><td>—</td></tr>
+            <tr><td>16</td><td><strong>Uplink → CRS317 core switch (OM3 fibre, 10 GbE)</strong></td><td>Trunk (all VLANs tagged)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Inter-Room Fibre Run — Electronics Room</h4>
+      <p>
+        Like the Mac Studio run, the 20–30 m distance to the server room rules out DAC cables (max ~7 m).
+        An OM3 multimode fibre LC-LC duplex cable carries 10 GbE between the TL-SG116E and the CRS317.
+        The TL-SG116E needs a 10 GbE SFP+ uplink port — the TL-SG116E has standard RJ45 ports only
+        (no built-in SFP+). Two options:
+      </p>
+      <ul>
+        <li><strong>Option A (recommended):</strong> Use the TL-SG116E's uplink port with a 10GBase-T RJ45 transceiver inserted into the CRS317, and run Cat6A copper (up to 55 m at 10 G). This avoids needing an SFP+ cage on the TL-SG116E side. A Cat6A solid-core pull cable from the electronics room to the server room handles this cleanly.</li>
+        <li><strong>Option B:</strong> Add a small media converter (GbE copper → SFP+ fibre) at the electronics room end. Runs 1 GbE aggregate — sufficient for the room's actual traffic (instruments + 4 devices), though not future-proof.</li>
+      </ul>
+      <div class="callout">
+        <strong>Practical recommendation:</strong> The TL-SG116E's total aggregate traffic from 8 GbE devices will rarely exceed 2–3 Gbps simultaneously. Running Cat6A copper (Option A) is simpler and cheaper than pulling OM3 fibre for this room. Reserve the OM3 approach for the Mac Studio run where sustained 10 GbE NAS throughput is critical. Pull the Cat6A and use a 10GBase-T RJ45 SFP+ transceiver (~$40) in a CRS317 port.
       </div>
 
       <!-- ============================================================ -->
-      <h3>4. Test Bench — Ethernet Remote Control</h3>
+      <h3 id="bench">5. Test Bench — Ethernet Remote Control</h3>
       <p>
         All four bench instruments support remote control over ethernet using <strong>SCPI</strong>
-        (Standard Commands for Programmable Instruments) over the <strong>LXI</strong> (LAN eXtensions
-        for Instrumentation) standard. A dedicated unmanaged gigabit switch on the bench connects all
-        instruments and uplinks to the MikroTik core switch on <span class="vlan-tag vlan-50">VLAN 50</span>.
-        The Mac Studio is permitted to reach instrument SCPI ports (TCP 5025) from its VLAN 20 address
-        via a specific OPNsense firewall rule.
+        (Standard Commands for Programmable Instruments) over the <strong>LXI</strong> standard.
+        They now connect through the TL-SG116E on
+        <span class="vlan-tag vlan-50">VLAN 50</span>, with the uplink back to the CRS317.
+        The Mac Studio reaches instrument SCPI ports (TCP 5025) via an OPNsense allow rule from VLAN 20.
       </p>
-
       <h4>Software: LXI Tools</h4>
-      <p>
-        Install on Mac via Homebrew. Provides both a GUI and command-line tool for instrument discovery,
-        SCPI commands, screenshots, and data logging. All four instruments are on the confirmed
-        compatibility list.
-      </p>
       <pre>brew install lxi-tools</pre>
-
-      <h4>What Each Instrument Supports Remotely</h4>
-      <ul>
-        <li><strong>Siglent SDS1202X-E (Oscilloscope)</strong> — capture screenshots to Mac, pull waveform data as files, set timebase/voltage/trigger remotely, automate measurements and log results, run headless data capture.</li>
-        <li><strong>Siglent SDG-2042X (Signal Generator)</strong> — set frequency, amplitude, waveform type, and DC offset; configure sweep sequences; save and recall waveform setups.</li>
-        <li><strong>Siglent SDM3055 (Multimeter)</strong> — <code>READ?</code> command returns live measurements; log voltage/current/resistance to CSV over time; automate repetitive measurements.</li>
-        <li><strong>Rigol DP832 (DC Power Supply)</strong> — set voltage and current limits precisely; enable/disable outputs under software control; log actual output over time; automate power sequencing.</li>
-      </ul>
-
       <h4>Python Automation</h4>
-      <p>
-        The <code>pyvisa</code> library allows Python scripts on the Mac to control all four
-        instruments simultaneously for automated test sequences:
-      </p>
       <pre>pip install pyvisa pyvisa-py</pre>
       <p>
-        Example use case — RC time constant experiment: a single script tells the SDG to output a
-        0.2Hz square wave, the DP832 to hold exactly 5.000V, the SDM to log capacitor voltage every
-        100ms, and the SDS to capture a screenshot at the end — all without touching any front panel.
+        Example RC time constant experiment: a single script tells the SDG to output a 0.2 Hz square wave,
+        the DP832 to hold exactly 5.000 V, the SDM to log capacitor voltage every 100 ms, and the SDS to
+        capture a screenshot — all without touching any front panel.
       </p>
+      <h4>What Each Instrument Supports Remotely</h4>
+      <ul>
+        <li><strong>Siglent SDS1202X-E (Oscilloscope)</strong> — capture screenshots, pull waveform data, set timebase/voltage/trigger, automate measurements and log results.</li>
+        <li><strong>Siglent SDG-2042X (Signal Generator)</strong> — set frequency, amplitude, waveform type, DC offset; configure sweep sequences; save and recall waveform setups.</li>
+        <li><strong>Siglent SDM3055 (Multimeter)</strong> — <code>READ?</code> returns live measurements; log voltage/current/resistance to CSV over time.</li>
+        <li><strong>Rigol DP832 (Power Supply)</strong> — set voltage and current limits; enable/disable outputs; log actual output; automate power sequencing.</li>
+      </ul>
 
       <!-- ============================================================ -->
-      <h3>5. Application Stack (Ubuntu iMac Server)</h3>
-      <p>
-        All services run as Docker containers on the 2019 iMac running Ubuntu Server.
-      </p>
+      <h3 id="appstack">6. Application Stack (Ubuntu iMac Server)</h3>
+      <p>All services run as Docker containers on the 2019 iMac running Ubuntu Server.</p>
       <ul>
         <li><strong>Nginx Reverse Proxy</strong> — entry point for external web services; traffic isolated to DMZ VLAN 40.</li>
-        <li><strong>Mosquitto MQTT Broker</strong> — logic hub for all IoT devices; firewall rules allow VLAN 30 devices to reach port 1883 only on this host.</li>
-        <li><strong>Grafana + Prometheus + InfluxDB</strong> — monitoring dashboards; Prometheus scrapes device metrics; InfluxDB stores time-series data from instruments and IoT devices.</li>
-        <li><strong>LibreNMS</strong> — polls the MikroTik switch and all network devices via SNMP over the OOB management rail; provides per-port traffic, SFP temperatures, and device health.</li>
+        <li><strong>Mosquitto MQTT Broker</strong> — logic hub for all IoT devices; VLAN 30 allowed on port 1883 only.</li>
+        <li><strong>Grafana + Prometheus + InfluxDB</strong> — monitoring dashboards; stores time-series from instruments and IoT devices.</li>
+        <li><strong>LibreNMS</strong> — polls MikroTik and all network devices via SNMP over the OOB rail; per-port traffic, SFP temperatures, device health.</li>
+        <li><strong>UniFi Network Application</strong> — manages all three U6 Pro APs; VLAN/SSID assignment, client isolation, RF data.</li>
       </ul>
-      <ul>
-        <li><a href="http://192.168.2.10:3000/d/mitchellnet-health/mitchellnet-health-monitoring?orgId=1&from=now-90d&to=now&timezone=browser&refresh=5m" target="_blank">Grafana MitchellNET Health Dashboard</a></li>
-        <li><a href="http://192.168.2.10:9090/graph" target="_blank">Prometheus Console</a></li>
-        <li><a href="https://github.com/theAgingApprentice/InternalWebServer" target="_blank">Ubuntu iMac Server GitHub</a></li>
-      </ul>
+      <div class="ref-grid" style="grid-template-columns:1fr;">
+        <a href="http://192.168.2.10:3000/d/mitchellnet-health/mitchellnet-health-monitoring?orgId=1&from=now-90d&to=now&timezone=browser&refresh=5m">Grafana Health Dashboard (internal)<span class="ref-desc">http://192.168.2.10:3000</span></a>
+        <a href="http://192.168.2.10:9090/graph">Prometheus Console (internal)<span class="ref-desc">http://192.168.2.10:9090</span></a>
+      </div>
 
       <!-- ============================================================ -->
-      <h3>6. Firewall &amp; Security</h3>
+      <h3 id="security">7. Firewall &amp; Security</h3>
       <p>
-        <strong>OPNsense</strong> is recommended over pfSense for this build. It has native Suricata
-        integration with policy-based rule management, more frequent updates, a cleaner GUI, and
-        stronger community development. Key security features:
+        <strong>OPNsense</strong> on the Protectli VP2430. Key rules:
       </p>
-      <ul>
-        <li><strong>Suricata IDS/IPS</strong> — runs in IPS mode with ET Open/Pro rules. Noisy rule categories (coin mining, DNS/TLS) are disabled to maintain throughput. Scheduled daily rule updates.</li>
-        <li><strong>Stateful packet inspection</strong> — all inter-VLAN traffic goes through the firewall; default-deny with explicit allow rules per VLAN.</li>
-        <li><strong>PPPoE passthrough</strong> — Bell HH3000 in bridge mode. OPNsense holds the public IP directly, eliminating double-NAT.</li>
-        <li><strong>VPN</strong> — WireGuard for remote access; AES-NI hardware offloading on the Netgate 6100 keeps VPN overhead minimal.</li>
-      </ul>
-
-      <h4>Key Firewall Rules Summary</h4>
       <ul>
         <li>VLAN 20 (Storage) → Any: <strong>allow</strong>. Mac Studio and NAS communicate freely.</li>
         <li>VLAN 30 (IoT) → Mosquitto port 1883 only: <strong>restricted</strong>. All other IoT traffic blocked.</li>
-        <li>VLAN 40 (DMZ) → LAN: <strong>blocked</strong>. Inbound HTTPS 443 from internet permitted; Pi cannot reach LAN.</li>
-        <li>VLAN 50 (Lab) → Mac Studio SCPI port 5025 only: <strong>restricted</strong>. Instruments isolated from all other network segments.</li>
+        <li>VLAN 40 (DMZ) → LAN: <strong>blocked</strong>. Inbound HTTPS 443 from internet permitted only.</li>
+        <li>VLAN 50 (Lab) → Mac Studio SCPI port 5025 only: <strong>restricted</strong>. All instruments isolated from other segments.</li>
         <li>VLAN 99 (Guest) → LAN: <strong>blocked</strong>. Internet only.</li>
       </ul>
+      <p>
+        Suricata IDS/IPS runs in IPS mode on WAN, VLAN 30 (IoT), and VLAN 40 (DMZ) interfaces.
+        <strong>Not</strong> on VLAN 20 (Storage) — it would throttle NAS throughput on N150-class hardware.
+        WireGuard VPN for remote access with AES-NI hardware offload.
+      </p>
 
       <!-- ============================================================ -->
-      <h3>7. Rack Elevation</h3>
-
+      <h3 id="rack">8. Rack Elevation</h3>
       <div class="diagram-block">
-        <img src="/img/mitchellnet_rack.svg" alt="MitchellNET Rack Elevation Diagram"/>
-        <div class="diagram-caption">Figure 3 — Rack elevation showing all 1RU and 2RU components. Bell HH3000, Mac Studio, UniFi APs, and bench switch/instruments are off-rack.</div>
+        <img src="/img/mitchellnet_rack.svg" alt="MitchellNET Rack Elevation Diagram" />
+        <div class="diagram-caption">Figure 2 — Server room rack. Bell HH3000, Mac Studio, UniFi APs, and the electronics room TL-SG116E are off-rack.</div>
       </div>
 
       <!-- ============================================================ -->
-      <h3>8. Bill of Materials — Canada</h3>
+      <h3 id="bom">9. Bill of Materials — Canada <span class="badge-updated">MAY 2026</span></h3>
 
-      <table class="bom">
-        <tr>
-          <th>Component</th>
-          <th>Recommendation</th>
-          <th>Notes</th>
-          <th>Source</th>
-        </tr>
-        <tr>
-          <td>Firewall Appliance</td>
-          <td>Netgate 6100 (SFP+ ports) <em>or</em> Protectli Vault i5</td>
-          <td>AES-NI, QAT, fanless, IDS/IPS at line rate. Netgate ships with OPNsense-compatible hardware.</td>
-          <td>DeployDepot.ca</td>
-        </tr>
-        <tr>
-          <td>Core Switch</td>
-          <td>MikroTik CRS317-1G-16S+RM</td>
-          <td>16x SFP+ 10GbE, VLAN trunk, SNMP, SwOS/RouterOS. ~$600–700 CAD. Silent under normal load.</td>
-          <td>MikroTikCanada.ca</td>
-        </tr>
-        <tr>
-          <td>OOB Switch</td>
-          <td>TP-Link TL-SG108E (Easy Smart)</td>
-          <td>8-port 1GbE managed. Dedicated management rail. Low power, set-and-forget.</td>
-          <td>Amazon.ca</td>
-        </tr>
-        <tr>
-          <td>SFP+ DAC Cables</td>
-          <td>10Gtek Passive DAC (1m / 2m)</td>
-          <td>Lower latency and cooler than 10G-BaseT RJ45 transceivers. Cost-effective for short rack runs.</td>
-          <td>Amazon.ca</td>
-        </tr>
-        <tr>
-          <td>Mac Studio 10G Adapter</td>
-          <td>10Gtek SFP+ to RJ45 transceiver <em>or</em> Sonnet Solo 10G Thunderbolt</td>
-          <td>Required if Mac Studio does not have native SFP+ port.</td>
-          <td>Amazon.ca</td>
-        </tr>
-        <tr>
-          <td>OOB USB Adapter</td>
-          <td>Anker or StarTech USB 3.0 to Gigabit Ethernet</td>
-          <td>Second NIC for Ubuntu iMac onto OOB rail.</td>
-          <td>Amazon.ca</td>
-        </tr>
-        <tr>
-          <td>NAS</td>
-          <td>Synology DS1823xs+ or QNAP TVS-h874 with 10GbE</td>
-          <td>SFP+ for 10G data; IPMI for OOB. SSD cache recommended for sustained throughput.</td>
-          <td>B&amp;H / Amazon.ca</td>
-        </tr>
-        <tr>
-          <td>WiFi Access Points</td>
-          <td>Ubiquiti UniFi U6 Pro (×3)</td>
-          <td>VLAN-aware. Multiple SSIDs mapped to VLANs. Managed via free UniFi Network Application (Docker on iMac).</td>
-          <td>Amazon.ca / Ubiquiti</td>
-        </tr>
-        <tr>
-          <td>Bench Switch</td>
-          <td>Any unmanaged 8-port GbE switch</td>
-          <td>Dedicated to test instruments. Uplinks to MikroTik core on VLAN 50.</td>
-          <td>Amazon.ca</td>
-        </tr>
-        <tr>
-          <td>Raspberry Pi 5</td>
-          <td>Raspberry Pi 5 (4GB or 8GB)</td>
-          <td>DMZ server. Hardened Ubuntu; HTTPS inbound only via OPNsense NAT rule.</td>
-          <td>PiShop.ca</td>
-        </tr>
-        <tr>
-          <td>Cabling</td>
-          <td>CAT6a (for 10G-BaseT runs) / CAT6 (for 1G runs)</td>
-          <td>CAT6a required for stable 10G over copper longer than 1m. DAC cables used inside rack.</td>
-          <td>Amazon.ca / local</td>
-        </tr>
-      </table>
+      <div class="bom-wrap">
+        <table class="bom">
+          <thead>
+            <tr>
+              <th style="width:28%">Item / Model</th>
+              <th style="width:5%">Qty</th>
+              <th style="width:16%">Source</th>
+              <th style="width:10%">Est. CAD</th>
+              <th>Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- FIREWALL -->
+            <tr class="section-row"><td colspan="5">① FIREWALL</td></tr>
+            <tr>
+              <td>Protectli VP2430 (N150, 4× 2.5GbE, 16GB DDR5, 256GB NVMe, coreboot)</td>
+              <td>1</td>
+              <td class="source">ca.protectli.com</td>
+              <td class="price">~$579</td>
+              <td>OPNsense firewall, IDS/IPS, VLAN routing, VPN</td>
+            </tr>
+            <tr>
+              <td>OPNsense OS</td>
+              <td>1</td>
+              <td class="source">opnsense.org</td>
+              <td class="price">Free</td>
+              <td>Pre-install option at checkout on ca.protectli.com</td>
+            </tr>
+
+            <!-- CORE SWITCH -->
+            <tr class="section-row"><td colspan="5">② CORE SWITCH (In-Band, Server Room)</td></tr>
+            <tr>
+              <td>MikroTik CRS317-1G-16S+RM (16× SFP+ 10GbE, passive cooling, dual PSU, 1U)</td>
+              <td>1</td>
+              <td class="source">store.mikrotikcanada.ca</td>
+              <td class="price">~$750</td>
+              <td>Core 10 GbE switching fabric, VLAN trunk, SNMP telemetry for Grafana</td>
+            </tr>
+
+            <!-- OOB SWITCH -->
+            <tr class="section-row"><td colspan="5">③ OOB MANAGEMENT SWITCH (Server Room)</td></tr>
+            <tr>
+              <td>TP-Link TL-SG108E (8-port GbE Easy Smart, 802.1Q, fanless)</td>
+              <td>1</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$45</td>
+              <td>Dedicated OOB rail: firewall mgmt, CRS317 console, NAS IPMI, Ubuntu iMac OOB</td>
+            </tr>
+            <tr>
+              <td>Anker / StarTech USB 3.0 → GbE adapter</td>
+              <td>1</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$25</td>
+              <td>Second NIC for Ubuntu iMac onto OOB VLAN 10 rail</td>
+            </tr>
+
+            <!-- ELECTRONICS ROOM SWITCH -->
+            <tr class="section-row"><td colspan="5">④ ELECTRONICS ROOM AGGREGATION SWITCH ✦ NEW</td></tr>
+            <tr>
+              <td>TP-Link TL-SG116E (16-port GbE Easy Smart, 802.1Q VLAN, fanless, metal)</td>
+              <td>1</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$75</td>
+              <td>Aggregates all 8 electronics room devices; trunked uplink to CRS317</td>
+            </tr>
+            <tr>
+              <td>10GBase-T SFP+ RJ45 transceiver (for CRS317 port serving electronics room uplink)</td>
+              <td>1</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$40</td>
+              <td>Inserts into CRS317; connects to TL-SG116E via Cat6A copper run</td>
+            </tr>
+            <tr>
+              <td>Cat6A solid-core cable, 30 m run (electronics room → server room)</td>
+              <td>1</td>
+              <td class="source">Amazon.ca / local</td>
+              <td class="price">~$35</td>
+              <td>In-wall/conduit copper run; supports 10 GbE up to 55 m</td>
+            </tr>
+
+            <!-- NAS -->
+            <tr class="section-row"><td colspan="5">⑤ NAS — NETWORK ATTACHED STORAGE</td></tr>
+            <tr>
+              <td>Synology DS1823xs+ (8-bay, 1× 10GbE SFP+, 2× GbE, OOB mgmt port, ECC RAM)</td>
+              <td>1</td>
+              <td class="source">Canada Computers</td>
+              <td class="price">~$2,700</td>
+              <td>Primary A/V + data storage on VLAN 20. OOB port on VLAN 10 rail</td>
+            </tr>
+            <tr>
+              <td>NAS drives — Seagate IronWolf Pro or WD Red Pro 8TB (minimum 8 drives)</td>
+              <td>8</td>
+              <td class="source">Canada Computers / Amazon.ca</td>
+              <td class="price">~$280–350 ea.</td>
+              <td>RAID6 array — 48 TB raw, ~32 TB usable with 2-drive fault tolerance</td>
+            </tr>
+            <tr>
+              <td>Synology SNV3510 800GB NVMe SSD cache (M.2, 2× for read/write cache)</td>
+              <td>2</td>
+              <td class="source">Canada Computers</td>
+              <td class="price">~$450 ea.</td>
+              <td>SSD cache tier — critical for sustained video editing throughput on spinning disks</td>
+            </tr>
+
+            <!-- WIFI -->
+            <tr class="section-row"><td colspan="5">⑥ WiFi ACCESS POINTS (UniFi)</td></tr>
+            <tr>
+              <td>Ubiquiti UniFi U6 Pro (Wi-Fi 6, 4×4 MIMO, 5.3 Gbps aggregate, ceiling mount, PoE+)</td>
+              <td>3</td>
+              <td class="source">ca.store.ui.com</td>
+              <td class="price">$219 ea. (~$657)</td>
+              <td>One per floor; VLAN-tagged SSIDs. Managed via UniFi Docker on Ubuntu iMac</td>
+            </tr>
+            <tr>
+              <td>PoE injector 802.3at 48V (if no PoE switch feeding APs)</td>
+              <td>3</td>
+              <td class="source">Amazon.ca / ui.com</td>
+              <td class="price">~$20 ea.</td>
+              <td>Powers each U6 Pro — only if no PoE switch on AP uplink</td>
+            </tr>
+
+            <!-- SFP+ CABLES (SERVER ROOM) -->
+            <tr class="section-row"><td colspan="5">⑦ SFP+ CABLES &amp; TRANSCEIVERS (In-Rack, Server Room)</td></tr>
+            <tr>
+              <td>10Gtek SFP+ DAC cable 1m (firewall → CRS317, NAS → CRS317)</td>
+              <td>4</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$20 ea. ($80)</td>
+              <td>Short in-rack DAC runs — lower latency and cooler than 10GBase-T</td>
+            </tr>
+            <tr>
+              <td>10Gtek SFP+ DAC cable 2m (longer rack runs + spare)</td>
+              <td>2</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$22 ea. ($44)</td>
+              <td>Slightly longer rack-to-rack and 1 spare</td>
+            </tr>
+            <tr>
+              <td>10Gtek SFP+ → RJ45 10GBase-T transceiver (Ubuntu iMac, RJ45 only)</td>
+              <td>1</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$40</td>
+              <td>CRS317 port → Cat6A patch → Ubuntu iMac GbE port (10G path)</td>
+            </tr>
+            <tr>
+              <td>Cat6A patch 0.5m (iMac ↔ its RJ45 transceiver)</td>
+              <td>1</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$8</td>
+              <td>Short patch connecting Ubuntu iMac to its rack transceiver</td>
+            </tr>
+
+            <!-- MAC STUDIO FIBRE RUN -->
+            <tr class="section-row"><td colspan="5">⑧ MAC STUDIO INTER-ROOM FIBRE (20–30 m, Server Room → Mac Studio Workspace)</td></tr>
+            <tr>
+              <td>OM3 50/125 multimode LC-LC duplex patch cable, 30m</td>
+              <td>1</td>
+              <td class="source">Amazon.ca / fs.com</td>
+              <td class="price">~$30–40</td>
+              <td>Physical fibre run between rooms. OM3 supports 10GBase-SR up to 300 m</td>
+            </tr>
+            <tr>
+              <td>10Gtek 10GBase-SR SFP+ transceiver (OM3, 850nm, LC) — CRS317 end</td>
+              <td>1</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$25</td>
+              <td>CRS317 port facing the Mac Studio fibre run</td>
+            </tr>
+            <tr>
+              <td>Sonnet Solo 10G SFP+ Thunderbolt adapter (incl. 10GBase-SR transceiver)</td>
+              <td>1</td>
+              <td class="source">AVShop.ca / Amazon.ca</td>
+              <td class="price">~$270–310</td>
+              <td>Adds 10GbE SFP+ to Mac Studio via Thunderbolt 3/4. SR transceiver included</td>
+            </tr>
+
+            <!-- BENCH -->
+            <tr class="section-row"><td colspan="5">⑨ BENCH / INSTRUMENTS (now via TL-SG116E in Electronics Room)</td></tr>
+            <tr>
+              <td>Cat6 patch cables 1–2m for instruments (×4) and room devices (×4)</td>
+              <td>8</td>
+              <td class="source">Amazon.ca</td>
+              <td class="price">~$5 ea. ($40)</td>
+              <td>Connects all 8 electronics room devices to the TL-SG116E</td>
+            </tr>
+
+            <!-- TOTAL -->
+            <tr class="total-row">
+              <td colspan="3">Estimated Grand Total (hardware only, excl. NAS drives &amp; SSD cache)</td>
+              <td>~$5,400–5,800 CAD</td>
+              <td>Prices current May 2026 — verify before ordering</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="budget-note">
+        ⚠ NAS drives (~$2,400–$2,800 for 8× 8TB) and NVMe SSD cache (~$900 for 2× 800GB) are shown separately above as the most price-volatile items. The grand total above <strong>excludes</strong> drives and cache — add ~$3,300–$3,700 for a fully populated NAS.
+      </div>
 
       <!-- ============================================================ -->
-      <h3>9. Key Design Decisions — Rationale</h3>
+      <h3 id="rationale">10. Key Design Decisions — Rationale</h3>
 
       <h4>MikroTik CRS317 vs. Enterprise Alternatives</h4>
-      <p>
-        Enterprise 16-port 10GbE switches (Cisco, Juniper, Arista) cost $3,000–$5,000 CAD and are
-        loud enough to be a dealbreaker in a home office. The CRS317 delivers wire-speed 10GbE
-        switching for ~$650 CAD with intelligent fan control (quiet or off under normal video editing
-        loads), dual-boot SwOS/RouterOS flexibility, and deep SNMP telemetry ideal for Grafana dashboards.
-        It draws 20–40W vs. 150W+ for older enterprise hardware — meaningful in Ontario where hydro
-        costs are variable. <span class="warn">Note:</span> MikroTik's interface is engineer-first with a steeper
-        learning curve than Ubiquiti. Familiarity with Docker and OPNsense helps significantly.
-      </p>
+      <p>Enterprise 16-port 10 GbE switches (Cisco, Juniper) cost $3,000–$5,000 CAD and are too loud for a home office. The CRS317 delivers wire-speed 10 GbE for ~$750 CAD, is passively cooled (silent), supports dual-boot SwOS/RouterOS, and exposes deep SNMP telemetry ideal for Grafana dashboards. 20–40 W vs. 150 W+ for equivalent enterprise gear.</p>
+
+      <h4>Protectli VP2430 vs. Netgate</h4>
+      <p>The VP2430 (launched May 2025, N150 CPU) replaces the previous Netgate 6100 recommendation. It offers 46% higher PassMark, DDR5 RAM, roughly double the VPN throughput, and coreboot open-source firmware — all from a Canadian assembly location at $579 CAD. The Netgate remains valid if OPNsense pre-install on VP2430 is not preferred.</p>
+
+      <h4>TL-SG116E for Electronics Room vs. Managed Switch</h4>
+      <p>A fully managed switch (UniFi, Cisco SB) is overkill for this room. The TL-SG116E supports 802.1Q VLAN tagging — enough to assign ports to the correct VLAN and trunk back to the CRS317 — at a fraction of the cost. Its 16 ports provide room for additional instruments or devices without touching the server room switch configuration.</p>
+
+      <h4>OOB Switch Stays as TL-SG108E</h4>
+      <p>The TL-SG116E you found is an excellent electronics room aggregation switch, but is <em>not</em> a replacement for the OOB switch. The OOB rail must be physically separate from production traffic — the TL-SG108E's dedicated role as a management-only switch with known, minimal configuration is the right design. Mixing OOB and production traffic defeats the purpose of having an out-of-band rail.</p>
+
+      <h4>Cat6A Copper vs. OM3 Fibre for Electronics Room Uplink</h4>
+      <p>The electronics room's 8 devices will never saturate even 1 GbE in aggregate under realistic use. Cat6A copper to the server room (Option A) is simpler, cheaper (~$75 total including transceiver and cable vs. ~$150+ for OM3 + media converters), and supports 10 GbE if needed. OM3 fibre is reserved for the Mac Studio run where sustained 10 GbE NAS editing throughput is the explicit goal.</p>
+
+      <h4>DAC Cables vs. 10GBase-T (In-Rack)</h4>
+      <p>DAC cables have lower latency, consume less power, and run cooler than 10GBase-T RJ45 transceivers. RJ45 10 GbE modules can thermal-throttle during long renders. For all rack-internal connections DAC is preferred; 10GBase-T adapters are used only where a device lacks an SFP+ port.</p>
 
       <h4>OPNsense vs. pfSense</h4>
-      <p>
-        OPNsense is the stronger choice for this build in 2025–2026: native Suricata integration with
-        policy-based rule management, more frequent security updates, a modern GUI, and active
-        community development without the commercial pressures that have complicated pfSense/Netgate's
-        relationship with the community. Both are capable — pfSense remains solid if its documentation
-        or WireGuard implementation is preferred.
-      </p>
-
-      <h4>DAC Cables vs. 10G-BaseT</h4>
-      <p>
-        Direct Attach Copper (DAC) cables have lower latency, consume less power, and stay cool
-        compared to 10G-BaseT (RJ45) transceivers. RJ45 10GbE modules can reach temperatures that
-        cause thermal throttling during long renders. For all rack-internal connections DAC is
-        preferred; 10G-BaseT adapters are used only where a device (Mac Studio) lacks an SFP+ port.
-      </p>
-
-      <h4>Dedicated Bench Switch for Test Instruments</h4>
-      <p>
-        A separate switch for the test bench keeps instrument traffic isolated on VLAN 50 and
-        provides a clean physical boundary between the lab and the main network. The OPNsense
-        firewall enforces that only the Mac Studio can reach instrument SCPI ports, preventing any
-        other device from accidentally interacting with the bench equipment. This also makes it easy
-        to add future instruments without touching the core switch configuration.
-      </p>
+      <p>OPNsense: native Suricata integration, more frequent updates, modern GUI, active community. pfSense remains solid if its WireGuard implementation or documentation is preferred. Both are capable.</p>
 
       <!-- ============================================================ -->
-      <h3>10. Day 1 Deployment Checklist</h3>
+      <h3 id="checklist">11. Day 1 Deployment Checklist</h3>
 
-      <h4>Phase 1 — Bench Prep &amp; Physical Labelling</h4>
+      <div class="phase-header"><span class="phase-num">Phase 1</span><span class="phase-title">Bench Prep &amp; Physical Labelling</span></div>
       <ul class="checklist">
         <li>Unbox and inspect all hardware. Verify power cables, mounting ears, and SFP+ modules.</li>
-        <li>Label every cable with a label maker before installation (e.g. CORE-TO-NAS, OOB-TO-FIREWALL, BENCH-TO-CORE).</li>
-        <li>Update firmware on each device (Firewall, Core Switch, OOB Switch) via existing internet before complex configuration begins.</li>
+        <li>Label every cable before installation (e.g. CORE-TO-NAS, OOB-TO-FIREWALL, ELEC-ROOM-UPLINK).</li>
+        <li>Update firmware on all devices before complex configuration begins.</li>
       </ul>
 
-      <h4>Phase 2 — OOB Management Rail (Safety Net First)</h4>
+      <div class="phase-header"><span class="phase-num">Phase 2</span><span class="phase-title">OOB Management Rail — Safety Net First</span></div>
       <ul class="checklist">
-        <li>Initialize TP-Link OOB switch. Set static management IP: 10.10.10.2.</li>
+        <li>Initialize TL-SG108E OOB switch. Set static management IP: 10.10.10.2.</li>
         <li>Connect MikroTik console/MGMT port → OOB Switch.</li>
-        <li>Connect NAS IPMI port → OOB Switch.</li>
-        <li>Connect Firewall MGMT NIC → OOB Switch.</li>
+        <li>Connect Synology DS1823xs+ OOB mgmt port → OOB Switch.</li>
+        <li>Connect VP2430 dedicated mgmt port → OOB Switch.</li>
         <li>Connect Ubuntu iMac USB–Ethernet adapter → OOB Switch.</li>
         <li>Test: laptop on OOB switch can ping all management interfaces. Do not proceed until all devices have a lifeline.</li>
       </ul>
 
-      <h4>Phase 3 — Core VLAN &amp; Data Plane</h4>
+      <div class="phase-header"><span class="phase-num">Phase 3</span><span class="phase-title">Core VLAN &amp; Data Plane</span></div>
       <ul class="checklist">
         <li>Define VLANs on OPNsense: VLAN 10 (10.10.10.1/24), VLAN 20 (10.10.20.1/24, MTU 9000), VLAN 30 (10.10.30.1/24), VLAN 40 (10.10.40.1/24), VLAN 50 (10.10.50.1/24), VLAN 99 (10.10.99.1/24).</li>
         <li>Configure SFP+ firewall ↔ MikroTik port as VLAN trunk (tagged for all VLANs).</li>
         <li>Set MikroTik ports for NAS and Mac Studio to access mode — untagged on VLAN 20.</li>
-        <li>Set MikroTik port for bench switch to access mode — untagged on VLAN 50.</li>
-        <li>Configure MikroTik trunk port to UniFi APs (tagged for VLANs 10, 30, 99).</li>
+        <li>Set MikroTik port for electronics room uplink to trunk mode — all VLANs tagged.</li>
+        <li>Configure MikroTik trunk port to UniFi APs (tagged for VLANs 1, 30, 99).</li>
       </ul>
 
-      <h4>Phase 4 — ISP Integration</h4>
+      <div class="phase-header"><span class="phase-num">Phase 4</span><span class="phase-title">Electronics Room Switch</span></div>
+      <ul class="checklist">
+        <li>Configure TL-SG116E: ports 1–4 as VLAN 50 access, ports 5–8 as VLAN 1 access, port 9 as trunk for the U6 Pro AP, port 16 as trunk uplink.</li>
+        <li>Run Cat6A from electronics room to server room. Terminate and test with cable tester.</li>
+        <li>Install 10GBase-T transceiver in CRS317 port. Connect Cat6A. Verify link-up at 10G.</li>
+        <li>Power on TL-SG116E. Verify all 8 room devices obtain DHCP leases on correct VLANs.</li>
+      </ul>
+
+      <div class="phase-header"><span class="phase-num">Phase 5</span><span class="phase-title">ISP Integration</span></div>
       <ul class="checklist">
         <li>Input Bell b1xxxxxx PPPoE credentials into OPNsense WAN interface.</li>
-        <li>Verify OPNsense shows a public IP address (not 192.168.x.x — that means double-NAT).</li>
+        <li>Verify OPNsense shows a public IP (not 192.168.x.x — that means double-NAT).</li>
         <li>Disable Bell HH3000 WiFi, DHCP, and UPnP completely.</li>
       </ul>
 
-      <h4>Phase 5 — Service Migration</h4>
+      <div class="phase-header"><span class="phase-num">Phase 6</span><span class="phase-title">Service Migration</span></div>
       <ul class="checklist">
         <li>Assign Ubuntu iMac a static IP on VLAN 10 (management).</li>
         <li>Verify Nginx serves one test site reachable from the internet via public IP.</li>
         <li>Verify LibreNMS successfully polls MikroTik via SNMP over OOB rail.</li>
-        <li>Verify Grafana/Prometheus dashboards are reachable from Mac Studio.</li>
+        <li>Verify Grafana/Prometheus dashboards reachable from Mac Studio.</li>
+        <li>Deploy UniFi Network Application Docker container. Adopt all three U6 Pro APs.</li>
       </ul>
 
-      <h4>Phase 6 — Test Bench Integration</h4>
+      <div class="phase-header"><span class="phase-num">Phase 7</span><span class="phase-title">Test Bench &amp; NAS Integration</span></div>
       <ul class="checklist">
         <li>Enable DHCP on each instrument: Utility → I/O → LAN → DHCP on.</li>
-        <li>Note each instrument's assigned IP from its front panel menu.</li>
         <li>Verify each instrument's built-in web interface loads in Mac browser.</li>
-        <li>Install LXI Tools on Mac: <code>brew install lxi-tools</code>.</li>
         <li>Run LXI Tools discovery scan — all four instruments should appear.</li>
         <li>Add OPNsense firewall rule: VLAN 20 (Mac Studio) → VLAN 50 (instruments) port 5025 allow.</li>
+        <li>Add NAS drives. Configure RAID6 array. Add NVMe SSD cache.</li>
+        <li>Test sustained NAS throughput from Mac Studio: target &gt;800 MB/s sequential read.</li>
       </ul>
 
       <!-- ============================================================ -->
-      <h3>11. Risks &amp; Key Considerations</h3>
+      <h3 id="risks">12. Risks &amp; Key Considerations</h3>
       <ul>
-        <li><span class="warn">Bell HH3000 bridge mode</span> — must be in true PPPoE passthrough; otherwise double-NAT will break VLAN firewall setup and external connectivity.</li>
-        <li><span class="warn">NAS throughput</span> — ensure SSD cache tier or RAID with fast drives for sustained 10Gbps editing. Without caching, spinning disks will bottleneck well below 10G.</li>
-        <li><span class="warn">Suricata throughput</span> — IDS/IPS in full inspection mode can reduce throughput on weaker hardware. Tune noisy rule categories (coin mining, DNS, TLS) to maintain line rate on the Netgate 6100.</li>
-        <li><span class="warn">MikroTik learning curve</span> — RouterOS is engineer-first. Start with SwOS for simplicity; migrate to RouterOS when comfortable with VLAN and routing concepts.</li>
-        <li><span class="warn">IoT device MAC tracking</span> — seasonal devices (Christmas lights, candy cane pillars) will get new DHCP leases each season. Track devices in Grafana/LibreNMS by MAC address, not IP.</li>
-        <li><span class="warn">Log storage for SNMP + IDS</span> — plan log rotation. SNMP polling + Suricata alert logs can consume storage quickly without retention policies in InfluxDB/Prometheus.</li>
-        <li><span class="warn">Ontario hydro costs</span> — 24/7 rack power draw matters. CRS317 (~30W) + Netgate 6100 (~15W) + TP-Link (~5W) + Pi (~7W) ≈ 57W continuous. NAS and iMac server dominate total draw.</li>
+        <li><span class="warn">Bell HH3000 bridge mode</span> — must be in true PPPoE passthrough; otherwise double-NAT will break VLAN setup and external connectivity.</li>
+        <li><span class="warn">NAS throughput</span> — ensure SSD cache tier or RAID with fast drives. Without caching, spinning disks bottleneck well below 10 G.</li>
+        <li><span class="warn">Suricata throughput</span> — IDS/IPS in full inspection mode reduces throughput on weaker hardware. Tune noisy rule categories (coin mining, DNS, TLS) to maintain line rate.</li>
+        <li><span class="warn">MikroTik learning curve</span> — RouterOS is engineer-first. Start with SwOS; migrate to RouterOS when comfortable with VLAN and routing concepts.</li>
+        <li><span class="warn">TL-SG116E VLAN limits</span> — the TL-SG116E is Easy Smart, not full L2 managed. Confirm that 802.1Q port-based VLAN tagging covers the required configuration before building out; it lacks some advanced features of Omada or UniFi switches.</li>
+        <li><span class="warn">Cat6A pull quality</span> — for the electronics room 10 G copper run, use solid-core Cat6A and terminate carefully. A poor termination will limit you to 1 GbE. Test with a cable certifier if 10 G link-up is inconsistent.</li>
+        <li><span class="warn">IoT MAC tracking</span> — seasonal devices (Christmas lights, candy cane pillars) will get new DHCP leases each season. Track by MAC in Grafana/LibreNMS, not IP.</li>
+        <li><span class="warn">Ontario hydro costs</span> — 24/7 rack draw: CRS317 (~30W) + VP2430 (~15W) + TL-SG108E (~5W) + NAS (~50W idle) + iMac server (~80W) ≈ 180W continuous.</li>
       </ul>
 
       <!-- ============================================================ -->
-      <h3>12. To-Do / Future Work</h3>
+      <h3 id="todo">13. To-Do / Future Work</h3>
       <ul>
-        <li>SSL certificate expiry tracker that alerts when certs are approaching renewal.</li>
-        <li>Grafana dashboard panel showing all aging apprentice devices on the network — including seasonal devices (Christmas tree, candy cane pillars) — with last-seen timestamps.</li>
-        <li>Define MQTT topic hierarchy: consider segments like <code>agingapprentice/seasonal/</code>, <code>agingapprentice/workshop/</code>, <code>agingapprentice/lab/</code>, <code>agingapprentice/house/</code>.</li>
+        <li>SSL certificate expiry tracker that alerts when certs approach renewal.</li>
+        <li>Grafana panel showing all Aging Apprentice devices — including seasonal IoT — with last-seen timestamps.</li>
+        <li>Define MQTT topic hierarchy: <code>agingapprentice/seasonal/</code>, <code>agingapprentice/workshop/</code>, <code>agingapprentice/lab/</code>, <code>agingapprentice/house/</code>.</li>
         <li>Automated test bench scripts using pyvisa for RC experiment data capture.</li>
         <li>Zeek network behavioral analysis — evaluate adding alongside Suricata once base build is stable.</li>
-        <li>Full BOM pricing pass in CAD once final component selections are confirmed.</li>
+        <li>Consider OPNsense SNMP polling of TL-SG116E for per-port traffic visibility in Grafana.</li>
+        <li>Evaluate pulling a second OM3 fibre for electronics room if 10 GbE aggregate becomes relevant (future-proofing).</li>
       </ul>
 
       <!-- ============================================================ -->
-      <h3>Reference Documents</h3>
-      <ul>
-        <li><a href="/reference/mitchellNetNewDesign.pdf" target="_blank">MitchellNET New Design PDF</a> (source document)</li>
-        <li><a href="/reference/networkMonitoring.md" target="_blank">Network Monitoring Notes</a></li>
-        <li><a href="/reference/mqttBroker.md" target="_blank">MQTT Broker Setup</a></li>
-        <li><a href="/reference/imacServer.md" target="_blank">iMac Server Configuration</a></li>
-        <li><a href="/reference/testbenchEthernet.html" target="_blank">Test Bench Ethernet Remote Control</a></li>
-        <li><a href="https://github.com/theAgingApprentice/InternalWebServer" target="_blank">Ubuntu iMac Server GitHub</a></li>
-        <li><a href="https://github.com/theAgingApprentice/localScripts" target="_blank">Local Script Automation GitHub</a></li>
-        <li><a href="http://192.168.2.10:3000/d/mitchellnet-health/mitchellnet-health-monitoring?orgId=1&from=now-90d&to=now&timezone=browser&refresh=5m" target="_blank">Grafana Health Dashboard (internal)</a></li>
-        <li><a href="http://192.168.2.10:9090/graph" target="_blank">Prometheus Console (internal)</a></li>
-      </ul>
+      <h3 id="refs">Reference Documents</h3>
+      <div class="ref-grid">
+        <a href="/reference/mitchellNetNewDesign.pdf">MitchellNET New Design PDF<span class="ref-desc">Source architecture document</span></a>
+        <a href="/reference/networkMonitoring.md">Network Monitoring Notes<span class="ref-desc">Grafana / LibreNMS / Prometheus setup</span></a>
+        <a href="/reference/mqttBroker.md">MQTT Broker Setup<span class="ref-desc">Mosquitto configuration and topic hierarchy</span></a>
+        <a href="/reference/imacServer.md">iMac Server Configuration<span class="ref-desc">Ubuntu Server Docker stack</span></a>
+        <a href="/reference/testbenchEthernet.html">Test Bench Ethernet Remote Control<span class="ref-desc">SCPI / LXI / pyvisa instrument automation</span></a>
+        <a href="https://github.com/theAgingApprentice/InternalWebServer">Ubuntu iMac Server GitHub<span class="ref-desc">github.com/theAgingApprentice</span></a>
+        <a href="https://github.com/theAgingApprentice/localScripts">Local Script Automation GitHub<span class="ref-desc">github.com/theAgingApprentice</span></a>
+        <a href="mitchellNet_diagram.svg">Network Topology Diagram (SVG)<span class="ref-desc">Full-size interactive diagram — opens in browser</span></a>
+      </div>
 
-    </section>
-  </main>
+    </main>
+  </div><!-- .doc-wrap -->
 
-  <!-- Include Footer -->
   <div data-include="/footer.html"></div>
-
-  <!-- Scripts -->
   <script src="/js/includes.js" defer></script>
 </body>
 </html>

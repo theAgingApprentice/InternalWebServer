@@ -1,0 +1,291 @@
+<svg viewBox="0 0 1200 860" xmlns="http://www.w3.org/2000/svg" font-family="'IBM Plex Mono', 'Courier New', monospace">
+  <defs>
+    <!-- Background grid pattern -->
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#e8edf2" stroke-width="0.5"/>
+    </pattern>
+
+    <!-- Arrowhead markers -->
+    <marker id="arr-grey" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#94a3b8"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#0969da"/>
+    </marker>
+    <marker id="arr-fibre" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#7c3aed"/>
+    </marker>
+    <marker id="arr-oob" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#dc2626"/>
+    </marker>
+    <marker id="arr-both" markerWidth="8" markerHeight="6" refX="1" refY="3" orient="auto-start-reverse">
+      <polygon points="0 3, 8 0, 8 6" fill="#94a3b8"/>
+    </marker>
+
+    <!-- Drop shadow -->
+    <filter id="shadow" x="-5%" y="-5%" width="115%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#00000018"/>
+    </filter>
+    <filter id="shadow-sm" x="-5%" y="-5%" width="115%" height="115%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#00000012"/>
+    </filter>
+  </defs>
+
+  <!-- ── Canvas background ──────────────────────────────────────────── -->
+  <rect width="1200" height="860" fill="#f0f4f8"/>
+  <rect width="1200" height="860" fill="url(#grid)"/>
+
+  <!-- ── Title bar ──────────────────────────────────────────────────── -->
+  <rect x="0" y="0" width="1200" height="46" fill="#0d1117"/>
+  <text x="20" y="29" fill="#ffffff" font-size="15" font-weight="700" letter-spacing="1">MitchellNET</text>
+  <text x="105" y="29" fill="#58a6ff" font-size="15" font-weight="700" letter-spacing="1">— Home Network Topology v3.0</text>
+  <text x="1180" y="29" fill="#8b949e" font-size="10" text-anchor="end">London, Ontario · May 2026</text>
+
+  <!-- ── Legend ─────────────────────────────────────────────────────── -->
+  <rect x="870" y="58" width="310" height="152" rx="6" fill="white" filter="url(#shadow-sm)" stroke="#d0d7de" stroke-width="1"/>
+  <text x="883" y="78" font-size="9" font-weight="700" fill="#57606a" letter-spacing="0.8">LEGEND</text>
+  <!-- 10G DAC -->
+  <line x1="883" y1="95" x2="923" y2="95" stroke="#0969da" stroke-width="2.5" marker-end="url(#arr-blue)"/>
+  <text x="930" y="99" font-size="9" fill="#24292f">10 GbE SFP+ DAC / Copper</text>
+  <!-- Fibre -->
+  <line x1="883" y1="115" x2="923" y2="115" stroke="#7c3aed" stroke-width="2.5" stroke-dasharray="6,3" marker-end="url(#arr-fibre)"/>
+  <text x="930" y="119" font-size="9" fill="#24292f">10 GbE OM3 Fibre / Cat6A</text>
+  <!-- OOB -->
+  <line x1="883" y1="135" x2="923" y2="135" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-oob)"/>
+  <text x="930" y="139" font-size="9" fill="#24292f">OOB Management (1 GbE)</text>
+  <!-- 1G copper -->
+  <line x1="883" y1="155" x2="923" y2="155" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr-grey)"/>
+  <text x="930" y="159" font-size="9" fill="#24292f">1 GbE Copper</text>
+  <!-- WAN -->
+  <line x1="883" y1="175" x2="923" y2="175" stroke="#ea580c" stroke-width="2" marker-end="url(#arr-grey)"/>
+  <text x="930" y="179" font-size="9" fill="#24292f">WAN / ISP</text>
+  <!-- VLAN chips -->
+  <text x="883" y="199" font-size="9" font-weight="700" fill="#57606a" letter-spacing="0.8">VLANs</text>
+  <rect x="883" y="203" width="36" height="12" rx="2" fill="#e0f2fe"/>
+  <text x="901" y="213" font-size="7.5" font-weight="700" fill="#0c4a6e" text-anchor="middle">10 Mgmt</text>
+  <rect x="924" y="203" width="36" height="12" rx="2" fill="#ede9fe"/>
+  <text x="942" y="213" font-size="7.5" font-weight="700" fill="#4c1d95" text-anchor="middle">20 Store</text>
+  <rect x="965" y="203" width="33" height="12" rx="2" fill="#fef3c7"/>
+  <text x="981" y="213" font-size="7.5" font-weight="700" fill="#78350f" text-anchor="middle">30 IoT</text>
+  <rect x="1003" y="203" width="33" height="12" rx="2" fill="#fee2e2"/>
+  <text x="1019" y="213" font-size="7.5" font-weight="700" fill="#7f1d1d" text-anchor="middle">40 DMZ</text>
+  <rect x="1041" y="203" width="33" height="12" rx="2" fill="#fce7f3"/>
+  <text x="1057" y="213" font-size="7.5" font-weight="700" fill="#831843" text-anchor="middle">50 Lab</text>
+  <rect x="1079" y="203" width="36" height="12" rx="2" fill="#f3f4f6"/>
+  <text x="1097" y="213" font-size="7.5" font-weight="700" fill="#374151" text-anchor="middle">99 Guest</text>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ── SERVER ROOM ──────────────────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <rect x="14" y="58" width="840" height="440" rx="8" fill="none" stroke="#0969da" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <rect x="14" y="58" width="130" height="18" rx="4" fill="#0969da"/>
+  <text x="22" y="71" font-size="9" font-weight="700" fill="white" letter-spacing="0.5">SERVER ROOM</text>
+
+  <!-- ── INTERNET (ISP) ────────────────────────────────────────────── -->
+  <rect x="30" y="85" width="110" height="52" rx="6" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="85" y="105" text-anchor="middle" font-size="9" font-weight="700" fill="#9a3412">INTERNET</text>
+  <text x="85" y="118" text-anchor="middle" font-size="8" fill="#c2410c">Bell PPPoE</text>
+  <text x="85" y="130" text-anchor="middle" font-size="7.5" fill="#9a3412">HH3000 (bridge)</text>
+
+  <!-- ── FIREWALL ──────────────────────────────────────────────────── -->
+  <rect x="30" y="175" width="180" height="68" rx="6" fill="#dbeafe" stroke="#1d4ed8" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="120" y="193" text-anchor="middle" font-size="8" font-weight="700" fill="#1e3a8a">FIREWALL</text>
+  <text x="120" y="206" text-anchor="middle" font-size="9" font-weight="700" fill="#1d4ed8">Protectli VP2430</text>
+  <text x="120" y="219" text-anchor="middle" font-size="7.5" fill="#1e40af">OPNsense · Suricata · WireGuard</text>
+  <text x="120" y="231" text-anchor="middle" font-size="7.5" fill="#1e40af">4× 2.5GbE · N150 · $579</text>
+
+  <!-- ISP → Firewall WAN -->
+  <line x1="85" y1="137" x2="85" y2="175" stroke="#ea580c" stroke-width="2" marker-end="url(#arr-grey)"/>
+  <text x="93" y="158" font-size="7.5" fill="#9a3412">PPPoE WAN</text>
+
+  <!-- ── MIKROTIK CORE SWITCH ─────────────────────────────────────── -->
+  <rect x="250" y="155" width="220" height="88" rx="6" fill="#0d1117" stroke="#30363d" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="360" y="176" text-anchor="middle" font-size="8" font-weight="700" fill="#8b949e" letter-spacing="1">CORE SWITCH</text>
+  <text x="360" y="191" text-anchor="middle" font-size="10" font-weight="700" fill="#58a6ff">MikroTik CRS317</text>
+  <text x="360" y="205" text-anchor="middle" font-size="7.5" fill="#8b949e">16× SFP+ 10 GbE · SwOS/RouterOS</text>
+  <text x="360" y="218" text-anchor="middle" font-size="7.5" fill="#8b949e">SNMP · VLAN trunk · Passive cooling</text>
+  <text x="360" y="231" text-anchor="middle" font-size="7.5" fill="#8b949e">~$750 CAD · store.mikrotikcanada.ca</text>
+
+  <!-- Firewall → CRS317 (10G DAC) -->
+  <line x1="210" y1="209" x2="250" y2="199" stroke="#0969da" stroke-width="2.5" marker-end="url(#arr-blue)"/>
+  <text x="223" y="196" font-size="7" fill="#0969da">10G DAC</text>
+
+  <!-- ── OOB SWITCH ────────────────────────────────────────────────── -->
+  <rect x="30" y="310" width="180" height="62" rx="6" fill="#fff1f2" stroke="#dc2626" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="120" y="328" text-anchor="middle" font-size="8" font-weight="700" fill="#991b1b">OOB SWITCH</text>
+  <text x="120" y="341" text-anchor="middle" font-size="9" font-weight="700" fill="#dc2626">TP-Link TL-SG108E</text>
+  <text x="120" y="354" text-anchor="middle" font-size="7.5" fill="#991b1b">8-port GbE · 802.1Q · VLAN 10</text>
+  <text x="120" y="366" text-anchor="middle" font-size="7.5" fill="#991b1b">Management rail only · ~$45</text>
+
+  <!-- Firewall → OOB switch (mgmt) -->
+  <line x1="120" y1="243" x2="120" y2="310" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-oob)"/>
+  <text x="128" y="280" font-size="7" fill="#dc2626">mgmt port</text>
+
+  <!-- CRS317 → OOB switch (console) -->
+  <line x1="260" y1="243" x2="205" y2="325" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-oob)"/>
+  <text x="208" y="290" font-size="7" fill="#dc2626">RJ45 console</text>
+
+  <!-- ── UBUNTU iMAC SERVER ───────────────────────────────────────── -->
+  <rect x="250" y="310" width="200" height="68" rx="6" fill="#f0fdf4" stroke="#16a34a" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="350" y="328" text-anchor="middle" font-size="8" font-weight="700" fill="#15803d">SERVER</text>
+  <text x="350" y="341" text-anchor="middle" font-size="9" font-weight="700" fill="#16a34a">Ubuntu iMac (2019)</text>
+  <text x="350" y="354" text-anchor="middle" font-size="7.5" fill="#15803d">Nginx · MQTT · Grafana · LibreNMS</text>
+  <text x="350" y="367" text-anchor="middle" font-size="7.5" fill="#15803d">Prometheus · InfluxDB · UniFi Ctrl</text>
+
+  <!-- CRS317 → iMac (10G via RJ45 transceiver) -->
+  <line x1="360" y1="243" x2="360" y2="310" stroke="#0969da" stroke-width="2.5" marker-end="url(#arr-blue)"/>
+  <text x="368" y="280" font-size="7" fill="#0969da">10G SFP+→RJ45</text>
+
+  <!-- iMac → OOB (USB-Ethernet) -->
+  <line x1="250" y1="344" x2="210" y2="344" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-oob)"/>
+  <text x="218" y="338" font-size="7" fill="#dc2626">USB-ETH</text>
+
+  <!-- ── NAS ──────────────────────────────────────────────────────── -->
+  <rect x="480" y="310" width="200" height="68" rx="6" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="580" y="328" text-anchor="middle" font-size="8" font-weight="700" fill="#6d28d9">NAS</text>
+  <text x="580" y="341" text-anchor="middle" font-size="9" font-weight="700" fill="#7c3aed">Synology DS1823xs+</text>
+  <text x="580" y="354" text-anchor="middle" font-size="7.5" fill="#6d28d9">8-bay · 10G SFP+ · OOB port · ECC</text>
+  <text x="580" y="367" text-anchor="middle" font-size="7.5" fill="#6d28d9">VLAN 20 (Storage) · ~$2,700</text>
+
+  <!-- CRS317 → NAS (10G SFP+ DAC) -->
+  <line x1="460" y1="199" x2="490" y2="310" stroke="#0969da" stroke-width="2.5" marker-end="url(#arr-blue)"/>
+  <text x="480" y="270" font-size="7" fill="#0969da">10G DAC</text>
+
+  <!-- NAS → OOB (IPMI) -->
+  <line x1="480" y1="372" x2="210" y2="362" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-oob)"/>
+  <text x="340" y="358" font-size="7" fill="#dc2626">IPMI/OOB mgmt</text>
+
+  <!-- ── UniFi APs ─────────────────────────────────────────────────── -->
+  <rect x="250" y="420" width="430" height="62" rx="6" fill="#fffbeb" stroke="#d97706" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="465" y="438" text-anchor="middle" font-size="8" font-weight="700" fill="#92400e">WiFi ACCESS POINTS</text>
+  <text x="465" y="451" text-anchor="middle" font-size="9" font-weight="700" fill="#d97706">3× Ubiquiti UniFi U6 Pro</text>
+  <text x="465" y="464" text-anchor="middle" font-size="7.5" fill="#92400e">Wi-Fi 6 · 4×4 MIMO · VLAN-tagged SSIDs · PoE+</text>
+  <text x="465" y="477" text-anchor="middle" font-size="7.5" fill="#92400e">Floor 1 / Floor 2 / Electronics Room · $219 ea.</text>
+
+  <!-- CRS317 → APs (1G trunk) -->
+  <line x1="360" y1="243" x2="390" y2="420" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr-grey)"/>
+  <text x="365" y="345" font-size="7" fill="#78716c">Cat6 trunk</text>
+
+  <!-- ── Raspberry Pi ──────────────────────────────────────────────── -->
+  <rect x="700" y="310" width="136" height="68" rx="6" fill="#fff1f2" stroke="#e11d48" stroke-width="1.2" filter="url(#shadow-sm)"/>
+  <text x="768" y="328" text-anchor="middle" font-size="8" font-weight="700" fill="#9f1239">DMZ</text>
+  <text x="768" y="341" text-anchor="middle" font-size="9" font-weight="700" fill="#e11d48">Raspberry Pi 5</text>
+  <text x="768" y="354" text-anchor="middle" font-size="7.5" fill="#9f1239">HTTPS inbound only</text>
+  <text x="768" y="367" text-anchor="middle" font-size="7.5" fill="#9f1239">VLAN 40 (DMZ)</text>
+
+  <!-- CRS317 → Pi (1G) -->
+  <line x1="468" y1="215" x2="730" y2="315" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arr-grey)"/>
+  <text x="615" y="275" font-size="7" fill="#78716c">1G Cat6 · VLAN 40</text>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ── MAC STUDIO WORKSPACE ─────────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <rect x="14" y="524" width="420" height="168" rx="8" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <rect x="14" y="524" width="165" height="18" rx="4" fill="#7c3aed"/>
+  <text x="22" y="537" font-size="9" font-weight="700" fill="white" letter-spacing="0.5">MAC STUDIO WORKSPACE</text>
+  <text x="190" y="537" font-size="8" fill="#7c3aed">20–30 m OM3 fibre run ↑</text>
+
+  <!-- Mac Studio box -->
+  <rect x="30" y="548" width="185" height="128" rx="6" fill="#faf5ff" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadow-sm)"/>
+  <text x="122" y="566" text-anchor="middle" font-size="8" font-weight="700" fill="#6d28d9">WORKSTATION</text>
+  <text x="122" y="580" text-anchor="middle" font-size="10" font-weight="700" fill="#7c3aed">Mac Studio M4 Max</text>
+  <text x="122" y="594" text-anchor="middle" font-size="7.5" fill="#6d28d9">Video editing · CNC design · Dev</text>
+  <text x="122" y="607" text-anchor="middle" font-size="7.5" fill="#6d28d9">Sonnet Solo 10G SFP+ (TB4)</text>
+  <text x="122" y="620" text-anchor="middle" font-size="7.5" fill="#6d28d9">→ 10GBase-SR transceiver</text>
+  <text x="122" y="633" text-anchor="middle" font-size="7.5" fill="#6d28d9">→ OM3 LC-LC 30m → CRS317</text>
+  <text x="122" y="646" text-anchor="middle" font-size="7.5" fill="#6d28d9">VLAN 20 (Storage) + VLAN 50 access</text>
+  <text x="122" y="660" text-anchor="middle" font-size="7.5" fill="#6d28d9">~$270–310 Sonnet adapter</text>
+
+  <!-- OM3 fibre run label + line -->
+  <line x1="225" y1="590" x2="360" y2="420" stroke="#7c3aed" stroke-width="2" stroke-dasharray="7,3" marker-end="url(#arr-fibre)"/>
+  <rect x="235" y="490" width="118" height="26" rx="3" fill="white" stroke="#7c3aed" stroke-width="1"/>
+  <text x="294" y="503" text-anchor="middle" font-size="7.5" font-weight="700" fill="#7c3aed">OM3 Fibre 30m</text>
+  <text x="294" y="513" text-anchor="middle" font-size="7" fill="#6d28d9">10GBase-SR · up to 300m</text>
+
+  <!-- Dummy IoT devices in workspace -->
+  <rect x="236" y="548" width="180" height="70" rx="6" fill="#fffbeb" stroke="#d97706" stroke-width="1" filter="url(#shadow-sm)"/>
+  <text x="326" y="566" text-anchor="middle" font-size="8" font-weight="700" fill="#92400e">WiFi Clients (this room)</text>
+  <text x="326" y="578" text-anchor="middle" font-size="7.5" fill="#78350f">SSID: AgingApprentice → VLAN 1</text>
+  <text x="326" y="590" text-anchor="middle" font-size="7.5" fill="#78350f">SSID: AgingApp-IoT → VLAN 30</text>
+  <text x="326" y="602" text-anchor="middle" font-size="7.5" fill="#78350f">SSID: Guest → VLAN 99</text>
+  <text x="326" y="614" text-anchor="middle" font-size="7.5" fill="#78350f">via U6 Pro AP floor 1 or 2</text>
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- ── ELECTRONICS ROOM ─────────────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <rect x="460" y="524" width="718" height="320" rx="8" fill="none" stroke="#059669" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <rect x="460" y="524" width="160" height="18" rx="4" fill="#059669"/>
+  <text x="468" y="537" font-size="9" font-weight="700" fill="white" letter-spacing="0.5">ELECTRONICS ROOM</text>
+  <text x="628" y="537" font-size="8" fill="#059669">20–30 m Cat6A run ↑ (new)</text>
+
+  <!-- TL-SG116E -->
+  <rect x="530" y="548" width="210" height="75" rx="6" fill="#ecfdf5" stroke="#059669" stroke-width="1.8" filter="url(#shadow)"/>
+  <text x="635" y="565" text-anchor="middle" font-size="8" font-weight="700" fill="#065f46">ROOM SWITCH ✦ NEW</text>
+  <text x="635" y="579" text-anchor="middle" font-size="10" font-weight="700" fill="#059669">TP-Link TL-SG116E</text>
+  <text x="635" y="593" text-anchor="middle" font-size="7.5" fill="#065f46">16-port GbE · 802.1Q · fanless</text>
+  <text x="635" y="606" text-anchor="middle" font-size="7.5" fill="#065f46">VLAN trunk uplink → CRS317 · ~$75</text>
+
+  <!-- Cat6A uplink to CRS317 -->
+  <line x1="635" y1="548" x2="450" y2="230" stroke="#7c3aed" stroke-width="2" stroke-dasharray="7,3" marker-end="url(#arr-fibre)"/>
+  <rect x="488" y="365" width="118" height="26" rx="3" fill="white" stroke="#059669" stroke-width="1"/>
+  <text x="547" y="378" text-anchor="middle" font-size="7.5" font-weight="700" fill="#059669">Cat6A · 30m</text>
+  <text x="547" y="388" text-anchor="middle" font-size="7" fill="#065f46">10G-BaseT transceiver in CRS317</text>
+
+  <!-- ── Bench instruments ─────────────────────────────────────────── -->
+  <!-- Oscilloscope -->
+  <rect x="476" y="650" width="148" height="56" rx="5" fill="#fce7f3" stroke="#9d174d" stroke-width="1" filter="url(#shadow-sm)"/>
+  <text x="550" y="666" text-anchor="middle" font-size="7.5" font-weight="700" fill="#831843">Siglent SDS1202X-E</text>
+  <text x="550" y="678" text-anchor="middle" font-size="8" fill="#9d174d">Oscilloscope</text>
+  <text x="550" y="690" text-anchor="middle" font-size="7" fill="#831843">SCPI/LXI · VLAN 50</text>
+  <text x="550" y="700" text-anchor="middle" font-size="7" fill="#831843">Port 1 → TL-SG116E</text>
+  <line x1="550" y1="650" x2="590" y2="623" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr-grey)"/>
+
+  <!-- Signal Generator -->
+  <rect x="638" y="650" width="148" height="56" rx="5" fill="#fce7f3" stroke="#9d174d" stroke-width="1" filter="url(#shadow-sm)"/>
+  <text x="712" y="666" text-anchor="middle" font-size="7.5" font-weight="700" fill="#831843">Siglent SDG-2042X</text>
+  <text x="712" y="678" text-anchor="middle" font-size="8" fill="#9d174d">Signal Generator</text>
+  <text x="712" y="690" text-anchor="middle" font-size="7" fill="#831843">SCPI/LXI · VLAN 50</text>
+  <text x="712" y="700" text-anchor="middle" font-size="7" fill="#831843">Port 2 → TL-SG116E</text>
+  <line x1="712" y1="650" x2="660" y2="623" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr-grey)"/>
+
+  <!-- Multimeter -->
+  <rect x="800" y="650" width="148" height="56" rx="5" fill="#fce7f3" stroke="#9d174d" stroke-width="1" filter="url(#shadow-sm)"/>
+  <text x="874" y="666" text-anchor="middle" font-size="7.5" font-weight="700" fill="#831843">Siglent SDM3055</text>
+  <text x="874" y="678" text-anchor="middle" font-size="8" fill="#9d174d">Multimeter</text>
+  <text x="874" y="690" text-anchor="middle" font-size="7" fill="#831843">SCPI/LXI · VLAN 50</text>
+  <text x="874" y="700" text-anchor="middle" font-size="7" fill="#831843">Port 3 → TL-SG116E</text>
+  <line x1="874" y1="650" x2="720" y2="623" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr-grey)"/>
+
+  <!-- Power Supply -->
+  <rect x="962" y="650" width="148" height="56" rx="5" fill="#fce7f3" stroke="#9d174d" stroke-width="1" filter="url(#shadow-sm)"/>
+  <text x="1036" y="666" text-anchor="middle" font-size="7.5" font-weight="700" fill="#831843">Rigol DP832</text>
+  <text x="1036" y="678" text-anchor="middle" font-size="8" fill="#9d174d">DC Power Supply</text>
+  <text x="1036" y="690" text-anchor="middle" font-size="7" fill="#831843">SCPI/LXI · VLAN 50</text>
+  <text x="1036" y="700" text-anchor="middle" font-size="7" fill="#831843">Port 4 → TL-SG116E</text>
+  <line x1="1000" y1="650" x2="730" y2="618" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr-grey)"/>
+
+  <!-- ── 4 general devices ─────────────────────────────────────────── -->
+  <rect x="750" y="548" width="400" height="72" rx="5" fill="#f0fdf4" stroke="#16a34a" stroke-width="1" filter="url(#shadow-sm)"/>
+  <text x="950" y="565" text-anchor="middle" font-size="8" font-weight="700" fill="#15803d">4× General Network Devices</text>
+  <text x="950" y="578" text-anchor="middle" font-size="7.5" fill="#15803d">(previously on Archer A6 LAN ports)</text>
+  <text x="950" y="591" text-anchor="middle" font-size="7.5" fill="#15803d">Ports 5–8 → TL-SG116E · VLAN 1 or assigned</text>
+  <text x="950" y="604" text-anchor="middle" font-size="7.5" fill="#15803d">TP-Link Archer A6 retired</text>
+  <line x1="820" y1="548" x2="740" y2="623" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr-grey)"/>
+
+  <!-- U6 Pro (electronics room) -->
+  <rect x="476" y="548" width="46" height="60" rx="4" fill="#fffbeb" stroke="#d97706" stroke-width="1" filter="url(#shadow-sm)"/>
+  <text x="499" y="564" text-anchor="middle" font-size="7" font-weight="700" fill="#92400e">U6 Pro</text>
+  <text x="499" y="575" text-anchor="middle" font-size="6.5" fill="#78350f">Elec Room</text>
+  <text x="499" y="585" text-anchor="middle" font-size="6.5" fill="#78350f">Port 9</text>
+  <text x="499" y="595" text-anchor="middle" font-size="6.5" fill="#78350f">Trunk</text>
+  <line x1="499" y1="548" x2="536" y2="548" stroke="#d97706" stroke-width="1" marker-end="url(#arr-grey)"/>
+
+  <!-- SCPI control annotation -->
+  <rect x="62" y="738" width="355" height="28" rx="4" fill="white" stroke="#7c3aed" stroke-width="1" stroke-dasharray="4,2"/>
+  <text x="239" y="752" text-anchor="middle" font-size="7.5" fill="#6d28d9" font-weight="600">SCPI/LXI control path:</text>
+  <text x="239" y="763" text-anchor="middle" font-size="7.5" fill="#6d28d9">Mac Studio (VLAN 20) → OPNsense rule → VLAN 50 port 5025</text>
+
+  <!-- ── Bottom footer ──────────────────────────────────────────────── -->
+  <rect x="0" y="840" width="1200" height="20" fill="#0d1117"/>
+  <text x="600" y="854" text-anchor="middle" font-size="8" fill="#8b949e">MitchellNET · Aging Apprentice Project · London, Ontario, Canada · v3.0 May 2026 · All prices CAD</text>
+</svg>

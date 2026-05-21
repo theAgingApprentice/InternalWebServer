@@ -1,0 +1,308 @@
+MitchellNET Internal Site — Analysis, Architecture Proposal & Recommendations
+Generated: 2026-05-19
+===============================================================================
+
+
+PART 1: CURRENT SITE ANALYSIS
+==============================
+
+SITE IDENTITY
+-------------
+Private, internal-only web server accessible only on the MitchellNET home network.
+Branded as "TheAgingApprentice" projects.
+Copyright: © 2026 TheAgingApprentice — Internal Use Only
+
+
+CURRENT STRUCTURE
+-----------------
+The site uses a consistent shell of shared header.html + footer.html components,
+with a nav bar linking to five top-level sections: Home, Tools, Reference, Projects, About.
+
+Total: 13 HTML files across a flat + two-level directory hierarchy.
+All pages share a common stylesheet (/css/style.css) and component includes.
+
+ROOT-LEVEL PAGES
+  index.html      - Landing page with quick-links table (web mail, LLMs, search engines,
+                    misc tools, own websites). Version 2.0.0.
+  about.html      - Creator background + server/network technical details
+  projects.html   - Project methodology PDF link + table of current/past projects
+  reference.html  - Single large page with 13 h3 sections and 40+ links spanning
+                    electronics, machine shop, wood shop, networking, and more
+  tools.html      - Two-row table: locally-hosted tools and third-party online tools
+  header.html     - Shared nav component
+  footer.html     - Shared footer component
+
+SUB-MODULES
+  fitnessTracker/index.html   - Fitness tracking app (v2.1.0)
+  fitnessTracker/admin.html   - Admin interface for fitness tracker
+  recipies/recipies.html      - Recipe collection and dinner planner
+  reference/macStudio.html    - Mac Studio Windows app setup guide
+  reference/mitchellNet.html  - Network design documentation (v3.0)
+  reference/testbenchEthernet.html - Test bench Ethernet remote control docs
+
+
+CURRENT PROBLEMS
+----------------
+1. REFERENCE.HTML IS OVERLOADED
+   A single flat page lists 40+ items across 13 unrelated topic sections.
+   Electronics hardware, machine shop manuals, wood shop guides, network config,
+   Tesla subscriptions, and Youtube playlists all live in the same list.
+   This is unscannable and will only get worse as content grows.
+
+2. INDEX.HTML AND TOOLS.HTML OVERLAP
+   Both pages contain links to external tools and services. The home page
+   has LLMs, web mail, search engines, and misc tools. The tools page has
+   Grafana, Prometheus, Autodesk, and Bambu Labs. There is no principled
+   distinction between the two.
+
+3. LOCALLY-HOSTED APPS ARE BURIED
+   The fitness tracker and recipe collection are only discoverable via tools.html.
+   They are not in the nav bar and have no visual prominence.
+
+4. REFERENCE/ HTML FILES ARE ORPHANED
+   macStudio.html, mitchellNet.html, and testbenchEthernet.html are standalone
+   reference documents in the reference/ subfolder, only reachable from links
+   inside reference.html. They are not surfaced in any consistent way.
+
+5. PROJECTS.HTML IS SPARSE
+   The page has four project categories; one ("Machine Shop") says "Nothing yet."
+   The methodology content is just a PDF link with no surrounding context.
+
+6. NETWORK/SERVER INFO IS SPLIT ACROSS TWO PAGES
+   about.html lists server hardware, IP addresses, OS, and network details.
+   reference.html has a "Network & Server Administration" section with iMac
+   server config, MQTT broker, and Ubuntu GUI docs. These belong together.
+
+7. DUPLICATE LINK IN REFERENCE.HTML
+   "AI Infrastructure plan" appears in both the "AI & Machine Learning" section
+   and the "ESP32 Microcontroller" section. The ESP32 entry also has a wrong
+   path (/AI_Dev_Environment_v3.pdf instead of /reference/AI_Dev_Environment_v3.pdf).
+
+8. DEPRECATED CONTENT LEFT IN PLACE
+   index.html lists two deprecated sites and two deprecated GitHub pages with
+   inline red "Deprecated" labels. These add noise and could be archived.
+
+9. TYPOS ACROSS MULTIPLE FILES
+   - "recipies" should be "recipes" (folder name, file name, and page title)
+   - "pracrtices" in projects.html
+   - "hany" in tools.html
+   - "produciton" in about.html
+
+
+===============================================================================
+
+PART 2: PROPOSED INFORMATION ARCHITECTURE
+==========================================
+
+ORGANIZING PRINCIPLE
+--------------------
+Group content by the domain it serves, not by file type. The site covers four
+distinct domains that a user visits for different reasons:
+
+  (A) ENGINEERING — electronics, embedded systems, software, AI/ML, PCB design
+  (B) WORKSHOP     — machine shop, wood shop, 3D printing/scanning, electrical
+  (C) INFRASTRUCTURE — MitchellNET network, servers, monitoring, home automation
+  (D) MAKING / PROJECTS — active and past maker projects
+
+The current nav (Home | Tools | Reference | Projects | About) does not map to
+these domains. "Reference" is a container, not a topic. "Tools" mixes local apps
+with external links.
+
+
+PROPOSED NAV (6 items)
+-----------------------
+  Home | Engineering | Workshop | Infrastructure | Projects | About
+
+  Home          — Quick-launch dashboard for frequently used external services
+                  (web mail, LLMs, search engines, own websites)
+  Engineering   — All electronics, embedded, software, and AI reference material
+  Workshop      — Machine shop, wood shop, 3D printing, electrical/facilities
+  Infrastructure — MitchellNET network design, server config, monitoring, MQTT
+  Projects      — Methodology, active projects, past projects, hosted apps
+  About         — Site and creator info; server and network technical details
+
+
+PROPOSED DIRECTORY STRUCTURE
+------------------------------
+html/prod/
+├── index.html                      (Home — quick-launch dashboard)
+├── about.html                      (About — site info, server, network)
+├── projects.html                   (Projects — methodology + project list + apps)
+├── header.html
+├── footer.html
+│
+├── engineering/
+│   └── index.html                  (Engineering reference hub)
+│       Sections: ESP32 & Embedded, Arduino, PCB Design, Electronic Components,
+│                 SMD Components, Electronic Tools, Software Dev & SDLC,
+│                 AI & Machine Learning, 3D Scanning
+│
+├── workshop/
+│   └── index.html                  (Workshop reference hub)
+│       Sections: Machine Shop (PCNC770), Wood Shop, 3D Printing,
+│                 Electrical Panel & Facilities, General Workshop
+│
+├── infrastructure/
+│   └── index.html                  (Infrastructure reference hub)
+│       Sections: Network Design, Server Setup, Monitoring & Observability,
+│                 MQTT & Home Automation, Mac Studio Setup, Test Bench
+│
+├── apps/
+│   ├── fitnessTracker/
+│   │   ├── index.html
+│   │   └── admin.html
+│   └── recipes/
+│       └── index.html
+│
+└── reference/                      (keep existing PDFs/assets in place)
+    ├── *.pdf
+    ├── *.md
+    └── *.html (macStudio, mitchellNet, testbenchEthernet — keep as detail pages)
+
+
+NOTE: The reference/ folder of assets (PDFs, images, markdown files) does not
+need to move. Only the HTML pages that link to them are being reorganized.
+
+
+PAGE-BY-PAGE CHANGES
+--------------------
+
+HOME (index.html)
+  Keep: web mail, LLMs, search engines, own websites table
+  Remove: deprecated links (archive in About or delete)
+  Remove: "Miscellaneous Tools" row (move Posterazor/Shaper/Bambu to Workshop)
+  Add: three prominent card links to Engineering / Workshop / Infrastructure hubs
+
+ENGINEERING (engineering/index.html) — new page
+  Absorbs from reference.html:
+    - ESP32 Microcontroller (fix duplicate AI link, fix bad path)
+    - Arduino & Embedded Systems
+    - PCB Design & Manufacturing
+    - Electronic Components
+    - SMD Components
+    - Electronic Tools
+    - AI & Machine Learning
+    - Project & Software Development (SDLC PDF, local scripts GitHub)
+    - 3D Printing & Scanning
+    - Electronic Projects and Experiments
+
+WORKSHOP (workshop/index.html) — new page
+  Absorbs from reference.html:
+    - Machine Shop (PCNC770 manuals)
+    - Wood Shop
+    - Electrical & Workshop (panel, sink maintenance, pilot holes)
+  Absorbs from index.html:
+    - Shaper Tools link
+    - Bambu Labs link (3D printers)
+  Absorbs from tools.html:
+    - Autodesk account / Fusion360 Hub
+    - Bambu Labs (consolidate duplicate)
+
+INFRASTRUCTURE (infrastructure/index.html) — new page
+  Absorbs from reference.html:
+    - Network & Server Administration (iMac server, power mgmt, network monitoring,
+      MQTT broker, MitchellNET diagram, Ubuntu GUI)
+    - macStudio.html link
+    - testbenchEthernet.html link
+  Absorbs from about.html:
+    - Server details, network details (or link back to About)
+  Absorbs from tools.html:
+    - Grafana health dashboard
+    - Prometheus console
+
+PROJECTS (projects.html)
+  Keep: methodology PDF, GitHub project board link, project table
+  Add: links to hosted apps (fitness tracker, recipes) as a "Local Apps" section
+  Clean: remove "Nothing yet" rows or replace with placeholder text
+
+ABOUT (about.html)
+  Keep: site purpose, server info, network info
+  Add: archive section for deprecated sites (move out of Home)
+  Clean: fix heading nesting (h1 inside p tag)
+
+APPS — keep as separate sub-apps, surface from Projects page and nav if desired
+
+
+===============================================================================
+
+PART 3: PRESENTATION RECOMMENDATIONS
+======================================
+
+1. REPLACE FLAT LISTS WITH CARD GRIDS ON HUB PAGES
+   The engineering, workshop, and infrastructure index pages each have 6-10
+   topic sections. Present each section as a card with:
+     - Icon or emoji representing the topic
+     - Section title (e.g., "PCB Design")
+     - 1-line description
+     - Expandable list of links (or inline if fewer than 4)
+   This makes the page scannable at a glance without scrolling through a wall
+   of <ul> items.
+
+2. ADD COLLAPSIBLE SECTIONS (ACCORDIONS) FOR DENSE CONTENT
+   Reference sections with 5+ links (PCB Design has 7, Machine Shop has 7)
+   should default to collapsed on page load. A user looking for one specific
+   thing can expand only what they need. Simple CSS + minimal JS, no framework.
+
+3. ADD A SEARCH/FILTER BAR ON EACH HUB PAGE
+   A text input that filters visible links in real time (JS string match on
+   link text + description). This is especially valuable on the engineering hub
+   where there are 30+ items. Implementation is ~20 lines of vanilla JS.
+
+4. IMPROVE HOME PAGE LAYOUT
+   Replace the plain HTML table with a two-column card layout grouping:
+     - Communication (web mail)
+     - AI Assistants (LLMs)
+     - Search
+     - My Presence (GitHub, YouTube, external site)
+   Each group gets a header and icon. More scannable than a two-column table.
+
+5. GIVE LOCALLY-HOSTED APPS MORE VISIBILITY
+   The fitness tracker and recipes collection are useful daily-driver tools.
+   Options:
+     (a) Add an "Apps" link to the main nav bar
+     (b) Feature them as prominent cards on the Home page
+     (c) Surface them in Projects page under a "Hosted Apps" section
+   Recommend (b): add two app cards to the Home page above the quick-links table.
+
+6. FIX CONTENT BUGS BEFORE OR DURING MIGRATION
+   - Fix duplicate AI Infrastructure link in reference.html ESP32 section
+   - Fix broken path: /AI_Dev_Environment_v3.pdf → /reference/AI_Dev_Environment_v3.pdf
+   - Rename "recipies" to "recipes" in folder, file, and page title
+   - Fix typos: pracrtices, hany, produciton
+   - Fix h1-inside-p nesting in about.html
+   - Update page <title> tags (currently "reference", "tools" — use sentence case)
+
+7. CONSOLIDATE DUPLICATE EXTERNAL LINKS
+   Bambu Labs appears in both index.html and tools.html. Shaper Tools appears
+   in index.html and is referenced in reference.html (YouTube). Pick one home
+   for each and link from the other, or just remove the duplicate.
+
+
+===============================================================================
+
+PART 4: MIGRATION APPROACH
+============================
+
+RECOMMENDED PHASING
+--------------------
+Phase 1 — Content cleanup (no structural change)
+  Fix all typos, fix duplicate/broken links, remove deprecated entries from
+  index.html, clean up projects.html empty rows. Low risk, high polish.
+
+Phase 2 — Create new hub pages
+  Build engineering/index.html, workshop/index.html, infrastructure/index.html
+  by splitting content out of reference.html. Update nav bar to include new links.
+  Keep reference.html as a redirect or tombstone page temporarily.
+
+Phase 3 — Improve Home and Projects
+  Redesign index.html with card layout and app shortcuts.
+  Expand projects.html with hosted apps section.
+
+Phase 4 — Presentation polish
+  Add card grid styling to hub pages.
+  Add collapsible sections and filter bar.
+
+Each phase can be completed and deployed independently. The site remains fully
+functional throughout.
+
+===============================================================================

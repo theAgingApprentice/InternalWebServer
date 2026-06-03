@@ -225,6 +225,107 @@ table td br {
     line-height: 1.4;
 }
 
+/* Hub card grid — Engineering, Workshop, Infrastructure pages */
+.hub-card-grid {
+    display: grid;
+    gap: 1.25rem;
+    margin: 1.5rem 0;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.hub-card {
+    border: 2px solid #000;
+    border-radius: 4px;
+    padding: 1.25rem;
+    background: #fff;
+}
+
+.hub-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    margin-bottom: 0.35rem;
+}
+
+.hub-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.hub-card h3 {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+    margin: 0;
+}
+
+.hub-desc {
+    font-size: 0.85rem;
+    color: #666;
+    margin: 0 0 0.7rem;
+    line-height: 1.4;
+}
+
+.hub-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.hub-card ul li {
+    padding: 0.2rem 0;
+    font-size: 0.9rem;
+}
+
+.hub-card ul li a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.hub-card ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Accordion — dense sections (5+ links) collapsed by default */
+.hub-card details > summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #555;
+    padding: 0.25rem 0;
+    list-style: none;
+    user-select: none;
+}
+
+.hub-card details > summary::-webkit-details-marker { display: none; }
+
+.hub-card details > summary::before { content: '▶ Show '; }
+.hub-card details[open] > summary::before { content: '▼ Hide '; }
+
+.hub-card details > ul {
+    margin-top: 0.4rem;
+}
+
+/* Filter bar */
+.hub-filter-bar {
+    margin: 0 0 1.5rem;
+}
+
+.hub-filter-bar input {
+    width: 100%;
+    max-width: 420px;
+    padding: 0.55rem 0.8rem;
+    font-size: 1rem;
+    border: 2px solid #000;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.hub-filter-bar input:focus {
+    outline: none;
+    border-color: #0066cc;
+}
+
 /* Footer styles */
 .site-footer {
     background-color: #f5f5f5;

@@ -18,42 +18,81 @@
   <main class="content">
     <section>
       <h2>Infrastructure Reference</h2>
-      <p>
-        MitchellNET network design, server configuration, monitoring, home automation, and test bench documentation.
-      </p>
+      <p>MitchellNET network design, server configuration, monitoring, home automation, and test bench documentation.</p>
 
-      <h3>Network Design</h3>
-      <ul>
-        <li><a href="/img/mitchellnet.pdf" target="_blank">MitchellNET Diagram</a> (PDF) — MitchellNET network architecture diagram</li>
-        <li><a href="/reference/mitchellNet.html" target="_blank">MitchellNET Detail Page</a> (HTML) — MitchellNET network architecture detail page</li>
-        <li><a href="https://github.com/theAgingApprentice/MitchellNET?tab=readme-ov-file" target="_blank" rel="noopener noreferrer">MitchellNET GitHub Repo</a> (Website)</li>
-      </ul>
+      <div class="hub-filter-bar">
+        <input id="hub-filter" type="search" placeholder="Filter links…" aria-label="Filter infrastructure links">
+      </div>
 
-      <h3>Server Setup</h3>
-      <ul>
-        <li><a href="/reference/imacServer.md" target="_blank">iMac Server</a> (Markdown) — iMac server configuration and setup notes</li>
-        <li><a href="/reference/imacServerPowerManagement.pdf" target="_blank">iMac Server Power Management</a> (PDF) — Power management settings for iMac server</li>
-        <li><a href="/reference/ubuntuGui.pdf" target="_blank">Ubuntu GUI</a> (PDF) — Ubuntu desktop environment configuration</li>
-        <li><a href="/reference/macStudio.html" target="_blank">Mac Studio</a> (HTML) — Mac Studio configuration and setup notes</li>
-        <li><a href="/about.html">Server &amp; Network Details</a> — Hardware specs, IP addresses, and OS details (About page)</li>
-      </ul>
+      <div class="hub-card-grid">
 
-      <h3>Monitoring &amp; Observability</h3>
-      <ul>
-        <li><a href="http://192.168.2.10:3000/d/mitchellnet-health/mitchellnet-health-monitoring?orgId=1&from=now-90d&to=now&timezone=browser&refresh=5m">MitchellNET Grafana Health Dashboard</a></li>
-        <li><a href="http://192.168.2.10:9090/graph">MitchellNET Prometheus Console</a></li>
-        <li><a href="/reference/networkMonitoring.md" target="_blank">Network Monitoring</a> (Markdown) — Network monitoring tools and techniques</li>
-      </ul>
+        <div class="hub-card">
+          <div class="hub-card-header">
+            <span class="hub-icon">🌐</span>
+            <h3>Network Design</h3>
+          </div>
+          <p class="hub-desc">MitchellNET architecture diagrams and GitHub repo</p>
+          <ul>
+            <li><a href="/img/mitchellnet.pdf" target="_blank">MitchellNET Diagram</a> (PDF) — MitchellNET network architecture diagram</li>
+            <li><a href="/reference/mitchellNet.html" target="_blank">MitchellNET Detail Page</a> (HTML) — MitchellNET network architecture detail page</li>
+            <li><a href="https://github.com/theAgingApprentice/MitchellNET?tab=readme-ov-file" target="_blank" rel="noopener noreferrer">MitchellNET GitHub Repo</a> (Website)</li>
+          </ul>
+        </div>
 
-      <h3>MQTT &amp; Home Automation</h3>
-      <ul>
-        <li><a href="/reference/mqttBroker.md" target="_blank">MQTT Broker</a> (Markdown) — MQTT broker setup and configuration</li>
-      </ul>
+        <div class="hub-card">
+          <div class="hub-card-header">
+            <span class="hub-icon">🖥️</span>
+            <h3>Server Setup</h3>
+          </div>
+          <p class="hub-desc">iMac server config, power management, Ubuntu, and Mac Studio</p>
+          <details>
+            <summary>5 references</summary>
+            <ul>
+              <li><a href="/reference/imacServer.md" target="_blank">iMac Server</a> (Markdown) — iMac server configuration and setup notes</li>
+              <li><a href="/reference/imacServerPowerManagement.pdf" target="_blank">iMac Server Power Management</a> (PDF) — Power management settings for iMac server</li>
+              <li><a href="/reference/ubuntuGui.pdf" target="_blank">Ubuntu GUI</a> (PDF) — Ubuntu desktop environment configuration</li>
+              <li><a href="/reference/macStudio.html" target="_blank">Mac Studio</a> (HTML) — Mac Studio configuration and setup notes</li>
+              <li><a href="/about.html">Server &amp; Network Details</a> — Hardware specs, IP addresses, and OS details (About page)</li>
+            </ul>
+          </details>
+        </div>
 
-      <h3>Test Bench</h3>
-      <ul>
-        <li><a href="/reference/testbenchEthernet.html" target="_blank">Testbench Ethernet</a> (HTML) — Testbench Ethernet configuration and setup notes</li>
-      </ul>
+        <div class="hub-card">
+          <div class="hub-card-header">
+            <span class="hub-icon">📊</span>
+            <h3>Monitoring &amp; Observability</h3>
+          </div>
+          <p class="hub-desc">Grafana dashboard, Prometheus console, and monitoring docs</p>
+          <ul>
+            <li><a href="http://192.168.2.10:3000/d/mitchellnet-health/mitchellnet-health-monitoring?orgId=1&from=now-90d&to=now&timezone=browser&refresh=5m">MitchellNET Grafana Health Dashboard</a></li>
+            <li><a href="http://192.168.2.10:9090/graph">MitchellNET Prometheus Console</a></li>
+            <li><a href="/reference/networkMonitoring.md" target="_blank">Network Monitoring</a> (Markdown) — Network monitoring tools and techniques</li>
+          </ul>
+        </div>
+
+        <div class="hub-card">
+          <div class="hub-card-header">
+            <span class="hub-icon">🏠</span>
+            <h3>MQTT &amp; Home Automation</h3>
+          </div>
+          <p class="hub-desc">MQTT broker setup and configuration</p>
+          <ul>
+            <li><a href="/reference/mqttBroker.md" target="_blank">MQTT Broker</a> (Markdown) — MQTT broker setup and configuration</li>
+          </ul>
+        </div>
+
+        <div class="hub-card">
+          <div class="hub-card-header">
+            <span class="hub-icon">🔬</span>
+            <h3>Test Bench</h3>
+          </div>
+          <p class="hub-desc">Testbench Ethernet configuration and setup</p>
+          <ul>
+            <li><a href="/reference/testbenchEthernet.html" target="_blank">Testbench Ethernet</a> (HTML) — Testbench Ethernet configuration and setup notes</li>
+          </ul>
+        </div>
+
+      </div>
     </section>
   </main>
 
@@ -62,5 +101,6 @@
 
   <!-- Scripts -->
   <script src="/js/includes.js" defer></script>
+  <script src="/js/hub.js" defer></script>
 </body>
 </html>

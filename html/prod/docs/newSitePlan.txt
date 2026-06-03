@@ -298,7 +298,7 @@ Phase 3 — Improve Home and Projects [DONE]
   Redesign index.html with card layout and app shortcuts.
   Expand projects.html with hosted apps section.
 
-Phase 4 — Presentation polish
+Phase 4 — Presentation polish [DONE]
   Add card grid styling to hub pages.
   Add collapsible sections and filter bar.
 

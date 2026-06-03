@@ -285,7 +285,7 @@ PART 4: MIGRATION APPROACH
 
 RECOMMENDED PHASING
 --------------------
-Phase 1 — Content cleanup (no structural change)
+Phase 1 — Content cleanup (no structural change) [DONE]
   Fix all typos, fix duplicate/broken links, remove deprecated entries from
   index.html, clean up projects.html empty rows. Low risk, high polish.
 

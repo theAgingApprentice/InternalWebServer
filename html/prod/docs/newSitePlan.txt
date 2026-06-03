@@ -289,7 +289,7 @@ Phase 1 — Content cleanup (no structural change) [DONE]
   Fix all typos, fix duplicate/broken links, remove deprecated entries from
   index.html, clean up projects.html empty rows. Low risk, high polish.
 
-Phase 2 — Create new hub pages
+Phase 2 — Create new hub pages [DONE]
   Build engineering/index.html, workshop/index.html, infrastructure/index.html
   by splitting content out of reference.html. Update nav bar to include new links.
   Keep reference.html as a redirect or tombstone page temporarily.

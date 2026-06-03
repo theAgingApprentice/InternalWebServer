@@ -159,6 +159,72 @@ table td br {
     margin-bottom: 0.25rem;
 }
 
+/* Card grid — used on Home page */
+.card-grid {
+    display: grid;
+    gap: 1rem;
+    margin: 1.25rem 0 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.card {
+    border: 2px solid #000;
+    border-radius: 4px;
+    padding: 1.25rem;
+    background: #fff;
+}
+
+.card h3 {
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.6rem;
+    color: #333;
+}
+
+.card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.card ul li {
+    padding: 0.2rem 0;
+}
+
+.card ul li a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.card ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Link cards — hub and app shortcuts */
+.card.link-card {
+    text-align: center;
+}
+
+.card.link-card a.card-link {
+    display: block;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #0066cc;
+    text-decoration: none;
+    margin-bottom: 0.4rem;
+}
+
+.card.link-card a.card-link:hover {
+    text-decoration: underline;
+}
+
+.card.link-card p {
+    font-size: 0.875rem;
+    color: #555;
+    margin: 0;
+    line-height: 1.4;
+}
+
 /* Footer styles */
 .site-footer {
     background-color: #f5f5f5;

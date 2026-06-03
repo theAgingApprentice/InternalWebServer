@@ -294,7 +294,7 @@ Phase 2 — Create new hub pages [DONE]
   by splitting content out of reference.html. Update nav bar to include new links.
   Keep reference.html as a redirect or tombstone page temporarily.
 
-Phase 3 — Improve Home and Projects
+Phase 3 — Improve Home and Projects [DONE]
   Redesign index.html with card layout and app shortcuts.
   Expand projects.html with hosted apps section.
 

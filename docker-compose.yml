@@ -16,6 +16,7 @@ services:
       - fitness-tracker-backend
     networks:
       - webnet
+      - mitchellnet
 
   nginx-prod:
     image: nginx:1.29
@@ -72,3 +73,5 @@ networks:
   webnet:
     external: true
     name: web_server_webnet
+  mitchellnet:
+    external: true

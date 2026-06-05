@@ -32,6 +32,8 @@
    - [GUI Installation](#gui-installation)
    - [Verification](#verification)
    - [Troubleshooting macOS Certificate Issues](#troubleshooting-macos-certificate-issues)
+11. [Connected Services](#11-connected-services)
+12. [Network](#12-network)
 
 ---
 
@@ -1158,6 +1160,48 @@ openssl s_client -connect 192.168.2.10:443 < /dev/null 2>/dev/null | grep -E "Ve
   4. Go to **Authorities** tab → **Import**
   5. Select `rootCA.pem` from the mkcert CA root directory
   6. Check "Trust this CA to identify websites" → **OK**
+
+---
+
+## 11. Connected Services
+
+The following services are currently routed through the `nginx-proxy` container. All upstream resolution happens by Docker container name within the shared Docker networks.
+
+| URL Path | Container Name | Internal Port | Notes |
+|----------|---------------|--------------|-------|
+| `/` | `nginx-prod` | 80 | Static web UI (HTML/CSS/JS) |
+| `/fitness/` | `fitness-tracker-backend-prod` | 5000 | Fitness Tracker REST API — pending extraction to a dedicated path |
+| `/api/bench/` | `bench-instrument-service` | 8000 | Bench Instrument Service (BIS) — waveform capture and multimeter logging |
+
+> **Note:** The fitness tracker backend is currently served at `/api/` in the NGINX configuration. The `/fitness/` path shown above reflects the planned dedicated route once the service is extracted from the shared `/api/` prefix.
+
+For full details on per-location proxy settings and timeout rationale, see [docs/nginx-routing.md](docs/nginx-routing.md).
+
+---
+
+## 12. Network
+
+### mitchellnet External Docker Network
+
+The `nginx-proxy` container must be connected to the `mitchellnet` external Docker network so it can resolve upstream service hostnames (e.g., `bench-instrument-service`) that run in other Docker Compose stacks. This is configured in [docker-compose.yml](docker-compose.yml):
+
+```yaml
+networks:
+  mitchellnet:
+    external: true
+```
+
+**The `mitchellnet` network must exist on the host before deploying.** Create it once with:
+
+```bash
+docker network create mitchellnet
+```
+
+If the network does not exist, `docker compose up` will fail with a network not found error and `nginx-proxy` will be unable to reach any service outside the local `webnet`.
+
+### webnet Internal Network
+
+The `webnet` network (`web_server_webnet`) is an external network used for communication between containers in this Compose stack (e.g., `nginx-proxy` → `nginx-prod`, `nginx-proxy` → `fitness-tracker-backend-prod`).
 
 ---
 

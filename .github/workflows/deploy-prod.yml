@@ -87,16 +87,6 @@ jobs:
           docker restart nginx-prod || true
           sleep 3
           
-      - name: Rebuild and restart backend container
-        run: |
-          echo "Rebuilding fitness-tracker-backend..."
-          cd "$WEB_SERVER_ROOT"
-          docker compose build fitness-tracker-backend
-          docker compose stop fitness-tracker-backend
-          docker compose rm -f fitness-tracker-backend
-          docker compose up -d fitness-tracker-backend
-          echo "Backend container restarted"
-          
       - name: Recreate nginx-proxy container
         run: |
           echo "Recreating nginx-proxy container to pick up new config and cert mounts..."

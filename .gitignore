@@ -12,7 +12,11 @@
 .~lock.*
 ~$*.*
 
-# SSL Certificates - private keys must not be committed
+# SSL certificates — never commit private keys
+nginx/certs/*.crt
+nginx/certs/*.key
+nginx/certs/*.pem
+ssl/
 sslCertificates/*.key
 sslCertificates/*.pem
 

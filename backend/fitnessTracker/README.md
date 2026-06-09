@@ -120,15 +120,15 @@ docker-compose -f docker-compose.dev.yml up -d mariadb
 sleep 10
 
 # Run SQL scripts in order
-docker exec -i mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev < database/fitnessTracker/structure/units.sql
-docker exec -i mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev < database/fitnessTracker/structure/activities.sql
-docker exec -i mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev < database/fitnessTracker/structure/activityLog.sql
+docker exec -i mariadb-dev mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_dev < database/fitnessTracker/structure/units.sql
+docker exec -i mariadb-dev mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_dev < database/fitnessTracker/structure/activities.sql
+docker exec -i mariadb-dev mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_dev < database/fitnessTracker/structure/activityLog.sql
 ```
 
 **Verify Data Load:**
 ```bash
 # Should return 670
-docker exec mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev -e "SELECT COUNT(*) FROM activityLog;"
+docker exec mariadb-dev mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_dev -e "SELECT COUNT(*) FROM activityLog;"
 ```
 
 ### 2. Development Setup
@@ -190,9 +190,9 @@ docker-compose up -d mariadb fitness-tracker-backend
 sleep 10
 
 # Run database scripts
-docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod < database/fitnessTracker/structure/units.sql
-docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod < database/fitnessTracker/structure/activities.sql
-docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod < database/fitnessTracker/structure/activityLog.sql
+docker exec -i mariadb-prod mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_prod < database/fitnessTracker/structure/units.sql
+docker exec -i mariadb-prod mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_prod < database/fitnessTracker/structure/activities.sql
+docker exec -i mariadb-prod mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_prod < database/fitnessTracker/structure/activityLog.sql
 
 # Restart nginx to pick up changes
 docker-compose restart nginx-proxy nginx-prod
@@ -496,11 +496,11 @@ ssh andrew@192.168.2.10 "docker logs -f mariadb-prod"
 ### Access Database Console
 ```bash
 # Development
-docker exec -it mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev
+docker exec -it mariadb-dev mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_dev
 
 # Production (via SSH)
 ssh andrew@192.168.2.10
-docker exec -it mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod
+docker exec -it mariadb-prod mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_prod
 ```
 
 ### Useful Database Queries
@@ -668,7 +668,7 @@ docker-compose -f docker-compose.dev.yml build --no-cache fitness-tracker-backen
 docker ps | grep mariadb
 
 # Check database exists
-docker exec mariadb-dev mysql -u fitness_user -pfitness_password -e "SHOW DATABASES;"
+docker exec mariadb-dev mysql -u ${DB_USER} -p"${DB_PASSWORD}" -e "SHOW DATABASES;"
 
 # Test connection from backend container
 docker exec fitness-tracker-backend-dev python -c "from config.database import get_db_connection; print(get_db_connection())"
@@ -707,7 +707,7 @@ ssh andrew@192.168.2.10 "cat /home/andrew/web_server/nginx/conf.d/prod.conf"
 
 ```bash
 # Check if data exists in database
-docker exec mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev -e "SELECT COUNT(*) FROM activityLog;"
+docker exec mariadb-dev mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_dev -e "SELECT COUNT(*) FROM activityLog;"
 
 # Test month query endpoint
 curl "http://localhost:5001/api/activity-log?month=2025-12"
@@ -809,19 +809,19 @@ CREATE TABLE activityLog (
 **Development:**
 ```bash
 # Backup dev database
-docker exec mariadb-dev mysqldump -u fitness_user -pfitness_password fitness_tracker_dev > backup_dev_$(date +%Y%m%d).sql
+docker exec mariadb-dev mysqldump -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_dev > backup_dev_$(date +%Y%m%d).sql
 
 # Restore dev database
-docker exec -i mariadb-dev mysql -u fitness_user -pfitness_password fitness_tracker_dev < backup_dev_20251222.sql
+docker exec -i mariadb-dev mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_dev < backup_dev_20251222.sql
 ```
 
 **Production:**
 ```bash
 # Backup production database (via SSH)
-ssh andrew@192.168.2.10 "docker exec mariadb-prod mysqldump -u fitness_user -pfitness_password fitness_tracker_prod" > backup_prod_$(date +%Y%m%d).sql
+ssh andrew@192.168.2.10 "docker exec mariadb-prod mysqldump -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_prod" > backup_prod_$(date +%Y%m%d).sql
 
 # Restore production database (via SSH)
-cat backup_prod_20251222.sql | ssh andrew@192.168.2.10 "docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod"
+cat backup_prod_20251222.sql | ssh andrew@192.168.2.10 "docker exec -i mariadb-prod mysql -u ${DB_USER} -p"${DB_PASSWORD}" fitness_tracker_prod"
 ```
 
 ## Technology Stack

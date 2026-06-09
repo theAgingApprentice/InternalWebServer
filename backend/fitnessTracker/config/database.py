@@ -8,8 +8,8 @@ def get_db_config():
         'host': os.getenv('DB_HOST', 'localhost'),
         'port': int(os.getenv('DB_PORT', 3306)),
         'database': os.getenv('DB_NAME', 'fitness_tracker_dev'),
-        'user': os.getenv('DB_USER', 'fitness_user'),
-        'password': os.getenv('DB_PASSWORD', 'fitness_password')
+        'user': os.getenv('DB_USER', ''),
+        'password': os.getenv('DB_PASSWORD', '')
     }
 
 def get_db_connection():

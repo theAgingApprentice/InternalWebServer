@@ -3,6 +3,14 @@
 
 set -e
 
+# Load secrets from .env if present (for local invocation)
+if [ -f "$(dirname "$0")/.env" ]; then
+  # shellcheck source=/dev/null
+  source "$(dirname "$0")/.env"
+fi
+DB_USER="${DB_USER:?DB_USER must be set}"
+DB_PASSWORD="${DB_PASSWORD:?DB_PASSWORD must be set}"
+
 PROD_SERVER="andrew@192.168.2.10"
 PROD_DIR="/home/andrew/web_server"
 
@@ -28,7 +36,7 @@ scp docker-compose.yml ${PROD_SERVER}:${PROD_DIR}/
 
 # 5. Start/restart services on production
 echo "Starting services on production..."
-ssh ${PROD_SERVER} << 'ENDSSH'
+ssh ${PROD_SERVER} << ENDSSH
 cd /home/andrew/web_server
 
 # Pull latest images
@@ -43,9 +51,9 @@ sleep 10
 
 # Run database setup scripts
 echo "Setting up database tables..."
-docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod < database/fitnessTracker/structure/units.sql
-docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod < database/fitnessTracker/structure/activities.sql
-docker exec -i mariadb-prod mysql -u fitness_user -pfitness_password fitness_tracker_prod < database/fitnessTracker/structure/activityLog.sql
+docker exec -i mariadb-prod mysql -u "${DB_USER}" -p"${DB_PASSWORD}" fitness_tracker_prod < database/fitnessTracker/structure/units.sql
+docker exec -i mariadb-prod mysql -u "${DB_USER}" -p"${DB_PASSWORD}" fitness_tracker_prod < database/fitnessTracker/structure/activities.sql
+docker exec -i mariadb-prod mysql -u "${DB_USER}" -p"${DB_PASSWORD}" fitness_tracker_prod < database/fitnessTracker/structure/activityLog.sql
 
 # Restart nginx to pick up any config changes
 docker-compose restart nginx-proxy nginx-prod

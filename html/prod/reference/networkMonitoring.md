@@ -82,7 +82,7 @@ Based on the ```prometheus.yml``` configuration, the following targets are curre
 
 1. Open a web browser and navigate to: ```http://192.168.2.10:3000```
 2. Log in:
-    * Username: admin
+    * Username: <see server .env>
     * Password: The administrator password set during setup (<configured in Grafana — see server .env>).
 3. View Dashboards:
     * Once logged in, click on the "Dashboards icon" (four squares) in the left sidebar.

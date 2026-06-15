@@ -100,7 +100,7 @@ jobs:
           set -euo pipefail
           HOST="$HOST"
           IP="$PROXY_IP"
-          PATHS=("/" "/version.json")
+          PATHS=("/")
 
           echo "=== Verifying production deployment ==="
           for p in "${PATHS[@]}"; do

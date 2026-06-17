@@ -23,6 +23,8 @@ InternalWebServer is the front door of MitchellNET, providing NGINX reverse prox
 | `/` | static web root | HTML/CSS/JS served directly by nginx-proxy |
 | `/fitness/` | `fitness-tracker:5000` | `proxy_pass http://fitness-tracker:5000/;` — trailing slash intentional (Approach A; see mitchellnet-infra runbook). Served from standalone container. |
 | `/api/bench/` | `bench-instrument-service:8000` | `proxy_read_timeout 120s` |
+| `/recipes/` | `recipes-app:5000` | Approach A — trailing slash strips prefix. See `docs/nginx-routing.md` for Flask routing patterns. |
+| `/recipes/api/` | `recipes-app:5000` | No trailing slash — multi-prefix exception preserves full path. |
 
 ---
 

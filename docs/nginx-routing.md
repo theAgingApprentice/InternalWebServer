@@ -123,4 +123,59 @@ These are declared at the `server {}` block level so every `location {}` inherit
 
 ---
 
-*Last updated: 2026-06-04*
+## Flask Service Routing Patterns
+
+These patterns apply to any Flask-based service proxied through this NGINX setup. They were established during the recipes app build (June 2026).
+
+### Approach A — Trailing Slash Strips the Prefix
+
+Adding a trailing slash to `proxy_pass` causes NGINX to strip the location prefix before forwarding to Flask. Flask routes are then written without the prefix:
+
+```nginx
+location /recipes/ {
+    proxy_pass http://recipes-app:5000/;  # trailing slash strips /recipes
+}
+```
+
+```python
+@app.route("/")           # handles /recipes/
+@app.route("/<int:id>")   # handles /recipes/<id>
+```
+
+### Multi-Prefix Exception
+
+Secondary prefixes under the same service (e.g. `/recipes/api/`) must use `proxy_pass` **without** a trailing slash so the full path is preserved and Flask can match it:
+
+```nginx
+location /recipes/api/ {
+    proxy_pass http://recipes-app:5000;  # no trailing slash — preserves /recipes/api/
+}
+```
+
+### Flask `url_for()` is Prefix-Unaware
+
+`url_for()` generates paths relative to Flask's own routing and does not know about the prefix NGINX adds. Never use `url_for()` for redirects in prefix-routed apps — use hard-coded absolute paths instead:
+
+```python
+# Wrong — generates /1, not /recipes/1
+return redirect(url_for("recipe_detail", id=r.id))
+
+# Correct
+return redirect(f"/recipes/{r.id}")
+```
+
+### Templates Must Use HTML Anchor Tags
+
+Jinja2 templates must use HTML `<a>` tags for links. Markdown-style links are not rendered by Flask/Jinja2:
+
+```html
+<!-- Correct -->
+<a href="/recipes/{{ recipe.id }}">View Recipe</a>
+
+<!-- Wrong — renders as literal text -->
+[View Recipe](/recipes/{{ recipe.id }})
+```
+
+---
+
+*Last updated: 2026-06-17*

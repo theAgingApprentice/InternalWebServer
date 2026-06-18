@@ -13,7 +13,7 @@
   </div>
 
   <!-- Include Header -->
-  <div data-include="/header.html"></div>
+  <div data-include="/includes/header.html"></div>
 
   <main class="content">
     <section>
@@ -133,6 +133,18 @@
 
         <div class="hub-card">
           <div class="hub-card-header">
+            <span class="hub-icon">🔬</span>
+            <h3>Electronics Lab</h3>
+          </div>
+          <p class="hub-desc">Bench instruments — oscilloscope, signal generator, multimeter, power supply</p>
+          <ul>
+            <li><a href="/api/bench/">Bench Instrument Service</a> — Live instrument status dashboard</li>
+            <li><a href="/api/bench/docs">BIS API Docs</a> — OpenAPI reference for all instrument endpoints</li>
+          </ul>
+        </div>
+
+        <div class="hub-card">
+          <div class="hub-card-header">
             <span class="hub-icon">🖥️</span>
             <h3>Design Software</h3>
           </div>
@@ -149,7 +161,7 @@
   </main>
 
   <!-- Include Footer -->
-  <div data-include="/footer.html"></div>
+  <div data-include="/includes/footer.html"></div>
 
   <!-- Scripts -->
   <script src="/js/includes.js" defer></script>

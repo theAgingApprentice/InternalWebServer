@@ -20,7 +20,7 @@ jobs:
 
       - name: Set variables
         run: |
-          echo "PROD_ROOT=/home/andrew/web_server/html/prod" >> $GITHUB_ENV
+          echo "PROD_ROOT=/home/andrew/web_server/site" >> $GITHUB_ENV
           echo "WEB_SERVER_ROOT=/home/andrew/web_server" >> $GITHUB_ENV
           echo "BACKUP_DIR=/home/andrew/web_server/backups/prod_backup_$(date +%Y%m%d_%H%M%S)" >> $GITHUB_ENV
           echo "HOST=mitchellnet.local" >> $GITHUB_ENV
@@ -46,8 +46,8 @@ jobs:
       - name: Write deployment metadata
         run: |
           set -euo pipefail
-          mkdir -p html/prod
-          cat > html/prod/version.json <<EOF
+          mkdir -p site
+          cat > site/version.json <<EOF
           {
             "env": "production",
             "commit": "$GITHUB_SHA",
@@ -63,8 +63,8 @@ jobs:
       - name: Deploy content to production
         run: |
           set -euo pipefail
-          echo "=== Deploying html/prod -> $PROD_ROOT ==="
-          rsync -av --delete html/prod/ "$PROD_ROOT"/
+          echo "=== Deploying site -> $PROD_ROOT ==="
+          rsync -av --delete site/ "$PROD_ROOT"/
           echo "HTML deployment completed"
           
           echo "=== Deploying nginx configuration ==="

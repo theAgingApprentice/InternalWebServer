@@ -67,10 +67,6 @@ jobs:
           rsync -av --delete html/prod/ "$PROD_ROOT"/
           echo "HTML deployment completed"
           
-          echo "=== Deploying backend code ==="
-          rsync -av --delete backend/ "$WEB_SERVER_ROOT/backend"/
-          echo "Backend deployment completed"
-          
           echo "=== Deploying nginx configuration ==="
           rsync -av --delete --exclude='certs/' nginx/ "$WEB_SERVER_ROOT/nginx"/
           echo "Nginx config deployment completed"
@@ -78,7 +74,6 @@ jobs:
           echo "=== Deploying docker-compose and other configs ==="
           rsync -av docker-compose.yml "$WEB_SERVER_ROOT/"
           echo "Docker-compose deployment completed"
-          echo "Note: Database migrations are not auto-deployed. Handle manually if needed."
           echo "=== Deploying includes fragments ==="
           rsync -av --delete includes/ "$WEB_SERVER_ROOT/includes"/
           echo "Includes deployment completed"

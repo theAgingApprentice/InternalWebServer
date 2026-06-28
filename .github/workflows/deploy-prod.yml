@@ -58,7 +58,7 @@ jobs:
           }
           EOF
           echo "Deployment metadata:"
-          cat html/prod/version.json
+          cat site/version.json
 
       - name: Deploy content to production
         run: |

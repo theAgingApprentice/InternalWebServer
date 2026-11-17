@@ -10,6 +10,7 @@ InternalWebServer is the front door of MitchellNET, providing NGINX reverse prox
 
 - MitchellNET home: https://mitchellnet.local
 - Bench Instrument Service: https://mitchellnet.local/api/bench/
+- Bench Instrument Service GUI: https://mitchellnet.local/bench/
 - Fitness Tracker: https://mitchellnet.local/fitness/ *(standalone container — extraction complete)*
 - Grafana: http://192.168.2.10:3000 *(not yet proxied)*
 - [GitHub Actions](https://github.com/theAgingApprentice/InternalWebServer/actions)
@@ -23,6 +24,7 @@ InternalWebServer is the front door of MitchellNET, providing NGINX reverse prox
 | `/` | static web root | HTML/CSS/JS served directly by nginx-proxy |
 | `/fitness/` | `fitness-tracker:5000` | `proxy_pass http://fitness-tracker:5000/;` — trailing slash intentional (Approach A; see mitchellnet-infra runbook). Served from standalone container. |
 | `/api/bench/` | `bench-instrument-service:8000` | `proxy_read_timeout 120s` |
+| `/bench/` | `bench-instrument-service:8000` | BIS GUI path; NGINX adds the API key from `/home/andrew/web_server/secrets/bis-gui-key.conf` (server only). See `docs/nginx-routing.md` |
 | `/recipes/` | `recipes-app:5000` | Approach A — trailing slash strips prefix. See `docs/nginx-routing.md` for Flask routing patterns. |
 | `/recipes/api/` | `recipes-app:5000` | No trailing slash — multi-prefix exception preserves full path. |
 

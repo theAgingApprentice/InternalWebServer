@@ -65,6 +65,45 @@ location /api/bench/ {
 
 ---
 
+### `location /bench/` — BIS GUI path
+
+```nginx
+location /bench/ {
+    include conf.d/security-headers.conf;
+    include /etc/nginx/secrets/bis-gui-key.conf;
+    proxy_set_header Host              $host;
+    proxy_set_header X-Real-IP         $remote_addr;
+    proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass http://bench-instrument-service:8000/;
+    proxy_http_version 1.1;
+    proxy_read_timeout 120s;
+    proxy_send_timeout 120s;
+    add_header X-Upstream bench-instrument-service-gui;
+}
+```
+
+| Setting | Value | Reason |
+|---------|-------|--------|
+| **Upstream** | `bench-instrument-service:8000` | BIS serves its GUI at `/` and its API under `/v1/`; the trailing slash strips `/bench/` |
+| `include /etc/nginx/secrets/bis-gui-key.conf` | one `proxy_set_header X-API-Key` line | NGINX adds the API key so the browser holds none. `proxy_set_header` replaces any `X-API-Key` the client sends, so the GUI path always uses this key |
+| Repeated `proxy_set_header` lines | `Host`, `X-Real-IP`, `X-Forwarded-For`, `X-Forwarded-Proto` | A `location` that sets any `proxy_set_header` of its own does not inherit the server-level ones, so they are repeated here. Without `X-Real-IP`, BIS would log the proxy as the client |
+| `proxy_read_timeout 120s` | 120 seconds | Same as `/api/bench/` |
+
+`/api/bench/` is unchanged and still requires the caller's own `X-API-Key`.
+
+**Key file (server only, never in a repo).** NGINX reads it from `/home/andrew/web_server/secrets/bis-gui-key.conf` on the server, which `docker-compose.yml` mounts read-only at `/etc/nginx/secrets/`. The file holds exactly one line:
+
+```nginx
+proxy_set_header X-API-Key "<the BIS API key>";
+```
+
+Create it before deploying (the folder is outside `nginx/`, so the deploy's `rsync --delete` never touches it; `secrets/` is also in `.gitignore`). Keep it readable only by the server user, for example `chmod 600`. If the file is missing, NGINX refuses to start and every site goes down, so the deploy workflow checks that it exists and runs `nginx -t` before anything is deployed (see **Deploy gate** below).
+
+**Client address in BIS.** NGINX sends `X-Real-IP` on both `/api/bench/` and `/bench/`. BIS uses it only when the direct peer is in `BIS_TRUSTED_PROXIES` in the BIS server `.env`. On MitchellNET set it to the `mitchellnet` Docker network, `172.25.0.0/16` (`nginx-proxy` is 172.25.0.5 on it; `docker network inspect mitchellnet` shows the current subnet). The network, not the single address, is used because the proxy is recreated on every deploy. Any container on that network could then set `X-Real-IP`, which is accepted on this LAN-only network. Without it BIS logs the proxy address as the client. See theAgingApprentice/bench-instrument-service#101.
+
+**Access control.** Anyone who can reach `/bench/` can control the bench. Restricting this path to a trusted VLAN depends on theAgingApprentice/mitchellnet-infra#7 and is not part of this change.
+
 ### `location /fitness/`
 
 ```nginx
@@ -234,6 +273,7 @@ As of 20 June 2026, this vhost is in exact parity with `prod.conf`'s path-based 
 |----------|----------|-------|
 | `/fitness/` | `fitness-tracker:5000` | Same as prod.conf |
 | `/api/bench/` | `bench-instrument-service:8000` | Same as prod.conf, including 120 s timeouts — added 20 June 2026 (PR #167) to close the bare-IP parity gap |
+| `/bench/` | `bench-instrument-service:8000` | BIS GUI path, same as prod.conf, with the API key added by NGINX |
 | `/recipes/` | `recipes-app:5000` | Same as prod.conf |
 | `/meal-plan/` | `recipes-app:5000` (no trailing slash) | Same as prod.conf |
 | `/shopping-list/` | `recipes-app:5000` (no trailing slash) | Same as prod.conf |
@@ -242,6 +282,12 @@ As of 20 June 2026, this vhost is in exact parity with `prod.conf`'s path-based 
 | `/includes/` | Host filesystem alias | Same as prod.conf |
 
 > **Historical note:** this table previously listed a `/api/` block proxying to `fitness-tracker-backend-prod` that did not actually exist in this file, and stated BIS was bare-IP-exempt by design. Both were incorrect and were corrected 20 June 2026 after a live `diff` audit against `prod.conf` revealed the actual state. See **Bare-IP Parity Standard** above for the policy now in place to prevent this drift recurring.
+
+---
+
+## Deploy gate
+
+`.github/workflows/deploy-prod.yml` runs a **Test nginx configuration (gate)** step before it deploys anything. It fails the run if `/home/andrew/web_server/secrets/bis-gui-key.conf` is missing (existence only; the file is never read or printed), then runs `nginx -t` in a throwaway `nginx:1.29` container. That container uses the checked-out `conf.d` and `nginx.conf`, the server's certs and secrets folder, and joins `web_server_webnet` and `mitchellnet` so upstream names resolve. A bad config stops the run before the rsync and before `nginx-proxy` is recreated.
 
 ---
 

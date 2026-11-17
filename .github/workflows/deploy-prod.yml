@@ -60,6 +60,35 @@ jobs:
           echo "Deployment metadata:"
           cat site/version.json
 
+      - name: Test nginx configuration (gate)
+        run: |
+          set -euo pipefail
+          SECRETS_DIR="$WEB_SERVER_ROOT/secrets"
+          KEY_FILE="$SECRETS_DIR/bis-gui-key.conf"
+          # A missing include file would stop nginx and take every site down.
+          # Check existence only; the file is never read or printed.
+          if [ ! -f "$KEY_FILE" ]; then
+            echo "ERROR: $KEY_FILE is missing. Create it on the server first (see docs/nginx-routing.md)."
+            exit 1
+          fi
+          echo "=== nginx -t on the checked-out config (before anything is deployed) ==="
+          # Upstream names must resolve, so the test container joins both Docker networks.
+          cid=$(docker create --network web_server_webnet \
+            -v "$GITHUB_WORKSPACE/nginx/conf.d:/etc/nginx/conf.d:ro" \
+            -v "$GITHUB_WORKSPACE/nginx/nginx.conf:/etc/nginx/nginx.conf:ro" \
+            -v "$WEB_SERVER_ROOT/nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro" \
+            -v "$WEB_SERVER_ROOT/nginx/certs/server.key:/etc/nginx/ssl/server.key:ro" \
+            -v "$SECRETS_DIR:/etc/nginx/secrets:ro" \
+            nginx:1.29 nginx -t)
+          rc=0
+          docker network connect mitchellnet "$cid" || rc=$?
+          if [ "$rc" -eq 0 ]; then docker start -a "$cid" || rc=$?; fi
+          docker rm -f "$cid" >/dev/null
+          if [ "$rc" -ne 0 ]; then
+            echo "ERROR: nginx -t failed; nothing was deployed."
+            exit 1
+          fi
+
       - name: Deploy content to production
         run: |
           set -euo pipefail

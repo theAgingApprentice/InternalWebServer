@@ -12,6 +12,8 @@ services:
       - ./includes:/home/andrew/web_server/includes:ro
       - ./nginx/certs/server.crt:/etc/nginx/ssl/server.crt:ro
       - ./nginx/certs/server.key:/etc/nginx/ssl/server.key:ro
+      # BIS GUI API key (untracked, server only): bis-gui-key.conf
+      - ./secrets:/etc/nginx/secrets:ro
     depends_on:
       - nginx-prod
     networks:

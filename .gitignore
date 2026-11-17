@@ -20,6 +20,9 @@ ssl/
 sslCertificates/*.key
 sslCertificates/*.pem
 
+# Server-side secrets (BIS GUI key file) — never commit
+secrets/
+
 # User-specific files
 *.rsuser
 *.suo
